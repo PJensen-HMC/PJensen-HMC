@@ -40,7 +40,34 @@
         "hooks": [
           {
             "type": "command",
-            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'git push'; then echo 'BLOCKED: Direct git push is disabled. Use /safe-push skill for all pushes.' >&2; exit 1; fi"
+            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'git push'; then echo 'BLOCKED: Direct git push is disabled. Use /safe-push skill for all pushes.' >&2; exit 1; fi; echo \"$cmd\" | head -c 60 | tr -cd '[:print:]' > /home/devadmin/.claude/.current-tool-ctx"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | xargs -I{} basename {} | head -c 60 > /home/devadmin/.claude/.current-tool-ctx"
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | xargs -I{} basename {} | head -c 60 > /home/devadmin/.claude/.current-tool-ctx"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '(.tool_input.pattern // .tool_input.glob // empty)' | head -c 40 | tr -cd '[:print:]' > /home/devadmin/.claude/.current-tool-ctx"
           }
         ]
       }
@@ -61,7 +88,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f /home/devadmin/.claude/.thinking /home/devadmin/.claude/.current-tool"
+            "command": "rm -f /home/devadmin/.claude/.thinking /home/devadmin/.claude/.current-tool /home/devadmin/.claude/.current-tool-ctx"
           }
         ]
       }
