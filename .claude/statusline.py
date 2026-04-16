@@ -357,7 +357,7 @@ try:
         _elapsed_secs = int(time.time()) - int(os.path.getmtime(transcript))
 except: pass
 
-def _pick(pool): return pool[now_sec % len(pool)]
+def _pick(pool): return pool[turn_count % len(pool)]
 
 if used_int >= 95:
     dung_msg = "The walls close in around you!"
@@ -370,25 +370,17 @@ elif used_int >= 70:
 elif _active_tool in TOOL_MSGS:
     base = _pick(TOOL_MSGS[_active_tool])
     # Splice in tool context where we have it
-    if _tool_ctx:
-        short_ctx = _tool_ctx[:30].rstrip()
-        if _active_tool in ('Edit', 'Write', 'Read', 'MultiEdit'):
-            dung_msg = f'{base}  ({short_ctx})'
-        elif _active_tool == 'Bash':
-            dung_msg = f'{base}  -- {short_ctx}'
-        elif _active_tool in ('Grep', 'Glob'):
-            dung_msg = f'{base}  [{short_ctx}]'
-        else:
-            dung_msg = base
+    if _tool_ctx and _active_tool == 'Bash':
+        dung_msg = f'{base}  -- {_tool_ctx[:30].rstrip()}'
     else:
         dung_msg = base
-elif cost > 0.10 and now_sec % 180 < 20:
+elif cost > 0.10 and turn_count % 10 == 0:
     dung_msg = f"Your gold pouch grows lighter. ({cost_fmt} spent)"
-elif _elapsed_secs > 3600 and now_sec % 240 < 25:
+elif _elapsed_secs > 3600 and turn_count % 12 == 1:
     dung_msg = "Your torch is burning dangerously low."
-elif turn_count > 30 and now_sec % 300 < 20:
+elif turn_count > 30 and turn_count % 15 == 2:
     dung_msg = f"Your legs ache from the long journey.  ({turn_count} turns)"
-elif git_remote_short and now_sec % 600 < 15:
+elif git_remote_short and turn_count % 20 == 3:
     repo = git_remote_short.split(':')[-1].split('/')[-1]
     dung_msg = f'You recognise these halls -- {repo}.'
 else:
@@ -396,21 +388,18 @@ else:
         'pr_work', 'debugging', 'testing', 'refactor', 'building',
         'frustrated', 'excited', 'happy', 'sad',
     ]
-    # Strong score (2) = always active; weak score (1) = active 40s per 2min
+    # Strong score (2) = always active; weak score (1) = active every other turn
     _signal_map = {
-        e: (_scores[e] == 2 or (_scores[e] == 1 and now_sec % 120 < 40))
+        e: (_scores[e] == 2 or (_scores[e] == 1 and turn_count % 2 == 0))
         for e in EMOTION_PRIORITY
     }
-    # Cycle through active signals on 25s slots — priority order
+    # Cycle through active signals — one slot per turn
     active = [e for e in EMOTION_PRIORITY if _signal_map.get(e)]
     _signal_msg = None
     if active:
-        slot_size = 25
-        cycle = len(active) * slot_size
-        slot = now_sec % cycle
-        idx = slot // slot_size
+        idx = turn_count % len(active)
         _signal_msg = _pick(SIGNAL_MSGS[active[idx]])
-    dung_msg = _signal_msg if _signal_msg else AMBIENT[(seed + now_sec // 60) % len(AMBIENT)]
+    dung_msg = _signal_msg if _signal_msg else AMBIENT[(seed + turn_count) % len(AMBIENT)]
 
 # --- Terminal width ---
 cols = 120
