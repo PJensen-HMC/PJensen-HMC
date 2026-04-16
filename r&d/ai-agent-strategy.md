@@ -5,7 +5,7 @@ author: Pete Jensen
 email: jensenp@hmc.harvard.edu
 status: decision
 service: HMC.ChatAI.Service
-tags: [agent-framework, migration, chatai, microsoft-agents-ai]
+tags: [agent-framework, migration, chatai, microsoft-agents-ai, hmc-shared-ai]
 artifacts:
   - semantic-kernel-spike.md
   - agent-framework-spike.md
@@ -42,11 +42,15 @@ Current state: raw OpenAI .NET SDK (`OpenAI.Chat.ChatClient`). Target: **Microso
 |---|---|
 | `ChatContext` (SignalR signals) | Transport layer — middleware calls into it |
 | `ChatCoordinator` (distributed cancel, semaphores) | Concurrency concern outside agent scope |
-| `DataExtractionServices` (PDF, Office, audio, HTML) | Domain-specific; wrap as tools |
-| `DocumentAnalysis` / chunking / Document Intelligence | Custom pipeline; expose as tools |
+| `DataExtractionServices` (PDF, Office, audio, HTML, images) | Extraction pipeline is not an agent concern — stays as-is |
+| `DocumentAnalysis` / chunking / Document Intelligence | Chunking + OCR pipeline unchanged — Agent Framework has no opinion here |
+| `VectorizationService` / embedding generation | **Agent Framework does not replace this.** Memory providers abstract retrieval; the pipeline that produces vectors (extract → chunk → embed → index) remains owned by `HMC.ChatAI.Service` and `HMC.Shared.ResearchManagementIndex` |
+| Azure AI Search index + indexing sweep | Entirely separate from agent framework — sweep, Service Bus commands, `IndexingService` all unchanged |
 | `EMailAiCoordinator` / AskAivy | Becomes `agent.RunAsync()` call |
 | Cosmos + Blob persistence | Survives; memory providers sit on top |
 | Auth / user profile middleware | ASP.NET Core concern, unchanged |
+
+> **Important:** Agent Framework memory providers cover *retrieval* — querying an existing vector store during a chat turn. They do not replace the indexing pipeline (extract → chunk → embed → push to Azure AI Search). That pipeline is HMC's and stays HMC's.
 
 ### Migration Phases
 
@@ -55,9 +59,10 @@ Current state: raw OpenAI .NET SDK (`OpenAI.Chat.ChatClient`). Target: **Microso
 - `ToolCallAccumulator` + dispatch loop → `agent.RunAsync()`
 - `ChatContext.Signal*` wired into agent middleware
 
-**Phase 2 — Memory / RAG**
-- `VectorizationService` + raw Azure AI Search → Agent Framework memory provider
-- `SmartSearch2Function` → memory-backed retrieval tool or memory provider
+**Phase 2 — RAG / retrieval wiring**
+- `SmartSearch2Function` → `AIFunctionFactory.Create()` tool backed by the existing Azure AI Search index
+- Indexing pipeline (`VectorizationService`, `DocumentAnalysis`, Document Intelligence, sweep, Service Bus) is **untouched** — Agent Framework queries the index, it does not own it
+- Agent Framework memory provider is optional abstraction over the existing index — raw Azure AI Search call inside the tool function is equally valid
 
 **Phase 3 — Named agents** *(optional architecture evolution)*
 - Split Aivy into focused agents: `OfficeAssistantAgent`, `SearchAgent`, `LearningAgent`
@@ -164,26 +169,32 @@ public async Task<string> ProcessEmailAsync(string emailBody, string senderId)
 
 ---
 
-## Shared Library Opportunity
+## HMC.Shared.AI
 
-`HMC.Shared.AgentCore` — follows `HMC.Shared.Web/ServiceExtensions.cs` pattern:
+Slim library — DI canonicalization only. No framework abstractions, no business logic. Follows `HMC.Shared.Web/ServiceExtensions.cs` pattern.
 
 ```csharp
-public static class AgentServiceExtensions
+// HMC.Shared.AI/ServiceExtensions.cs
+public static class AIServiceExtensions
 {
-    public static IServiceCollection AddHMCAIAgent(
+    public static IServiceCollection AddHMCAI(
         this IServiceCollection services,
-        IConfiguration config,
-        Action<AgentBuilder>? configure = null)
+        IConfiguration config)
     {
-        // standard HMC Azure Foundry client + agent config
-        // standard HMC tools: SmartSearch, Calendar, UserProfile, WebSearch
-        // standard HMC middleware: ChatContext SignalR signals, telemetry
+        // canonical Azure Foundry client wired to HMC App Configuration keys
+        services.AddSingleton(sp =>
+            new AIProjectClient(
+                new Uri(config["AzureFoundry:Endpoint"]!),
+                new DefaultAzureCredential()));
+
+        return services;
     }
 }
 ```
 
-All microservices needing AI adopt HMC-standard agent config in one call.
+Consuming services build their agents on top of the canonical client — no boilerplate, no diverging endpoint configs across microservices.
+
+> **Scope:** wires the `AIProjectClient`. That's it. Tools, middleware, and instructions stay in the service that owns them.
 
 ---
 
