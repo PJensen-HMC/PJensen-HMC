@@ -32,10 +32,6 @@ tools/*
 !tools/*.sh
 
 # --- repos bootstrap (code repos ignored, init script tracked) ---
-!repos/
-repos/*
-!repos/init.sh
-!repos/repos.list
 
 # --- r&d spikes ---
 !r&d/
