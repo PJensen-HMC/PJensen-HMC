@@ -27,8 +27,8 @@ git pull origin main
 | `repos.list` | List of repos to pull on init |
 | `.bashrc` | Shell config |
 | `CLAUDE.md` | Claude Code project instructions |
-| `.claude/statusline.sh` | NetHack-style Claude Code status line |
-| `.claude/settings.json` | Claude Code settings |
+| `.claude/statusline.sh` | NetHack-style Claude Code status line (shows last active git remote) |
+| `.claude/settings.json` | Claude Code settings + hooks (PostToolUse writes `.last-git-dir`) |
 | `.claude/plugins/local/hmc-tools/` | Custom Claude skills (upgrade-hmc-pkgs, etc.) |
 | `.claude/projects/-home-devadmin/memory/` | Claude Code persistent memory |
 
