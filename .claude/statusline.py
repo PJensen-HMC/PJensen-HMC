@@ -580,7 +580,7 @@ corridor += f'{DIM}#{RST}'
 # =============================================================================
 # NETHACK STATS LINE
 # =============================================================================
-dlvl = turn_count            # one level per turn in this session
+dlvl = turn_count + 1        # one level per turn; starts at 1
 ac   = 2 if 'opus' in model.lower() else 7 if 'haiku' in model.lower() else 4
 model_short = re.sub(r'[Cc]laude[- ]', '', model)[:16]
 hp_col = RED if used_int >= 90 else YEL if used_int >= 70 else GRN
