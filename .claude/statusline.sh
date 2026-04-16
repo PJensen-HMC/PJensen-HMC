@@ -52,18 +52,43 @@ cwd_short=$(echo "$cwd" | awk -F/ '{
   else print ".../" parts[n-1] "/" parts[n]
 }')
 
+# --- Git remote (short, sanitized) ---
+git_remote_raw=$(git -C "$cwd" remote get-url origin 2>/dev/null)
+git_remote_short=""
+if [ -n "$git_remote_raw" ]; then
+  # strip embedded PAT/credentials
+  clean=$(echo "$git_remote_raw" | sed 's|https://[^@]*@|https://|')
+  if echo "$clean" | grep -q "github.com"; then
+    slug=$(echo "$clean" | sed 's|.*github\.com[:/]||' | sed 's|\.git$||')
+    git_remote_short="gh:${slug}"
+  elif echo "$clean" | grep -q "dev.azure.com"; then
+    repo=$(echo "$clean" | sed 's|.*/_git/||' | sed 's|\.git$||')
+    git_remote_short="ado:${repo}"
+  else
+    git_remote_short=$(echo "$clean" | sed 's|.*/||' | sed 's|\.git$||')
+  fi
+fi
+
 # --- Session duration ---
 duration_str="0h00m"
+started_epoch=""
 if [ -n "$transcript" ] && [ -f "$transcript" ]; then
-  started_ms=$(jq -r '.startedAt // empty' "$transcript" 2>/dev/null)
-  if [ -n "$started_ms" ]; then
-    started_epoch=$(( started_ms / 1000 ))
-    now_epoch=$(date +%s)
-    elapsed=$(( now_epoch - started_epoch ))
-    hrs=$(( elapsed / 3600 ))
-    mins=$(( (elapsed % 3600) / 60 ))
-    duration_str=$(printf '%dh%02dm' "$hrs" "$mins")
+  # First entry with a timestamp field (ISO 8601)
+  ts=$(jq -r 'select(.timestamp != null) | .timestamp' "$transcript" 2>/dev/null | head -1)
+  if [ -n "$ts" ]; then
+    started_epoch=$(date -d "$ts" +%s 2>/dev/null)
   fi
+  # Fall back to transcript file mtime
+  if [ -z "$started_epoch" ]; then
+    started_epoch=$(stat -c %Y "$transcript" 2>/dev/null)
+  fi
+fi
+if [ -n "$started_epoch" ]; then
+  now_epoch=$(date +%s)
+  elapsed=$(( now_epoch - started_epoch ))
+  hrs=$(( elapsed / 3600 ))
+  mins=$(( (elapsed % 3600) / 60 ))
+  duration_str=$(printf '%dh%02dm' "$hrs" "$mins")
 fi
 
 # --- Flags ---
@@ -324,5 +349,6 @@ printf "  ${dim}AC:${ac}${reset}"
 printf "  T:${duration_str}"
 printf "  ${active_indicator} ${dim}${model_short}${reset}"
 printf "  ${dim}${cwd_short}${reset}"
+[ -n "$git_remote_short" ] && printf "  ${cyan}${git_remote_short}${reset}"
 [ -n "$caveman_text" ] && printf "  ${orange}${caveman_text}${reset}"
 printf '\n'

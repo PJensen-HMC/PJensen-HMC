@@ -42,6 +42,7 @@ See `.claude/.secrets.example` for the template.
 **hmc-tools** (local, this repo):
 - `/upgrade-hmc-pkgs` — bump all `HMC.*` NuGet packages to latest from HMCgitNuget feed
 - `/hmc_dot_net_list_pkgs` — audit `HMC.*` packages across repos; current vs latest, no changes made
+- `/safe-push` — gated `git push`; shows repo/remote/branch/commits, requires explicit confirmation before executing
 
 **caveman** (marketplace — reinstall on fresh machine):
 ```bash
