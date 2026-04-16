@@ -23,6 +23,9 @@
 # --- README ---
 !README.md
 
+# --- docs ---
+!indexing-topology.md
+
 # --- local plugins ---
 !.claude/plugins/
 .claude/plugins/*
