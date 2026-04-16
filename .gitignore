@@ -31,7 +31,12 @@ tools/*
 !tools/*.ts
 !tools/*.sh
 
-# --- repos bootstrap (code repos ignored, init script tracked) ---
+# keep only these tracked
+!repos/
+!repos/init.sh
+!repos/repos.list
+!repos/crimson-sandbox/
+!repos/crimson-sandbox/**
 
 # --- r&d spikes ---
 !r&d/
