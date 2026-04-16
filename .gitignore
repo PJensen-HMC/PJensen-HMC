@@ -23,6 +23,14 @@
 # --- README ---
 !README.md
 
+# --- tools ---
+!tools/
+tools/*
+!tools/*.ps1
+!tools/*.js
+!tools/*.ts
+!tools/*.sh
+
 # --- repos bootstrap (code repos ignored, init script tracked) ---
 !repos/
 repos/*
