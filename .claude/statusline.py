@@ -386,9 +386,9 @@ for i in range(W):
 # Stairs always near end of corridor — player reaches them after enough turns
 floor[W - 3] = '>'
 
-# Player walks left→right one step per turn; ±1 drift per second for animation
-# Wraps corridor each time — dlvl increments on each wrap
-base = turn_count % W
+# Player walks left→right as context fills — @ = context window position
+# Stairs (>) near end = you're almost out of context; dlvl = turns this session
+base = int(used_pct / 100.0 * (W - 1))
 ppos = max(0, min(W - 1, base + now_sec % 3 - 1))
 orig_floor = floor[:]   # snapshot before player mutations — used for event detection
 # Use base (no drift) for event detection so events fire on the exact turn
@@ -580,7 +580,7 @@ corridor += f'{DIM}#{RST}'
 # =============================================================================
 # NETHACK STATS LINE
 # =============================================================================
-dlvl = turn_count // W + 1   # increments each time player completes a corridor run
+dlvl = turn_count            # one level per turn in this session
 ac   = 2 if 'opus' in model.lower() else 7 if 'haiku' in model.lower() else 4
 model_short = re.sub(r'[Cc]laude[- ]', '', model)[:16]
 hp_col = RED if used_int >= 90 else YEL if used_int >= 70 else GRN
