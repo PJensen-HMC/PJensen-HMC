@@ -1,8 +1,15 @@
-# Agent Framework — Technical Spike
+---
+title: Agent Framework — Technical Spike
+date: 2026-04-16
+author: Pete Jensen
+email: jensenp@hmc.harvard.edu
+status: archived
+service: HMC.ChatAI.Service
+tags: [agent-framework, autogen, semantic-kernel, spike, chatai]
+superseded-by: ai-agent-strategy.md
+---
 
-**Date:** 2026-04-16  
-**Author:** Pete Jensen  
-**Context:** Evaluating agent framework options for HMC ChatAI evolution
+# Agent Framework — Technical Spike
 
 ---
 

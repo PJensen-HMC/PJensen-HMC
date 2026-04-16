@@ -1,9 +1,17 @@
-# HMC AI Agent Strategy
+---
+title: HMC AI Agent Strategy
+date: 2026-04-16
+author: Pete Jensen
+email: jensenp@hmc.harvard.edu
+status: decision
+service: HMC.ChatAI.Service
+tags: [agent-framework, migration, chatai, microsoft-agents-ai]
+artifacts:
+  - semantic-kernel-spike.md
+  - agent-framework-spike.md
+---
 
-**Date:** 2026-04-16  
-**Author:** Pete Jensen  
-**Status:** Decision document  
-**Research artifacts:** `semantic-kernel-spike.md`, `agent-framework-spike.md`
+# HMC AI Agent Strategy
 
 ---
 

@@ -1,8 +1,15 @@
-# Semantic Kernel — Technical Spike
+---
+title: Semantic Kernel — Technical Spike
+date: 2026-04-16
+author: Pete Jensen
+email: jensenp@hmc.harvard.edu
+status: archived
+service: HMC.ChatAI.Service
+tags: [semantic-kernel, spike, chatai]
+superseded-by: ai-agent-strategy.md
+---
 
-**Date:** 2026-04-16  
-**Author:** Pete Jensen  
-**Context:** Evaluating SK as migration target for `HMC.ChatAI.Service`
+# Semantic Kernel — Technical Spike
 
 ---
 
