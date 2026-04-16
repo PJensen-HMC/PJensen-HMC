@@ -26,6 +26,11 @@
 # --- docs ---
 !indexing-topology.md
 
+# --- r&d spikes ---
+!r&d/
+r&d/*
+!r&d/*.md
+
 # --- local plugins ---
 !.claude/plugins/
 .claude/plugins/*
