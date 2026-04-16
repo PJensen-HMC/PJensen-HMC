@@ -53,7 +53,10 @@ cwd_short=$(echo "$cwd" | awk -F/ '{
 }')
 
 # --- Git remote (short, sanitized) ---
-git_remote_raw=$(git -C "$cwd" remote get-url origin 2>/dev/null)
+# Prefer last active git repo (written by PostToolUse Bash hook); fall back to session cwd
+last_git_dir=$(cat /home/devadmin/.claude/.last-git-dir 2>/dev/null)
+git_lookup_dir="${last_git_dir:-$cwd}"
+git_remote_raw=$(git -C "$git_lookup_dir" remote get-url origin 2>/dev/null)
 git_remote_short=""
 if [ -n "$git_remote_raw" ]; then
   # strip embedded PAT/credentials

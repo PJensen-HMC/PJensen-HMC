@@ -36,6 +36,17 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "root=$(git rev-parse --show-toplevel 2>/dev/null); [ -n \"$root\" ] && echo \"$root\" > /home/devadmin/.claude/.last-git-dir || true"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
