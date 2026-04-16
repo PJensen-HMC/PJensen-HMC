@@ -6,9 +6,15 @@
 
 ---
 
+## Status Note (April 2026)
+
+> **Microsoft Agent Framework 1.0 GA'd April 3, 2026** — a unified successor combining SK + AutoGen into `Microsoft.Agents.AI`. Official migration guides exist FROM SK. For new agent work, evaluate Agent Framework first (see `agent-framework-spike.md`). SK core concepts (plugins, filters, vector stores) remain directly relevant as Agent Framework builds on the same foundations — this spike is still the right reference for understanding those primitives.
+
+---
+
 ## What Is It
 
-Microsoft's official .NET SDK for integrating LLMs into applications. First-class Azure OpenAI support. ASP.NET Core DI native. GA at `1.0.0` Jan 2024; agents layer stabilizing through 2025.
+Microsoft's official .NET SDK for integrating LLMs into applications. First-class Azure OpenAI support. ASP.NET Core DI native. GA at `1.0.0` Jan 2024; superseded for agent work by Microsoft Agent Framework in April 2026.
 
 ---
 

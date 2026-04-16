@@ -6,17 +6,144 @@
 
 ---
 
-## TL;DR
+## Critical Context — What "Agent Framework" Actually Is
 
-Semantic Kernel IS an agent framework. The question isn't "SK vs agent framework" — it's "how deep into SK's agent layer do we go, and do we need AutoGen for multi-agent orchestration?"
+**Microsoft Agent Framework** is a distinct, standalone product that GA'd **April 3, 2026**. It is NOT Semantic Kernel's agent layer — it's the unified successor to both SK and AutoGen, combining the best of both into a single SDK.
+
+- GitHub: [microsoft/agent-framework](https://github.com/microsoft/agent-framework) (9.5k stars, 44% C#)
+- NuGet: `Microsoft.Agents.AI`
+- Explicit migration guides exist FROM SK and FROM AutoGen
+- Built on `Microsoft.Extensions.AI` (`IChatClient`) — provider-agnostic by design
+- Covers: single agents, middleware, memory, workflows, multi-agent orchestration
+
+> **The previous spike docs (SK Agents layer) described the predecessor. This is the current answer.**
+
+---
+
+## TL;DR
 
 | Scenario | Recommendation |
 |---|---|
-| Migrate ChatAI tool calling | SK core (`ChatCompletionAgent` or just `Kernel` + `FunctionChoiceBehavior.Auto`) |
-| Named persona agents (Aivy, OfficeFunctions, Search) | `ChatCompletionAgent` per persona — RC, acceptable |
-| Multi-agent orchestration (route between agents) | SK `AgentGroupChat` — experimental, evaluate carefully |
-| Distributed/durable agents at scale | Azure AI Agent Service via `AzureAIAgent` — experimental |
-| Complex multi-agent research patterns | AutoGen.NET wrapper over SK — only if SK orchestration is insufficient |
+| New agent work, greenfield | **Microsoft Agent Framework (`Microsoft.Agents.AI`)** — GA, 1.0 stable |
+| Migrate ChatAI tool calling | Agent Framework single-agent + `AIFunctionFactory.Create()` |
+| Named personas (Aivy, OfficeAssistant, Search) | Separate `AIAgent` instances per persona |
+| Multi-agent orchestration | Agent Framework built-in: sequential, concurrent, handoff, group chat, Magentic-One |
+| Existing SK code | Migrate via official SK → Agent Framework guide |
+| Existing AutoGen code | Migrate via official AutoGen → Agent Framework guide |
+
+---
+
+---
+
+## Microsoft Agent Framework 1.0
+
+### NuGet Packages
+
+```xml
+<!-- Core -->
+<PackageReference Include="Microsoft.Agents.AI" Version="1.*" />
+
+<!-- Provider-specific (choose one or more) -->
+<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.*" />
+<!-- Azure Foundry path uses AIProjectClient — included in Azure.AI.Projects -->
+```
+
+### Foundation: Microsoft.Extensions.AI
+
+Built on `IChatClient` from `Microsoft.Extensions.AI` — the .NET platform-level AI abstraction. All providers (Azure OpenAI, OpenAI, Anthropic, Bedrock, Gemini, Ollama) implement `IChatClient`. Swap providers without rewriting agent code.
+
+```csharp
+// Azure Foundry path (recommended for Azure shops)
+var agent = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential())
+    .AsAIAgent(
+        model: "gpt-4o",
+        name: "Aivy",
+        instructions: "You are Aivy, Harvard Medical Community's AI assistant.");
+
+var result = await agent.RunAsync("user message");
+
+// Direct OpenAI path
+var agent = new OpenAIClient(apiKey)
+    .GetResponsesClient()
+    .AsAIAgent(model: "gpt-4o", name: "Aivy", instructions: "...");
+```
+
+### Tools (Function Calling)
+
+`AIFunctionFactory.Create()` replaces `[KernelFunction]`. Accepts delegates; generates JSON schema automatically.
+
+```csharp
+var searchTool = AIFunctionFactory.Create(
+    async (string query) =>
+    {
+        var results = await searchService.SearchAsync(query);
+        return JsonConvert.SerializeObject(results);
+    },
+    name: "search_knowledge_base",
+    description: "Search the HMC knowledge base for relevant documents");
+
+var calendarTool = AIFunctionFactory.Create(
+    async (string userId, DateTimeOffset start, DateTimeOffset end) =>
+        await calendarService.GetEventsAsync(userId, start, end),
+    name: "get_calendar_events",
+    description: "Get calendar events for a user within a date range");
+
+var agent = client.AsAIAgent(
+    model: "gpt-4o",
+    name: "Aivy",
+    instructions: "...",
+    tools: [searchTool, calendarTool]);
+```
+
+MCP server tools also supported — discover tools from any MCP-compliant server at runtime.
+
+### Middleware Pipeline
+
+Replaces SK filters. Intercept execution stages for logging, safety, compliance, SignalR signaling:
+
+```csharp
+// Pseudocode — exact API TBD from docs
+agent.Use(async (context, next) =>
+{
+    await chatContext.SignalChatStatusMessage(LogLevel.Information, $"Thinking...");
+    await next(context);
+});
+```
+
+### Memory Providers
+
+Pluggable backends — conversation history, key-value state, vector retrieval:
+- Microsoft Foundry (Azure-native)
+- Redis
+- Neo4j
+- Mem0
+- (Cosmos, Azure AI Search expected via connectors)
+
+### Multi-Agent Orchestration (5 built-in patterns)
+
+All patterns ship in 1.0 stable — unlike SK's experimental orchestration packages.
+
+```csharp
+// Sequential — output of A feeds B feeds C
+var workflow = new SequentialOrchestration(researchAgent, summaryAgent, reviewAgent);
+var result = await workflow.RunAsync("Research and summarize topic X");
+
+// Handoff — triage agent routes to specialist
+var workflow = new HandoffOrchestration(triageAgent, officeAgent, searchAgent, learningAgent);
+
+// Group Chat — manager selects speaker each turn
+var workflow = new GroupChatOrchestration(managerAgent, agents: [officeAgent, searchAgent]);
+
+// Concurrent — all agents work same task in parallel
+var workflow = new ConcurrentOrchestration(agent1, agent2, agent3);
+
+// Magentic-One — Microsoft Research's generalist multi-agent pattern
+var workflow = new MagenticOneOrchestration(agents);
+```
+
+### A2A Protocol
+
+Agent-to-Agent (A2A) protocol enables cross-framework coordination — your HMC agents can interoperate with agents built in other frameworks/languages via structured messaging. Future-proofing for multi-system agent networks.
 
 ---
 
@@ -266,18 +393,24 @@ var result = await groupChat.InitiateChat(
 ## Decision Tree for HMC
 
 ```
-Current ChatAI flow (single assistant, tool calling)?
-└── Migrate to SK Kernel + FunctionChoiceBehavior.Auto()
-    └── Want explicit agent identity / thread management?
-        └── Use ChatCompletionAgent (RC)
-            └── Want server-managed threads + Azure-native RAG tools?
-                └── Evaluate AzureAIAgent when it GAs
-            └── Need multiple specialized agents collaborating?
-                └── Use AgentToolPlugin supervisor pattern (stable now)
-                    └── Need more complex orchestration topology?
-                        └── Try SK AgentGroupChat/HandoffOrchestration (experimental)
-                            └── Still insufficient?
-                                └── AutoGen.NET wrapping SK agents
+New agent work / greenfield?
+└── Microsoft Agent Framework (Microsoft.Agents.AI) — GA 1.0, start here
+
+Migrating existing ChatAI?
+└── Official SK → Agent Framework migration guide
+    └── IChatFunction + ToolCallAccumulator → AIFunctionFactory.Create()
+    └── PromptEngineeringProvider → middleware pipeline
+    └── ChatHistory + truncation → Agent Framework memory providers
+
+Need multi-agent orchestration?
+└── Agent Framework built-in patterns — all stable in 1.0
+    ├── Simple routing → HandoffOrchestration
+    ├── Specialized parallel work → ConcurrentOrchestration  
+    ├── Consensus/review loop → GroupChatOrchestration
+    └── Complex generalist tasks → MagenticOneOrchestration
+
+Stuck with SK agent code already written?
+└── SK ChatCompletionAgent → Agent Framework migration guide exists
 ```
 
 ---
@@ -309,10 +442,15 @@ Current ChatAI flow (single assistant, tool calling)?
 
 ## References
 
-- [SK Agent Framework overview](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/)
-- [ChatCompletionAgent](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-types/chat-completion-agent)
-- [OpenAIAssistantAgent](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-types/assistant-agent)
-- [AzureAIAgent](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-types/azure-ai-agent)
-- [Agent Orchestration](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-orchestration/)
-- [AutoGen .NET repo](https://github.com/microsoft/autogen) — .NET under `dotnet/` subfolder
-- [Function Calling deep dive](https://learn.microsoft.com/en-us/semantic-kernel/concepts/ai-services/chat-completion/function-calling/)
+- [Microsoft Agent Framework 1.0 announcement](https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-version-1-0/)
+- [Agent Framework devblog](https://devblogs.microsoft.com/agent-framework/)
+- [GitHub: microsoft/agent-framework](https://github.com/microsoft/agent-framework)
+- [GitHub releases](https://github.com/microsoft/agent-framework/releases)
+- [VSMag: SK + AutoGen = Agent Framework (origin story)](https://visualstudiomagazine.com/articles/2025/10/01/semantic-kernel-autogen--open-source-microsoft-agent-framework.aspx)
+- [Start Debugging: Agent Framework 1.0 C# deep dive](https://startdebugging.net/2026/04/microsoft-agent-framework-1-0-ai-agents-in-csharp/)
+- [InfoQ: Agent Framework RC](https://www.infoq.com/news/2026/02/ms-agent-framework-rc/)
+- NuGet: `Microsoft.Agents.AI`, `Microsoft.Agents.AI.OpenAI`
+
+### SK / AutoGen (predecessors — still relevant for existing code)
+- [SK Agent Framework](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/)
+- [AutoGen .NET repo](https://github.com/microsoft/autogen)
