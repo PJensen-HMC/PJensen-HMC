@@ -1,0 +1,6 @@
+# Repos to pull on init — one per line, absolute path
+# Format: /path/to/repo
+/home/devadmin/Shared
+/home/devadmin/CoreServices
+/home/devadmin/Crimson.Legacy
+/home/devadmin/caveman

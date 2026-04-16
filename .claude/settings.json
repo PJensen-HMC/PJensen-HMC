@@ -34,6 +34,15 @@
             "command": "jq -r '.tool_name // empty' | tr -cd '[:alnum:]' | head -c 32 > /home/devadmin/.claude/.current-tool"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'git push'; then echo 'BLOCKED: Direct git push is disabled. Use /safe-push skill for all pushes.' >&2; exit 1; fi"
+          }
+        ]
       }
     ],
     "PostToolUse": [

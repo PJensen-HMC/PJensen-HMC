@@ -115,6 +115,3 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# Write terminal width for Claude Code statusline hook (no TTY in subprocesses)
-PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }echo \$COLUMNS > \$HOME/.claude/.term-cols 2>/dev/null"

@@ -61,7 +61,9 @@ Any other response → abort, report "Push cancelled."
 
 If approved:
 ```bash
-git push [--force]
+SAFE_PUSH=1 git push [--force]
 ```
+
+`SAFE_PUSH=1` is required — the global pre-push hook blocks any push without it.
 
 Report the result verbatim.

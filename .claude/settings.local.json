@@ -48,7 +48,17 @@
       "Bash(dotnet list *)",
       "Bash(sed -i 's|HMC.Shared.Web\" Version=\"3.0.0.16-shared-web-swagger-3-1\"|HMC.Shared.Web\" Version=\"3.0.0.17\"|' /home/devadmin/Crimson.Legacy/HMC.ResearchManagement.Service/HMC.ResearchManagement.Service.csproj)",
       "Bash(sed -i 's|HMC.Shared.ResearchManagementIndex\" Version=\"3.0.0.11\"|HMC.Shared.ResearchManagementIndex\" Version=\"3.0.0.12\"|' /home/devadmin/Crimson.Legacy/HMC.ResearchManagement.Service/HMC.ResearchManagement.Service.csproj)",
-      "Bash(dotnet restore *)"
+      "Bash(dotnet restore *)",
+      "Bash(find ~/.nuget/packages/hmc.shared.researchmanagementindex/3.0.0.12 -name \"*.xml\" -exec grep -l -i \"fingerprint\" {} \\\\; find ~/.nuget/packages/hmc.shared.researchmanagementindex/3.0.0.12 -type f)",
+      "Bash(ls ~/.claude/.secrets*)",
+      "Bash(rg -l \"Blob|blob\" /home/devadmin/Shared /home/devadmin/CoreServices /home/devadmin/Crimson.Legacy --include=\"*.cs\")",
+      "Bash(/usr/bin/rg -l \"chunk|Chunk\" /home/devadmin/Shared /home/devadmin/CoreServices /home/devadmin/Crimson.Legacy --include=\"*.cs\")",
+      "Bash(/usr/bin/rg -rl \"vector\\\\|Vector\\\\|embed\\\\|Embed\" /home/devadmin/CoreServices/ -g \"*.cs\")",
+      "WebSearch",
+      "WebFetch(domain:devblogs.microsoft.com)",
+      "WebFetch(domain:startdebugging.net)",
+      "Bash(python3 -c \"import fcntl, termios, struct, os; r=fcntl.ioctl\\(0,termios.TIOCGWINSZ,b'\\\\x00'*8\\); print\\(struct.unpack\\('HHHH',r\\)\\)\")",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

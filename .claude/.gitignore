@@ -1,0 +1,29 @@
+# ignore everything by default
+*
+
+# --- scripts ---
+!statusline.sh
+!send_statusline.sh
+!send_test.sh
+!init.sh
+!pr.sh
+
+# --- secrets (never commit) ---
+.secrets
+
+# --- config ---
+!.gitignore
+!.secrets.example
+!settings.json
+!settings.local.json
+!repos.list
+!bashrc
+
+# --- memory ---
+!projects/
+projects/*
+!projects/-home-devadmin/
+projects/-home-devadmin/*
+!projects/-home-devadmin/memory/
+projects/-home-devadmin/memory/*
+!projects/-home-devadmin/memory/*.md

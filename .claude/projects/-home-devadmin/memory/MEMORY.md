@@ -5,3 +5,4 @@
 - [Azure DevOps access — HMCgit](reference_azure_devops.md) — PAT, git auth, NuGet creds, PR REST API, default reviewers, target branch
 - [Dotfiles/backup repo — planned reorganization](project_dotfiles_backup.md) — ~/.claude backup is temporary; moving to ~/dotfiles with personal remote
 - [Always update README when adding a skill](feedback_readme_skills.md) — new hmc-tools skill = README update required, same commit
+- [Trust user assertions — proceed immediately](feedback_trust_user_assertions.md) — user says method exists = use it, do NOT search, demotion-level failure if ignored

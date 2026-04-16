@@ -183,7 +183,9 @@ else
 fi
 
 now_sec=$(date +%s)
-cols=$(tput cols 2>/dev/null || echo 120)
+cols=$(cat "$config_dir/.term-cols" 2>/dev/null | tr -cd '0-9')
+[ -z "$cols" ] && cols=$(tput cols 2>/dev/null)
+[ -z "$cols" ] && cols=120
 
 # =============================================================================
 # DUNGEON CORRIDOR (NetHack-style) — primary display
