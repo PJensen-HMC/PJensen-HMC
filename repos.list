@@ -1,6 +1,7 @@
-# Repos to pull on init — one per line, absolute path
-# Format: /path/to/repo
-/home/devadmin/Shared
-/home/devadmin/CoreServices
-/home/devadmin/Crimson.Legacy
-/home/devadmin/caveman
+# Repos to clone/pull — one remote URL per line
+# ADO repos: PAT injected at runtime from ~/.claude/.secrets
+# GitHub repos: public, no PAT needed
+https://dev.azure.com/HarvMgmt/HMCgit/_git/Shared
+https://dev.azure.com/HarvMgmt/HMCgit/_git/CoreServices
+https://dev.azure.com/HarvMgmt/HMCgit/_git/Crimson.Legacy
+https://github.com/JuliusBrussee/caveman

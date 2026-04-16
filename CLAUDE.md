@@ -4,13 +4,13 @@ Guidance for Claude Code (claude.ai/code) in this repo.
 
 ## Repos
 
-Three sibling repos under `/home/devadmin/`:
+Three repos under `/home/devadmin/repos/`:
 
 | Dir | Purpose |
 |---|---|
-| `Shared/` | C# NuGet library monorepo (HMC.Shared.*). Published to internal Azure DevOps feed at version `3.0.0.x`. |
-| `CoreServices/` | ASP.NET Core microservices (Core, Chat, ChatAI, Calendar, Tasks, Workflow, Notifications). |
-| `Crimson.Legacy/` | Legacy TFS code migrating into CoreServices/Crimson. Touch minimally. |
+| `repos/Shared/` | C# NuGet library monorepo (HMC.Shared.*). Published to internal Azure DevOps feed at version `3.0.0.x`. |
+| `repos/CoreServices/` | ASP.NET Core microservices (Core, Chat, ChatAI, Calendar, Tasks, Workflow, Notifications). |
+| `repos/Crimson.Legacy/` | Legacy TFS code migrating into CoreServices/Crimson. Touch minimally. |
 
 ## Tooling
 
@@ -21,9 +21,9 @@ Three sibling repos under `/home/devadmin/`:
 All repos pin to .NET 10 (`global.json`). Same commands across repos — substitute `.sln` path.
 
 ```bash
-dotnet restore Shared/HMC.Shared.sln
-dotnet build   Shared/HMC.Shared.sln
-dotnet test    Shared/Tests/HMC.Shared.Types.Tests/HMC.Shared.Types.Tests.csproj --no-build
+dotnet restore repos/Shared/HMC.Shared.sln
+dotnet build   repos/Shared/HMC.Shared.sln
+dotnet test    repos/Shared/Tests/HMC.Shared.Types.Tests/HMC.Shared.Types.Tests.csproj --no-build
 ```
 
 Run single test project by path. Most `Shared/` tests need no credentials; exceptions:
@@ -48,7 +48,7 @@ Clean `Shared` build = **161 warnings, 0 errors** — no new errors. Check error
 
 **Serialization:** Always Newtonsoft.Json, never `System.Text.Json`.
 
-**DI registration:** Follow extension method pattern in `Shared/HMC.Shared.Web/ServiceExtensions.cs` (`UseHMCServices`) and `MvcExtensions.cs` (`AddHMCMvc`).
+**DI registration:** Follow extension method pattern in `repos/Shared/HMC.Shared.Web/ServiceExtensions.cs` (`UseHMCServices`) and `MvcExtensions.cs` (`AddHMCMvc`).
 
 **Expose internals to tests** via `<AssemblyAttribute>` in library `.csproj` (see `HMC.Shared.UserService.csproj`), not `[assembly: InternalsVisibleTo]` in source.
 

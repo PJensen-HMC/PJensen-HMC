@@ -24,6 +24,11 @@
 # --- README ---
 !README.md
 
+# --- repos bootstrap (code repos ignored, init script tracked) ---
+!repos/
+repos/*
+!repos/init.sh
+
 # --- r&d spikes ---
 !r&d/
 r&d/*

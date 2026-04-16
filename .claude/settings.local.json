@@ -62,7 +62,9 @@
       "Bash(python3 /home/devadmin/.claude/statusline.py)",
       "Bash(SAFE_PUSH=1 git push *)",
       "Bash(python3 *)",
-      "Bash(SAFE_PUSH=1 git *)"
+      "Bash(SAFE_PUSH=1 git *)",
+      "Bash(mkdir -p /home/devadmin/repos)",
+      "Bash(mv /home/devadmin/Shared /home/devadmin/CoreServices /home/devadmin/Crimson.Legacy /home/devadmin/repos/)"
     ]
   }
 }
