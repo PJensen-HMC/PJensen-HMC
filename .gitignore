@@ -23,9 +23,6 @@
 # --- README ---
 !README.md
 
-# --- docs ---
-!indexing-topology.md
-
 # --- r&d spikes ---
 !r&d/
 r&d/*
