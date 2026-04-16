@@ -69,10 +69,11 @@ if transcript and os.path.exists(transcript):
                         ts = obj.get('timestamp')
                         if ts:
                             started = datetime.fromisoformat(ts.replace('Z','+00:00')).timestamp()
-                    if obj.get('role') == 'user':
+                    if obj.get('type') == 'user':
                         turn_count += 1
-                        # Extract text content
-                        content = obj.get('content', '')
+                        # Extract text content (message.content or top-level content)
+                        msg = obj.get('message', obj)
+                        content = msg.get('content', '')
                         if isinstance(content, list):
                             txt = ' '.join(p.get('text','') for p in content if isinstance(p,dict))
                         else:
