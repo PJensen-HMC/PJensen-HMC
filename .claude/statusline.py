@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """NetHack-style Claude Code status line."""
-import sys, json, os, re, random, time, subprocess, math
+import sys, json, os, re, random, time, subprocess
 
 data = json.loads(sys.stdin.read())
 config_dir = os.environ.get('CLAUDE_CONFIG_DIR', os.path.expanduser('~/.claude'))
@@ -357,7 +357,124 @@ try:
         _elapsed_secs = int(time.time()) - int(os.path.getmtime(transcript))
 except: pass
 
+# --- Terminal width + floor (needed here for floor event detection) ---
+cols = 120
+try:
+    v = int(open(os.path.join(config_dir, '.term-cols')).read().strip())
+    if v > 20: cols = v
+except:
+    try:
+        import shutil
+        v = shutil.get_terminal_size().columns
+        if v > 20: cols = v
+    except: pass
+
+W   = max(cols - 8, 20)
+rng = random.Random(seed)
+d0  = int(W * 0.15)
+d1  = int(W * 0.40)
+d2  = int(W * 0.70)
+
+ITEM_THRESHOLDS = [(')', .012), ('%', .022), ('!', .030), ('?', .036), ('^', .042), ('$', .048)]
+floor = []
+for i in range(W):
+    if i in (d0, d1, d2):
+        floor.append('+'); continue
+    r = rng.random()
+    floor.append(next((sym for sym, t in ITEM_THRESHOLDS if r < t), '·'))
+
+# Stairs always near end of corridor — player reaches them after enough turns
+floor[W - 3] = '>'
+
+# Player walks left→right one step per turn; ±1 drift per second for animation
+# Wraps corridor each time — dlvl increments on each wrap
+base = turn_count % W
+ppos = max(0, min(W - 1, base + now_sec % 3 - 1))
+orig_floor = floor[:]   # snapshot before player mutations — used for event detection
+# Use base (no drift) for event detection so events fire on the exact turn
+_event_tile = orig_floor[base] if 0 <= base < W else '·'
+
+# --- Floor event messages ---
+FLOOR_EVENT_MSGS = {
+    '^': [
+        "You blunder into a trap!",
+        "A trap springs underfoot!",
+        "Click. Pain shoots up your leg.",
+        "The trap was hidden under the dust.",
+        "You curse your carelessness.",
+    ],
+    '%': [
+        "You pick up some food.",
+        "Rations. You add them to your pack.",
+        "Smells edible enough.",
+        "You snatch the food from the floor.",
+        "You stow the food gratefully.",
+    ],
+    ')': [
+        "You pick up a weapon.",
+        "The blade feels well-balanced.",
+        "You heft the find approvingly.",
+        "A solid weapon. You keep it.",
+        "You test the edge. Sharp enough.",
+    ],
+    '!': [
+        "You quaff the potion.",
+        "It tastes faintly of almonds.",
+        "The liquid burns going down.",
+        "You pocket the vial for later.",
+        "Bitter, but perhaps useful.",
+    ],
+    '?': [
+        "You pocket the scroll.",
+        "The text is in an unfamiliar hand.",
+        "You fold the scroll carefully.",
+        "Words you don't yet understand.",
+        "You tuck it away for later study.",
+    ],
+    '$': [
+        "You find a pile of gold.",
+        "Coins clink against each other.",
+        "You add the gold to your pouch.",
+        "A small windfall.",
+        "You pocket the coins quickly.",
+    ],
+    '+': [
+        "You push open the door.",
+        "The door groans on rusty hinges.",
+        "You squeeze through the doorway.",
+        "A draught of cold air greets you.",
+        "The door scrapes on the stone floor.",
+        "You force the door open.",
+        "Beyond the door, more corridor.",
+    ],
+    '>': [
+        "A staircase leads downward.",
+        "You peer into the depths below.",
+        "The way down beckons.",
+        "You feel the pull of the abyss.",
+        "Descend, or press on?",
+        "Each step down is a step deeper.",
+    ],
+}
+
+_HUNGER = [
+    "You are starting to feel hungry.",
+    "You are hungry.",
+    "You are weak from hunger.",
+    "You are fainting from lack of food!",
+]
+
+_CAT_DEMON_MSGS = [
+    "Your cat hisses at the demon.",
+    "Your cat yowls and backs away.",
+    "Your cat arches its back.",
+    "Your cat bristles and retreats.",
+    "Your cat spits and hides behind you.",
+]
+
 def _pick(pool): return pool[turn_count % len(pool)]
+
+_floor_event = FLOOR_EVENT_MSGS.get(_event_tile)
 
 if used_int >= 95:
     dung_msg = "The walls close in around you!"
@@ -367,13 +484,18 @@ elif used_int >= 80:
     dung_msg = "Your pack feels very heavy."
 elif used_int >= 70:
     dung_msg = "You sense danger ahead."
+elif _floor_event:
+    dung_msg = _pick(_floor_event)
 elif _active_tool in TOOL_MSGS:
     base = _pick(TOOL_MSGS[_active_tool])
-    # Splice in tool context where we have it
     if _tool_ctx and _active_tool == 'Bash':
         dung_msg = f'{base}  -- {_tool_ctx[:30].rstrip()}'
     else:
         dung_msg = base
+elif is_thinking and turn_count % 5 == 3:
+    dung_msg = _pick(_CAT_DEMON_MSGS)
+elif turn_count > 5 and turn_count % 8 == 5:
+    dung_msg = _HUNGER[min(3, turn_count // 15)]
 elif cost > 0.10 and turn_count % 10 == 0:
     dung_msg = f"Your gold pouch grows lighter. ({cost_fmt} spent)"
 elif _elapsed_secs > 3600 and turn_count % 12 == 1:
@@ -401,58 +523,24 @@ else:
         _signal_msg = _pick(SIGNAL_MSGS[active[idx]])
     dung_msg = _signal_msg if _signal_msg else AMBIENT[(seed + turn_count) % len(AMBIENT)]
 
-# --- Terminal width ---
-cols = 120
-try:
-    v = int(open(os.path.join(config_dir, '.term-cols')).read().strip())
-    if v > 20: cols = v
-except:
-    try:
-        import shutil
-        v = shutil.get_terminal_size().columns
-        if v > 20: cols = v
-    except: pass
-
 # =============================================================================
-# DUNGEON CORRIDOR
+# DUNGEON CORRIDOR  (floor / W / d0 d1 d2 / ppos / orig_floor computed above)
 # =============================================================================
 RST='\033[0m'; DIM='\033[2m'; BLD='\033[1;37m'; RED='\033[0;31m'
 YEL='\033[0;33m'; CYN='\033[0;36m'; GRN='\033[0;32m'; MAG='\033[0;35m'
 BRT='\033[1;33m'; WHT='\033[0;37m'; LBL='\033[1;34m'; ORG='\033[38;5;172m'
-
-W    = max(cols - 8, 20)
-rng  = random.Random(seed)
-d1   = int(W * 0.35)
-d2   = int(W * 0.68)
-
-# Stable floor items (seeded per session)
-ITEM_THRESHOLDS = [(')', .012), ('%', .022), ('!', .030), ('?', .036), ('^', .042), ('$', .048)]
-floor = []
-for i in range(W):
-    if i in (d1, d2):
-        floor.append('+'); continue
-    r = rng.random()
-    floor.append(next((sym for sym, t in ITEM_THRESHOLDS if r < t), '·'))
-
-# Stairs near right wall at high context
-if used_int >= 85 and W - 3 >= 0:
-    floor[W - 3] = '>'
-
-# Player position (ctx% → x, ±1 drift per second for animation)
-ppos = max(0, min(W - 1, int(used_int * (W - 1) / 100) + now_sec % 3 - 1))
 
 # Pickup: clear all items player has already passed
 for i in range(ppos):
     if floor[i] not in ('+', '/', '>'):
         floor[i] = '·'
 
-# Cat: wanders independently using two overlapping sine waves (unique freq per session)
-# Moves on same 1s tick as spinner. Stays off player and stairs.
-f1 = 0.05 + (seed % 11) * 0.004   # ~0.05–0.09 Hz
-f2 = 0.03 + (seed %  7) * 0.003   # ~0.03–0.05 Hz
-cpos = int(W / 2 + (W / 3) * math.sin(now_sec * f1) * math.cos(now_sec * f2))
-cpos = max(1, min(W - 2, cpos))
-if cpos == ppos: cpos = max(1, ppos - 2)
+# Cat: leashed — oscillates 1–3 steps behind player each second
+cpos = ppos - 1 - (now_sec % 3)
+cpos = max(0, cpos)
+# Nudge off blocked tiles (stairs, closed door) — slide one further back
+if floor[cpos] in ('>', '+'):
+    cpos = max(0, cpos - 1)
 if floor[cpos] not in ('@', '>'):
     floor[cpos] = 'f'
 
@@ -463,6 +551,7 @@ for i in range(ppos - 1, ppos + 2):
 floor[ppos] = '@'
 
 # Open doors player has passed
+if ppos > d0 and floor[d0] not in ('@', 'f'): floor[d0] = '/'
 if ppos > d1 and floor[d1] not in ('@', 'f'): floor[d1] = '/'
 if ppos > d2 and floor[d2] not in ('@', 'f'): floor[d2] = '/'
 
@@ -491,7 +580,7 @@ corridor += f'{DIM}#{RST}'
 # =============================================================================
 # NETHACK STATS LINE
 # =============================================================================
-dlvl = turn_count
+dlvl = turn_count // W + 1   # increments each time player completes a corridor run
 ac   = 2 if 'opus' in model.lower() else 7 if 'haiku' in model.lower() else 4
 model_short = re.sub(r'[Cc]laude[- ]', '', model)[:16]
 hp_col = RED if used_int >= 90 else YEL if used_int >= 70 else GRN

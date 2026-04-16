@@ -61,7 +61,8 @@
       "Bash(python3 -c ' *)",
       "Bash(python3 /home/devadmin/.claude/statusline.py)",
       "Bash(SAFE_PUSH=1 git push *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(SAFE_PUSH=1 git *)"
     ]
   }
 }
