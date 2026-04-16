@@ -61,4 +61,21 @@ if [ -z "$PR_ID" ]; then
   exit 1
 fi
 
-echo "PR #${PR_ID} — https://dev.azure.com/${ORG}/${PROJECT}/_git/${REPO}/pullrequest/${PR_ID}"
+PR_URL="https://dev.azure.com/${ORG}/${PROJECT}/_git/${REPO}/pullrequest/${PR_ID}"
+echo "PR #${PR_ID} — ${PR_URL}"
+
+# Add required reviewer: smurnyyy@hmc.harvard.edu
+REVIEWER_ID=$(curl -s \
+  "https://vssps.dev.azure.com/${ORG}/_apis/identities?searchFilter=MailAddress&filterValue=smurnyyy@hmc.harvard.edu&api-version=7.1" \
+  -u ":${ADO_PAT}" | jq -r '.value[0].id // empty')
+
+if [ -n "$REVIEWER_ID" ]; then
+  curl -s -X PUT \
+    "https://dev.azure.com/${ORG}/${PROJECT}/_apis/git/repositories/${REPO}/pullrequests/${PR_ID}/reviewers/${REVIEWER_ID}?api-version=7.1" \
+    -H "Content-Type: application/json" \
+    -u ":${ADO_PAT}" \
+    -d '{"isRequired":true,"vote":0}' > /dev/null
+  echo "Reviewer added: smurnyyy@hmc.harvard.edu (required)"
+else
+  echo "WARNING: could not resolve smurnyyy@hmc.harvard.edu — add reviewer manually"
+fi
