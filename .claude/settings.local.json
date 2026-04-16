@@ -38,7 +38,17 @@
       "Bash(cp ~/CLAUDE.md /tmp/dotfiles/CLAUDE.md)",
       "Bash(cp ~/.claude/repos.list /tmp/dotfiles/repos.list)",
       "Bash(cp ~/.claude/.secrets.example /tmp/dotfiles/.claude/.secrets.example)",
-      "Bash(cp ~/.claude/settings.json /tmp/dotfiles/.claude/settings.json)"
+      "Bash(cp ~/.claude/settings.json /tmp/dotfiles/.claude/settings.json)",
+      "Bash(ls ~/.claude/plugins/**/)",
+      "Bash(mkdir -p /tmp/dotfiles/.claude/plugins/local/hmc-tools/.claude-plugin)",
+      "Bash(mkdir -p /tmp/dotfiles/.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs)",
+      "Bash(cp ~/.claude/plugins/local/hmc-tools/.claude-plugin/plugin.json /tmp/dotfiles/.claude/plugins/local/hmc-tools/.claude-plugin/)",
+      "Bash(cp ~/.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/SKILL.md /tmp/dotfiles/.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/)",
+      "Bash(claude --compact)",
+      "Bash(dotnet list *)",
+      "Bash(sed -i 's|HMC.Shared.Web\" Version=\"3.0.0.16-shared-web-swagger-3-1\"|HMC.Shared.Web\" Version=\"3.0.0.17\"|' /home/devadmin/Crimson.Legacy/HMC.ResearchManagement.Service/HMC.ResearchManagement.Service.csproj)",
+      "Bash(sed -i 's|HMC.Shared.ResearchManagementIndex\" Version=\"3.0.0.11\"|HMC.Shared.ResearchManagementIndex\" Version=\"3.0.0.12\"|' /home/devadmin/Crimson.Legacy/HMC.ResearchManagement.Service/HMC.ResearchManagement.Service.csproj)",
+      "Bash(dotnet restore *)"
     ]
   }
 }
