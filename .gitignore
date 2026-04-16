@@ -20,6 +20,25 @@
 !.claude/send_statusline.sh
 !.claude/send_test.sh
 
+# --- README ---
+!README.md
+
+# --- local plugins ---
+!.claude/plugins/
+.claude/plugins/*
+!.claude/plugins/local/
+.claude/plugins/local/*
+!.claude/plugins/local/hmc-tools/
+.claude/plugins/local/hmc-tools/*
+!.claude/plugins/local/hmc-tools/.claude-plugin/
+.claude/plugins/local/hmc-tools/.claude-plugin/*
+!.claude/plugins/local/hmc-tools/.claude-plugin/plugin.json
+!.claude/plugins/local/hmc-tools/skills/
+.claude/plugins/local/hmc-tools/skills/*
+!.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/
+.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/*
+!.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/SKILL.md
+
 # --- memory ---
 !.claude/projects/
 .claude/projects/*

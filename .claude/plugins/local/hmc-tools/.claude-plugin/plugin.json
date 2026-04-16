@@ -1,0 +1,7 @@
+{
+  "name": "hmc-tools",
+  "description": "HMC-specific dev tools for CoreServices/Shared repos",
+  "author": {
+    "name": "jensenp@hmc.harvard.edu"
+  }
+}
