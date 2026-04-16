@@ -3,6 +3,7 @@
 
 # --- scripts ---
 !statusline.sh
+!statusline.py
 !send_statusline.sh
 !send_test.sh
 !init.sh

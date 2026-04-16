@@ -218,14 +218,13 @@ dungeon_colored=$(awk \
   for (i = 0; i < W; i++) {
     if (i == d1 || i == d2) { f[i] = "+"; continue }
     r = rand()
-    if      (r < 0.020) f[i] = ")"
-    else if (r < 0.038) f[i] = "%"
-    else if (r < 0.052) f[i] = "!"
-    else if (r < 0.062) f[i] = "?"
-    else if (r < 0.072) f[i] = "^"
-    else if (r < 0.082) f[i] = "$"
-    else if (r < 0.140) f[i] = "."
-    else                f[i] = " "
+    if      (r < 0.012) f[i] = ")"
+    else if (r < 0.022) f[i] = "%"
+    else if (r < 0.030) f[i] = "!"
+    else if (r < 0.036) f[i] = "?"
+    else if (r < 0.042) f[i] = "^"
+    else if (r < 0.048) f[i] = "$"
+    else                f[i] = "·"
   }
 
   # Stairs: near right wall when context running out
@@ -245,7 +244,7 @@ dungeon_colored=$(awk \
 
   # Clear floor around player (not cat, not stairs)
   for (i = ppos - 1; i <= ppos + 1; i++) {
-    if (i >= 0 && i < W && i != ppos && f[i] != "f" && f[i] != ">") f[i] = "."
+    if (i >= 0 && i < W && i != ppos && f[i] != "f" && f[i] != ">") f[i] = "·"
   }
   f[ppos] = "@"
 
@@ -296,7 +295,8 @@ dungeon_colored=$(awk \
     else if (c == "+") printf YEL "+" RST
     else if (c == "^") printf RED "^" RST
     else if (c == "$") printf YEL "$" RST
-    else if (c == ".") printf DIM "." RST
+    else if (c == "·") printf DIM "·" RST
+    else if (c == ".") printf DIM "·" RST
     else if (c == ")") printf YEL ")" RST
     else if (c == "%") printf GRN "%" RST
     else if (c == "!") printf MAG "!" RST

@@ -1,7 +1,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "/home/devadmin/.claude/statusline.sh"
+    "command": "/home/devadmin/.claude/statusline.py"
   },
   "extraKnownMarketplaces": {
     "caveman": {

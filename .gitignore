@@ -17,6 +17,7 @@
 !.claude/settings.json
 !.claude/settings.local.json
 !.claude/statusline.sh
+!.claude/statusline.py
 !.claude/send_statusline.sh
 !.claude/send_test.sh
 

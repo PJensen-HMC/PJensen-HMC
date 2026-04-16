@@ -58,7 +58,8 @@
       "WebFetch(domain:devblogs.microsoft.com)",
       "WebFetch(domain:startdebugging.net)",
       "Bash(python3 -c \"import fcntl, termios, struct, os; r=fcntl.ioctl\\(0,termios.TIOCGWINSZ,b'\\\\x00'*8\\); print\\(struct.unpack\\('HHHH',r\\)\\)\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(python3 /home/devadmin/.claude/statusline.py)"
     ]
   }
 }
