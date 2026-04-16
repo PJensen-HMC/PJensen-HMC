@@ -38,6 +38,9 @@
 !.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/
 .claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/*
 !.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/SKILL.md
+!.claude/plugins/local/hmc-tools/skills/hmc_dot_net_list_pkgs/
+.claude/plugins/local/hmc-tools/skills/hmc_dot_net_list_pkgs/*
+!.claude/plugins/local/hmc-tools/skills/hmc_dot_net_list_pkgs/SKILL.md
 
 # --- memory ---
 !.claude/projects/
