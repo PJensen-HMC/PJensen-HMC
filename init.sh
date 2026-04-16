@@ -27,7 +27,43 @@ fi
 source "$SECRETS_FILE"
 
 # ---------------------------------------------------------------------------
-# 2. Git identity
+# 2. System tools
+# ---------------------------------------------------------------------------
+echo ">>> System tools"
+
+# apt packages
+APT_PKGS=()
+command -v rg      &>/dev/null || APT_PKGS+=(ripgrep)
+command -v jq      &>/dev/null || APT_PKGS+=(jq)
+command -v ffmpeg  &>/dev/null || APT_PKGS+=(ffmpeg)
+command -v unzip   &>/dev/null || APT_PKGS+=(unzip)
+
+if [ ${#APT_PKGS[@]} -gt 0 ]; then
+  echo "    apt-get: ${APT_PKGS[*]}"
+  sudo apt-get install -y "${APT_PKGS[@]}" 2>&1 | grep -E "^(Inst|Err)" || true
+else
+  echo "    apt: all present"
+fi
+
+# deno (not in apt)
+if ! command -v deno &>/dev/null; then
+  echo "    installing deno..."
+  curl -fsSL https://deno.land/install.sh | sh
+  export DENO_INSTALL="$HOME/.deno"
+  export PATH="$DENO_INSTALL/bin:$PATH"
+else
+  echo "    deno: $(deno --version | head -1)"
+fi
+
+# dotnet (warn only — needs Microsoft feed on fresh machine)
+if ! command -v dotnet &>/dev/null; then
+  echo "    WARNING: dotnet not found — install .NET 10 from https://dot.net"
+else
+  echo "    dotnet: $(dotnet --version)"
+fi
+
+# ---------------------------------------------------------------------------
+# 3. Git identity
 # ---------------------------------------------------------------------------
 echo ">>> Git identity"
 git config --global user.email "$ADO_USER"
