@@ -22,6 +22,7 @@ PROJECT="HMCgit"
 
 TITLE="${1?Usage: pr.sh <title> [description] [source-branch] [target-branch]}"
 DESCRIPTION="${2:-}"
+CLAUDE_FOOTER=$'\n\n---\n ▐▛███▜▌  Generated with [Claude Code](https://claude.ai/code)\n▝▜█████▛▘\n  ▘▘ ▝▝'
 SOURCE="${3:-$(git branch --show-current 2>/dev/null)}"
 TARGET="${4:-dev}"
 
@@ -47,7 +48,7 @@ RESPONSE=$(curl -s -X POST \
   -u ":${ADO_PAT}" \
   -d "$(jq -n \
     --arg title "$TITLE" \
-    --arg desc "$DESCRIPTION" \
+    --arg desc "${DESCRIPTION}${CLAUDE_FOOTER}" \
     --arg src "refs/heads/$SOURCE" \
     --arg tgt "refs/heads/$TARGET" \
     '{title:$title, description:$desc, sourceRefName:$src, targetRefName:$tgt, isDraft:false}'
