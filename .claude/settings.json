@@ -1,0 +1,50 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "/home/devadmin/.claude/statusline.sh"
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "caveman@caveman": true,
+    "local@hmc-tools": true
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "touch /home/devadmin/.claude/.thinking"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_name // empty' | tr -cd '[:alnum:]' | head -c 32 > /home/devadmin/.claude/.current-tool"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rm -f /home/devadmin/.claude/.thinking /home/devadmin/.claude/.current-tool"
+          }
+        ]
+      }
+    ]
+  }
+}

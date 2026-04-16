@@ -1,0 +1,30 @@
+# ignore everything in ~/
+*
+
+# --- root files ---
+!.bashrc
+!.gitignore
+!CLAUDE.md
+!init.sh
+!pr.sh
+!repos.list
+
+# --- .claude directory ---
+!.claude/
+.claude/*
+!.claude/.gitignore
+!.claude/.secrets.example
+!.claude/settings.json
+!.claude/settings.local.json
+!.claude/statusline.sh
+!.claude/send_statusline.sh
+!.claude/send_test.sh
+
+# --- memory ---
+!.claude/projects/
+.claude/projects/*
+!.claude/projects/-home-devadmin/
+.claude/projects/-home-devadmin/*
+!.claude/projects/-home-devadmin/memory/
+.claude/projects/-home-devadmin/memory/*
+!.claude/projects/-home-devadmin/memory/*.md
