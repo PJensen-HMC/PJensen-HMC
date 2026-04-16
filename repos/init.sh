@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SECRETS_FILE="$HOME/.claude/.secrets"
-REPOS_FILE="$HOME/repos.list"
+REPOS_FILE="$REPOS_DIR/repos.list"
 REPOS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ ! -f "$SECRETS_FILE" ]; then

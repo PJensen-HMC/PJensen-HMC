@@ -7,7 +7,6 @@
 !CLAUDE.md
 !init.sh
 !pr.sh
-!repos.list
 
 # --- .claude directory ---
 !.claude/
@@ -28,6 +27,7 @@
 !repos/
 repos/*
 !repos/init.sh
+!repos/repos.list
 
 # --- r&d spikes ---
 !r&d/
