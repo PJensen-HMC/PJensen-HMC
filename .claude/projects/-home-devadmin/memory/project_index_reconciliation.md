@@ -53,7 +53,8 @@ No pre-enumeration. No Id lists. Only count queries (`$top=0`, very cheap).
 
 ### Why this works for both GUID types
 - **v4 random GUIDs** (Notes, Attachments): uniformly distributed — depth-1 or depth-2 is usually sufficient
-- **Sequential GUIDs** (Documents, SQL FileTable): cluster at a fixed prefix, but recursive subdivision handles this automatically — no special-casing needed, no awareness of GUID type
+- **Sequential GUIDs** (Documents, SQL FileTable `NEWSEQUENTIALID()`): the sequence walks the **first byte**, so Documents smear across `6x`, `7x`, `8x` hex prefixes (not a single root bucket). Recursive subdivision goes deeper there naturally — no special-casing needed, no awareness of GUID type.
+- **Confirmed by sampling ~180 Document GUIDs (2026-04-20)**: first-byte distribution clusters in `6`–`8` era, sparse elsewhere. Adjacent sequential IDs (e.g. `864ED3CE` → `874ED3CE`) land in the same or adjacent depth-3 bucket — no missing doc can slip between fetch boundaries.
 
 ### Output — Part 1
 Plain text file. One line per leaf bucket:
@@ -69,9 +70,21 @@ Roughly uniform chunk counts across all leaf buckets — no hot spots, no near-e
 
 ---
 
+## Part 1 — Verified Results (2026-04-20)
+
+Test ran successfully against live Primary index:
+- **3,721 fetches** (leaf buckets in the plan)
+- **22,176,227 total chunks**
+- Runtime: ~1.7 minutes (count-only queries, no document fetch)
+- Distribution: mostly depth-3 (3-char prefix) buckets at 2K–12K chunks; some depth-2 (~75K–80K) left as leaves; all under 100K ceiling
+- Plan written to temp file. Distribution confirmed flat — "GOOD" signal achieved.
+
+---
+
 ## Implementation
 
-- **New isolated class** inside `HMC.Shared.ResearchManagementIndex`
-- Uses existing `IndexingService` / `SearchClient` infrastructure
-- Self-calibration: sample N Ids to estimate avg chunks/Id (for bin-pack sizing if needed in Part 2)
-- Part 2 (not yet designed): uses the query plan to fetch and diff Primary vs Secondary
+- **`IndexQueryPlanner`** — new isolated class in `HMC.Shared.ResearchManagementIndex`
+- **`IndexQueryPlan`** / **`QueryPlanEntry`** / **`IndexQueryPlannerOptions`** — supporting types
+- Uses `IndexingService.PrimarySearchClient` (existing infrastructure)
+- Test: `IndexQueryPlannerTests.BuildQueryPlan_ProducesEvenDistribution` in `HMC.Shared.ResearchManagementIndex.Tests`
+- Part 2 (not yet built): use the query plan to fetch and diff Primary vs Secondary at `Id` grain
