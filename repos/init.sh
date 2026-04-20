@@ -6,8 +6,8 @@
 set -euo pipefail
 
 SECRETS_FILE="$HOME/.claude/.secrets"
-REPOS_FILE="$REPOS_DIR/repos.list"
 REPOS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPOS_FILE="$REPOS_DIR/repos.list"
 
 if [ ! -f "$SECRETS_FILE" ]; then
   echo "ERROR: $SECRETS_FILE not found — run ~/init.sh first to create it"
