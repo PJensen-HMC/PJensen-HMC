@@ -38,6 +38,11 @@ tools/*
 !repos/crimson-sandbox/
 !repos/crimson-sandbox/**
 
+# --- hiring ---
+!hiring/
+hiring/*
+!hiring/*.md
+
 # --- r&d spikes ---
 !r&d/
 r&d/*
