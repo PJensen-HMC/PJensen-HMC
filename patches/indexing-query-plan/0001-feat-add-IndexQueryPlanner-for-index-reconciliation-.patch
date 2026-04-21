@@ -1,0 +1,228 @@
+From b14b03890bd9cf32ba03089ec591cb140c3a5d7d Mon Sep 17 00:00:00 2001
+From: "Jensen, Pete" <jensenp@hmc.harvard.edu>
+Date: Mon, 20 Apr 2026 19:08:08 +0000
+Subject: [PATCH 1/7] feat: add IndexQueryPlanner for index reconciliation
+ query plan
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Adaptive lexical-prefix strategy that tiles the search index into fetch
+buckets each ≤ 100K chunks. Uses $top=0 count-only queries — no document
+enumeration, no $skip wall. Recursively subdivides hex-prefix buckets
+until every leaf is within target. Single regime handles both random and
+sequential GUIDs without special-casing.
+
+- IndexQueryPlanner: core planner with recursive SubdivideAsync
+- IndexQueryPlan / QueryPlanEntry: result types
+- IndexQueryPlannerOptions: Target (default 80K) + OutputPath
+- IndexQueryPlannerTests: integration test writing plan to temp file
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../IndexQueryPlan.cs                         |  16 +++
+ .../IndexQueryPlanner.cs                      | 104 ++++++++++++++++++
+ .../IndexQueryPlannerOptions.cs               |  10 ++
+ .../Service/IndexQueryPlannerTests.cs         |  39 +++++++
+ 4 files changed, 169 insertions(+)
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexQueryPlan.cs
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexQueryPlanner.cs
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexQueryPlannerOptions.cs
+ create mode 100644 Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs
+
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexQueryPlan.cs b/HMC.Shared.ResearchManagementIndex/IndexQueryPlan.cs
+new file mode 100644
+index 0000000..7dd79a0
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexQueryPlan.cs
+@@ -0,0 +1,16 @@
++namespace HMC.Shared.ResearchManagementIndex;
++
++public sealed class IndexQueryPlan
++{
++    public IReadOnlyList<QueryPlanEntry> Entries { get; }
++    public long TotalChunks { get; }
++    public int FetchCount => Entries.Count;
++
++    internal IndexQueryPlan(IReadOnlyList<QueryPlanEntry> entries)
++    {
++        Entries = entries;
++        TotalChunks = entries.Sum(e => e.Count);
++    }
++}
++
++public sealed record QueryPlanEntry(string Filter, long Count);
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexQueryPlanner.cs b/HMC.Shared.ResearchManagementIndex/IndexQueryPlanner.cs
+new file mode 100644
+index 0000000..b3d2766
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexQueryPlanner.cs
+@@ -0,0 +1,104 @@
++using Azure.Search.Documents;
++using Azure.Search.Documents.Models;
++
++namespace HMC.Shared.ResearchManagementIndex;
++
++/// <summary>
++/// Builds an adaptive lexical-prefix query plan that tiles a search index into
++/// fetch buckets each containing at most <see cref="IndexQueryPlannerOptions.Target"/> chunks.
++///
++/// Algorithm: recursively subdivide Id-prefix buckets via count-only queries ($top=0)
++/// until every leaf is within the target. No document enumeration required.
++/// </summary>
++public sealed class IndexQueryPlanner(SearchClient searchClient, IndexQueryPlannerOptions options)
++{
++    private static readonly char[] HexChars = "0123456789abcdef".ToCharArray();
++
++    public async Task<IndexQueryPlan> BuildPlanAsync(CancellationToken ct = default)
++    {
++        var entries = new List<QueryPlanEntry>();
++
++        for (var i = 0; i < 16; i++)
++        {
++            var prefix = HexChars[i].ToString();
++            var upper  = i < 15 ? HexChars[i + 1].ToString() : null;
++            await SubdivideAsync(prefix, upper, entries, ct);
++        }
++
++        var plan = new IndexQueryPlan(entries);
++
++        if (options.OutputPath != null)
++            await WritePlanAsync(plan, ct);
++
++        return plan;
++    }
++
++    private async Task SubdivideAsync(
++        string prefix, string? upper,
++        List<QueryPlanEntry> results,
++        CancellationToken ct)
++    {
++        var filter = BuildFilter(prefix, upper);
++        var count  = await CountAsync(filter, ct);
++
++        if (count <= options.Target)
++        {
++            results.Add(new QueryPlanEntry(filter, count));
++            return;
++        }
++
++        // Subdivide into 16 hex children.
++        for (var i = 0; i < 16; i++)
++        {
++            var childPrefix = prefix + HexChars[i];
++            var childUpper  = i < 15 ? prefix + HexChars[i + 1] : upper;
++            await SubdivideAsync(childPrefix, childUpper, results, ct);
++        }
++    }
++
++    private async Task<long> CountAsync(string filter, CancellationToken ct)
++    {
++        var searchOptions = new SearchOptions
++        {
++            Filter           = filter,
++            Size             = 0,
++            IncludeTotalCount = true,
++        };
++
++        var response = await searchClient.SearchAsync<SearchDocument>("*", searchOptions, ct);
++        return response.Value.TotalCount ?? 0;
++    }
++
++    private async Task WritePlanAsync(IndexQueryPlan plan, CancellationToken ct)
++    {
++        await using var writer = new StreamWriter(options.OutputPath!, append: false);
++
++        foreach (var entry in plan.Entries)
++            await writer.WriteLineAsync($"{entry.Filter,-50}  {entry.Count,10:N0}");
++
++        await writer.WriteLineAsync();
++        await writer.WriteLineAsync($"Total: {plan.TotalChunks:N0} chunks | {plan.FetchCount} fetches");
++    }
++
++    private static string BuildFilter(string prefix, string? upper) =>
++        upper == null
++            ? $"Id ge '{prefix}'"
++            : $"Id ge '{prefix}' and Id lt '{upper}'";
++
++    // Visible for testing.
++    internal static string? NextHexPrefix(string prefix)
++    {
++        var chars = prefix.ToCharArray();
++        for (var i = chars.Length - 1; i >= 0; i--)
++        {
++            if (chars[i] != 'f')
++            {
++                chars[i] = HexChars[Array.IndexOf(HexChars, chars[i]) + 1];
++                return new string(chars);
++            }
++            chars[i] = '0';
++            if (i == 0) return null;
++        }
++        return null;
++    }
++}
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexQueryPlannerOptions.cs b/HMC.Shared.ResearchManagementIndex/IndexQueryPlannerOptions.cs
+new file mode 100644
+index 0000000..5e52476
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexQueryPlannerOptions.cs
+@@ -0,0 +1,10 @@
++namespace HMC.Shared.ResearchManagementIndex;
++
++public sealed class IndexQueryPlannerOptions
++{
++    /// <summary>Cut a new bucket when estimated chunks reach this threshold.</summary>
++    public int Target { get; init; } = 80_000;
++
++    /// <summary>Write the finished plan to this path. Null = skip file output.</summary>
++    public string? OutputPath { get; init; }
++}
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs
+new file mode 100644
+index 0000000..5cd7c97
+--- /dev/null
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs
+@@ -0,0 +1,39 @@
++using HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
++using Xunit.Abstractions;
++using Xunit.Microsoft.DependencyInjection.Abstracts;
++
++namespace HMC.Shared.ResearchManagementIndex.Tests.Service;
++
++public class IndexQueryPlannerTests : TestBed<IndexingTestBedFixture>
++{
++    private readonly IndexingService? _indexingService;
++
++    public IndexQueryPlannerTests(ITestOutputHelper testOutputHelper, IndexingTestBedFixture fixture)
++        : base(testOutputHelper, fixture)
++    {
++        _indexingService = _fixture.GetService<IndexingService>(_testOutputHelper);
++    }
++
++    [Fact]
++    public async Task BuildQueryPlan_ProducesEvenDistribution()
++    {
++        var outputPath = Path.Combine(Path.GetTempPath(), "index-query-plan.txt");
++
++        var planner = new IndexQueryPlanner(
++            _indexingService!.PrimarySearchClient,
++            new IndexQueryPlannerOptions { OutputPath = outputPath });
++
++        var plan = await planner.BuildPlanAsync();
++
++        _testOutputHelper.WriteLine($"Fetches : {plan.FetchCount}");
++        _testOutputHelper.WriteLine($"Chunks  : {plan.TotalChunks:N0}");
++        _testOutputHelper.WriteLine($"Plan    : {outputPath}");
++        _testOutputHelper.WriteLine(string.Empty);
++
++        foreach (var entry in plan.Entries)
++            _testOutputHelper.WriteLine($"  {entry.Filter,-50}  {entry.Count,10:N0}");
++
++        Assert.NotEmpty(plan.Entries);
++        Assert.True(plan.TotalChunks > 0);
++    }
++}
+-- 
+2.34.1
+

@@ -1,0 +1,54 @@
+From 2cd3f66606d55a8697124adedde91fe41d14b685 Mon Sep 17 00:00:00 2001
+From: "Jensen, Pete" <jensenp@hmc.harvard.edu>
+Date: Tue, 21 Apr 2026 13:49:11 +0000
+Subject: [PATCH 5/7] fix: replace Progress<T> with SyncProgress<T> so ETA
+ lands in xUnit output
+
+Progress<T> marshals through SynchronizationContext causing ITestOutputHelper
+to drop background-thread output. SyncProgress<T> invokes directly on the
+reporting thread, which xUnit captures correctly.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../Fixtures/SyncProgress.cs                         | 12 ++++++++++++
+ .../Service/IndexReconcilerTests.cs                  |  5 ++++-
+ 2 files changed, 16 insertions(+), 1 deletion(-)
+ create mode 100644 Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/SyncProgress.cs
+
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/SyncProgress.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/SyncProgress.cs
+new file mode 100644
+index 0000000..f1b22f7
+--- /dev/null
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/SyncProgress.cs
+@@ -0,0 +1,12 @@
++namespace HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
++
++/// <summary>
++/// IProgress&lt;T&gt; that invokes the handler synchronously on the calling thread.
++/// Use instead of Progress&lt;T&gt; in tests — Progress&lt;T&gt; marshals through
++/// SynchronizationContext and fires on a thread-pool thread, which causes
++/// ITestOutputHelper to silently drop output.
++/// </summary>
++internal sealed class SyncProgress<T>(Action<T> handler) : IProgress<T>
++{
++    void IProgress<T>.Report(T value) => handler(value);
++}
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+index 6e0401d..2110e52 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+@@ -30,7 +30,10 @@ public class IndexReconcilerTests : TestBed<IndexingTestBedFixture>
+             _indexingService!.SecondarySearchClient,
+             new IndexReconcilerOptions { OutputPath = outputPath });
+ 
+-        var progress = new Progress<IndexReconcilerProgress>(p =>
++        // Progress<T> marshals through SynchronizationContext and fires on a thread-pool thread,
++        // which causes ITestOutputHelper to drop output. SyncProgress calls directly on the
++        // reporting thread so xUnit captures it.
++        IProgress<IndexReconcilerProgress> progress = new SyncProgress<IndexReconcilerProgress>(p =>
+             _testOutputHelper.WriteLine(
+                 $"[{p.Elapsed:mm\\:ss}] {p.BucketsCompleted}/{p.BucketsTotal} buckets ({p.PercentComplete:F1}%)" +
+                 (p.EstimatedRemaining.HasValue ? $" — ETA {p.EstimatedRemaining.Value:mm\\:ss}" : string.Empty)));
+-- 
+2.34.1
+

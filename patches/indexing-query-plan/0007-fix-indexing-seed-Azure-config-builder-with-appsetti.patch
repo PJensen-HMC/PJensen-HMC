@@ -1,0 +1,43 @@
+From da6380d35b270e0bc88f6ec59ff73fba917e345e Mon Sep 17 00:00:00 2001
+From: "Jensen, Pete" <jensenp@hmc.harvard.edu>
+Date: Tue, 21 Apr 2026 17:08:11 +0000
+Subject: [PATCH 7/7] fix(indexing): seed Azure config builder with appsettings
+ before AddAzureConfigurator
+
+TestBedFixture pre-loaded json files into its ConfigurationBuilder;
+bare ConfigurationBuilder had no endpoint, causing fixture init to throw.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../Clone/IndexSchemaCloneFixture.cs                            | 1 +
+ .../Fixtures/IndexingTestBedFixture.cs                          | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs
+index a89454b..e8bbfbe 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs
+@@ -19,6 +19,7 @@ public sealed class IndexSchemaCloneFixture : IAsyncLifetime
+             .Build();
+ 
+         var azureConfiguration = new ConfigurationBuilder()
++            .AddJsonFile("appsettings.Cloud.json", optional: false)
+             .AddAzureConfigurator("HMC.ResearchManagement.Service", "Development")
+             .Build();
+ 
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs
+index 9963930..e5b6a11 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs
+@@ -20,6 +20,8 @@ public class IndexingTestBedFixture : IAsyncLifetime
+             .Build();
+ 
+         var azureConfiguration = new ConfigurationBuilder()
++            .AddJsonFile("appsettings.json", optional: true)
++            .AddJsonFile("appsettings.Cloud.json", optional: false)
+             .AddAzureConfigurator("HMC.ResearchManagement.Service", "Development")
+             .Build();
+ 
+-- 
+2.34.1
+

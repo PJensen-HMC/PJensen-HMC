@@ -43,6 +43,13 @@ tools/*
 hiring/*
 !hiring/*.md
 
+# --- patches ---
+!patches/
+patches/*
+!patches/*/
+patches/*/*
+!patches/*/*.patch
+
 # --- r&d spikes ---
 !r&d/
 r&d/*

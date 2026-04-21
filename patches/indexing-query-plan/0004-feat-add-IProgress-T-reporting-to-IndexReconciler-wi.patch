@@ -1,0 +1,113 @@
+From 580e517bfdf272e2e40e8d6fec530a8935e4ec93 Mon Sep 17 00:00:00 2001
+From: "Jensen, Pete" <jensenp@hmc.harvard.edu>
+Date: Tue, 21 Apr 2026 13:29:14 +0000
+Subject: [PATCH 4/7] feat: add IProgress<T> reporting to IndexReconciler with
+ ETA
+
+Reports every 50 buckets: elapsed, completed/total, percent, and
+estimated remaining time. Test wires progress to ITestOutputHelper.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../IndexReconciler.cs                        | 25 +++++++++++++++++++
+ .../IndexReconcilerProgress.cs                | 11 ++++++++
+ .../Service/IndexReconcilerTests.cs           |  7 +++++-
+ 3 files changed, 42 insertions(+), 1 deletion(-)
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexReconcilerProgress.cs
+
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs b/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs
+index 5764407..1879c61 100644
+--- a/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs
++++ b/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs
+@@ -1,6 +1,7 @@
+ using Azure.Search.Documents;
+ using Azure.Search.Documents.Models;
+ using System.Collections.Concurrent;
++using System.Diagnostics;
+ 
+ namespace HMC.Shared.ResearchManagementIndex;
+ 
+@@ -16,14 +17,20 @@ public sealed class IndexReconciler(
+     SearchClient secondaryClient,
+     IndexReconcilerOptions options)
+ {
++    private const int ProgressReportEvery = 50;
++
+     public async Task<IndexReconciliationResult> ReconcileAsync(
+         IndexQueryPlan plan,
++        IProgress<IndexReconcilerProgress>? progress = null,
+         CancellationToken ct = default)
+     {
+         // Buckets are disjoint lexical ranges — no Id can appear in two buckets,
+         // so ConcurrentBag accumulation is duplicate-free.
+         var primaryIdBag   = new ConcurrentBag<string>();
+         var secondaryIdBag = new ConcurrentBag<string>();
++        var completed      = 0;
++        var total          = plan.FetchCount;
++        var sw             = Stopwatch.StartNew();
+ 
+         await Parallel.ForEachAsync(
+             plan.Entries,
+@@ -39,6 +46,24 @@ public sealed class IndexReconciler(
+ 
+                 foreach (var id in secondaryTask.Result)
+                     secondaryIdBag.Add(id);
++
++                var done = Interlocked.Increment(ref completed);
++                if (progress != null && done % ProgressReportEvery == 0)
++                {
++                    var elapsed   = sw.Elapsed;
++                    var rate      = done / elapsed.TotalSeconds;
++                    var remaining = rate > 0
++                        ? TimeSpan.FromSeconds((total - done) / rate)
++                        : (TimeSpan?)null;
++
++                    progress.Report(new IndexReconcilerProgress
++                    {
++                        BucketsCompleted    = done,
++                        BucketsTotal        = total,
++                        Elapsed             = elapsed,
++                        EstimatedRemaining  = remaining
++                    });
++                }
+             });
+ 
+         var primarySet   = new HashSet<string>(primaryIdBag,   StringComparer.OrdinalIgnoreCase);
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexReconcilerProgress.cs b/HMC.Shared.ResearchManagementIndex/IndexReconcilerProgress.cs
+new file mode 100644
+index 0000000..0e6c482
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexReconcilerProgress.cs
+@@ -0,0 +1,11 @@
++namespace HMC.Shared.ResearchManagementIndex;
++
++public sealed class IndexReconcilerProgress
++{
++    public int BucketsCompleted { get; init; }
++    public int BucketsTotal { get; init; }
++    public TimeSpan Elapsed { get; init; }
++    public TimeSpan? EstimatedRemaining { get; init; }
++
++    public double PercentComplete => BucketsTotal == 0 ? 0 : (double)BucketsCompleted / BucketsTotal * 100;
++}
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+index 22f659c..6e0401d 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+@@ -30,7 +30,12 @@ public class IndexReconcilerTests : TestBed<IndexingTestBedFixture>
+             _indexingService!.SecondarySearchClient,
+             new IndexReconcilerOptions { OutputPath = outputPath });
+ 
+-        var result = await reconciler.ReconcileAsync(plan);
++        var progress = new Progress<IndexReconcilerProgress>(p =>
++            _testOutputHelper.WriteLine(
++                $"[{p.Elapsed:mm\\:ss}] {p.BucketsCompleted}/{p.BucketsTotal} buckets ({p.PercentComplete:F1}%)" +
++                (p.EstimatedRemaining.HasValue ? $" — ETA {p.EstimatedRemaining.Value:mm\\:ss}" : string.Empty)));
++
++        var result = await reconciler.ReconcileAsync(plan, progress);
+ 
+         _testOutputHelper.WriteLine($"Buckets            : {result.BucketsProcessed:N0}");
+         _testOutputHelper.WriteLine($"Primary chunks     : {result.PrimaryChunks:N0}");
+-- 
+2.34.1
+

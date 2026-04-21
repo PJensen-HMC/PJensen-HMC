@@ -1,0 +1,438 @@
+From d5ffc12870f68b7597f6c8dc75a05e7c3a269660 Mon Sep 17 00:00:00 2001
+From: "Jensen, Pete" <jensenp@hmc.harvard.edu>
+Date: Tue, 21 Apr 2026 12:39:18 +0000
+Subject: [PATCH 3/7] feat: add IndexReconciler for Primary/Secondary index
+ diff (Part 2)
+
+Implements adaptive lexical-prefix reconciliation at the document Id grain.
+IndexReconciler executes an IndexQueryPlan against both search clients
+concurrently, diffs the resulting Id sets, and writes a report.
+Includes IndexReconcilerTests and RECONCILIATION-DESIGN.md.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../IndexReconciler.cs                        | 126 ++++++++++++++
+ .../IndexReconcilerOptions.cs                 |   9 +
+ .../IndexReconciliationResult.cs              |  38 +++++
+ .../docs/RECONCILIATION-DESIGN.md             | 161 ++++++++++++++++++
+ .../Service/IndexReconcilerTests.cs           |  46 +++++
+ 5 files changed, 380 insertions(+)
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexReconciler.cs
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexReconcilerOptions.cs
+ create mode 100644 HMC.Shared.ResearchManagementIndex/IndexReconciliationResult.cs
+ create mode 100644 HMC.Shared.ResearchManagementIndex/docs/RECONCILIATION-DESIGN.md
+ create mode 100644 Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs b/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs
+new file mode 100644
+index 0000000..5764407
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexReconciler.cs
+@@ -0,0 +1,126 @@
++using Azure.Search.Documents;
++using Azure.Search.Documents.Models;
++using System.Collections.Concurrent;
++
++namespace HMC.Shared.ResearchManagementIndex;
++
++/// <summary>
++/// Reconciles Primary (east) and Secondary (west) search indexes at the document-Id grain
++/// by executing a pre-built <see cref="IndexQueryPlan"/> against both clients concurrently.
++///
++/// Each plan bucket is fetched from both clients in parallel; the resulting Id sets are
++/// diffed after all buckets complete.  No document content is retrieved — only the Id field.
++/// </summary>
++public sealed class IndexReconciler(
++    SearchClient primaryClient,
++    SearchClient secondaryClient,
++    IndexReconcilerOptions options)
++{
++    public async Task<IndexReconciliationResult> ReconcileAsync(
++        IndexQueryPlan plan,
++        CancellationToken ct = default)
++    {
++        // Buckets are disjoint lexical ranges — no Id can appear in two buckets,
++        // so ConcurrentBag accumulation is duplicate-free.
++        var primaryIdBag   = new ConcurrentBag<string>();
++        var secondaryIdBag = new ConcurrentBag<string>();
++
++        await Parallel.ForEachAsync(
++            plan.Entries,
++            new ParallelOptions { MaxDegreeOfParallelism = options.MaxDegreeOfParallelism, CancellationToken = ct },
++            async (entry, innerCt) =>
++            {
++                var primaryTask   = FetchIdsAsync(primaryClient,   entry.Filter, innerCt);
++                var secondaryTask = FetchIdsAsync(secondaryClient, entry.Filter, innerCt);
++                await Task.WhenAll(primaryTask, secondaryTask);
++
++                foreach (var id in primaryTask.Result)
++                    primaryIdBag.Add(id);
++
++                foreach (var id in secondaryTask.Result)
++                    secondaryIdBag.Add(id);
++            });
++
++        var primarySet   = new HashSet<string>(primaryIdBag,   StringComparer.OrdinalIgnoreCase);
++        var secondarySet = new HashSet<string>(secondaryIdBag, StringComparer.OrdinalIgnoreCase);
++
++        var missing = primarySet
++            .Where(id => !secondarySet.Contains(id))
++            .ToHashSet(StringComparer.OrdinalIgnoreCase);
++
++        var extra = secondarySet
++            .Where(id => !primarySet.Contains(id))
++            .ToHashSet(StringComparer.OrdinalIgnoreCase);
++
++        var result = new IndexReconciliationResult(
++            missing,
++            extra,
++            primarySet.Count,
++            secondarySet.Count,
++            plan.TotalChunks,
++            plan.FetchCount);
++
++        if (options.OutputPath != null)
++            await WriteReportAsync(result);
++
++        return result;
++    }
++
++    private static async Task<HashSet<string>> FetchIdsAsync(
++        SearchClient client, string filter, CancellationToken ct)
++    {
++        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
++
++        var searchOptions = new SearchOptions
++        {
++            Filter            = filter,
++            IncludeTotalCount = false
++        };
++        searchOptions.Select.Add("Id");
++
++        var response = await client.SearchAsync<SearchDocument>("*", searchOptions, ct);
++        await foreach (var page in response.Value
++            .GetResultsAsync()
++            .AsPages(pageSizeHint: 1000)
++            .WithCancellation(ct))
++        {
++            foreach (var result in page.Values)
++            {
++                if (result.Document?.TryGetValue("Id", out var val) == true && val != null)
++                    ids.Add(val.ToString()!);
++            }
++        }
++
++        return ids;
++    }
++
++    private async Task WriteReportAsync(IndexReconciliationResult result)
++    {
++        await using var writer = new StreamWriter(options.OutputPath!, append: false);
++
++        await writer.WriteLineAsync("Index Reconciliation Report");
++        await writer.WriteLineAsync($"Generated              : {DateTime.UtcNow:O}");
++        await writer.WriteLineAsync($"Buckets processed      : {result.BucketsProcessed:N0}");
++        await writer.WriteLineAsync($"Primary chunks (plan)  : {result.PrimaryChunks:N0}");
++        await writer.WriteLineAsync($"Primary unique Ids     : {result.PrimaryIdCount:N0}");
++        await writer.WriteLineAsync($"Secondary unique Ids   : {result.SecondaryIdCount:N0}");
++        await writer.WriteLineAsync($"Missing from Secondary : {result.MissingFromSecondary.Count:N0}");
++        await writer.WriteLineAsync($"Extra in Secondary     : {result.ExtraInSecondary.Count:N0}");
++        await writer.WriteLineAsync();
++
++        if (result.MissingFromSecondary.Count > 0)
++        {
++            await writer.WriteLineAsync($"--- Missing from Secondary ({result.MissingFromSecondary.Count}) ---");
++            foreach (var id in result.MissingFromSecondary.OrderBy(static x => x))
++                await writer.WriteLineAsync($"  {id}");
++            await writer.WriteLineAsync();
++        }
++
++        if (result.ExtraInSecondary.Count > 0)
++        {
++            await writer.WriteLineAsync($"--- Extra in Secondary ({result.ExtraInSecondary.Count}) ---");
++            foreach (var id in result.ExtraInSecondary.OrderBy(static x => x))
++                await writer.WriteLineAsync($"  {id}");
++        }
++    }
++}
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexReconcilerOptions.cs b/HMC.Shared.ResearchManagementIndex/IndexReconcilerOptions.cs
+new file mode 100644
+index 0000000..58f0216
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexReconcilerOptions.cs
+@@ -0,0 +1,9 @@
++namespace HMC.Shared.ResearchManagementIndex;
++
++public sealed class IndexReconcilerOptions
++{
++    public int MaxDegreeOfParallelism { get; init; } = 16;
++
++    /// <summary>Write the finished report to this path. Null = skip file output.</summary>
++    public string? OutputPath { get; init; }
++}
+diff --git a/HMC.Shared.ResearchManagementIndex/IndexReconciliationResult.cs b/HMC.Shared.ResearchManagementIndex/IndexReconciliationResult.cs
+new file mode 100644
+index 0000000..abee656
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/IndexReconciliationResult.cs
+@@ -0,0 +1,38 @@
++namespace HMC.Shared.ResearchManagementIndex;
++
++public sealed class IndexReconciliationResult
++{
++    /// <summary>Ids present in Primary but absent from Secondary.</summary>
++    public IReadOnlySet<string> MissingFromSecondary { get; }
++
++    /// <summary>Ids present in Secondary but absent from Primary.</summary>
++    public IReadOnlySet<string> ExtraInSecondary { get; }
++
++    /// <summary>Unique document Ids found in Primary.</summary>
++    public int PrimaryIdCount { get; }
++
++    /// <summary>Unique document Ids found in Secondary.</summary>
++    public int SecondaryIdCount { get; }
++
++    /// <summary>Total chunk count from the query plan (count-only queries, not fetched).</summary>
++    public long PrimaryChunks { get; }
++
++    /// <summary>Number of query plan buckets processed.</summary>
++    public int BucketsProcessed { get; }
++
++    internal IndexReconciliationResult(
++        HashSet<string> missingFromSecondary,
++        HashSet<string> extraInSecondary,
++        int primaryIdCount,
++        int secondaryIdCount,
++        long primaryChunks,
++        int bucketsProcessed)
++    {
++        MissingFromSecondary = missingFromSecondary;
++        ExtraInSecondary     = extraInSecondary;
++        PrimaryIdCount       = primaryIdCount;
++        SecondaryIdCount     = secondaryIdCount;
++        PrimaryChunks        = primaryChunks;
++        BucketsProcessed     = bucketsProcessed;
++    }
++}
+diff --git a/HMC.Shared.ResearchManagementIndex/docs/RECONCILIATION-DESIGN.md b/HMC.Shared.ResearchManagementIndex/docs/RECONCILIATION-DESIGN.md
+new file mode 100644
+index 0000000..d84d35c
+--- /dev/null
++++ b/HMC.Shared.ResearchManagementIndex/docs/RECONCILIATION-DESIGN.md
+@@ -0,0 +1,161 @@
++# Index Reconciliation — Technical Design
++
++**Component:** `HMC.Shared.ResearchManagementIndex`
++**Author:** Pete Jensen
++**Date:** 2026-04-20
++**Status:** Part 1 complete and verified; Part 2 implemented
++
++---
++
++## Problem
++
++Primary (East) and Secondary (West) Azure AI Search indexes are maintained via dual-write.
++Over time, transient failures can cause divergence. This tool identifies documents present
++in one index but absent from the other, operating at the document `Id` grain.
++
++---
++
++## Hard Constraints
++
++| Constraint | Detail |
++|---|---|
++| **AsOfDate is abandoned** | Production geometry is too dense. Single date values can exceed 100K chunks. Cannot be used as a partition key. |
++| **ChunkId is unusable** | Schema issue (not expected to be fixed) makes ChunkId unreliable as a reconciliation or partition key. |
++| **`Id` is the anchor** | `Id` (document-level GUID shared across all chunks via `ResearchIndexSharedFields.Id`) is the only reliable reconciliation key. All logic operates at the `Id` grain. |
++| **100K chunk ceiling per fetch** | Azure AI Search limit. Each fetch (filter expression) must return ≤ 100K documents. |
++| **Full Id enumeration is not viable** | Azure AI Search `$skip` caps at 100K. Cannot page through the full index to collect all Ids. |
++
++---
++
++## Rejected Approaches
++
++- **Date bucketing** — crushed by production geometry (prior approach, failed).
++- **Two-regime split** (lexical for random GUIDs, bin-pack for sequential) — unnecessary complexity.
++- **Bin-pack with pre-enumeration** — blocked by the `$skip` cap; getting all Ids up-front is not feasible.
++
++---
++
++## Finalized Strategy — Adaptive Lexical Prefix (Single Regime)
++
++No pre-enumeration. No Id lists. Only count queries (`$top=0`, very cheap) to build the plan.
++
++### Part 1 — Query Plan Generation (`IndexQueryPlanner`)
++
++1. Start with 16 depth-1 hex prefix buckets covering the full `Id` space:
++   `Id ge '0' and Id lt '1'`, ..., `Id ge 'f'`
++2. Issue a count query per bucket: `$filter=<range>&$count=true&$top=0`
++3. Any bucket with count > target (default 80K) → subdivide into 16 depth-2 children, recurse
++4. Repeat until every leaf bucket is within the target
++5. Leaf filter expressions = the query plan
++
++**Why this works for both GUID types:**
++
++- **v4 random GUIDs** (Notes, Attachments): uniformly distributed — depth-1 or depth-2 is usually sufficient.
++- **Sequential GUIDs** (Documents, SQL FileTable `NEWSEQUENTIALID()`): the sequence walks the first byte,
++  so Documents cluster in `6x`–`8x` hex prefixes. Recursive subdivision goes deeper there naturally —
++  no special-casing required. Adjacent sequential IDs (e.g. `864ED3CE` → `874ED3CE`) land in the
++  same or adjacent depth-3 bucket; no document can slip between fetch boundaries.
++
++**Sampling note (2026-04-20):** ~180 Document GUIDs sampled from production. First-byte distribution
++confirmed clustering in the `6`–`8` era, sparse elsewhere.
++
++### Part 1 — Verified Results (2026-04-20)
++
++| Metric | Value |
++|---|---|
++| Leaf buckets (fetches) | 3,721 |
++| Total chunks | 22,176,227 |
++| Runtime | ~1.7 min (count-only queries) |
++| Distribution | Mostly depth-3 (2K–12K chunks); some depth-2 (~75K–80K) left as leaves; all under 100K ceiling |
++
++Distribution confirmed flat — **GOOD** signal. Proceeding to Part 2.
++
++### Part 1 — Output Format
++
++Plain text file, one line per leaf bucket:
++
++```
++Id ge '3a' and Id lt '3b'                          82,441
++Id ge '3b' and Id lt '3c'                          79,103
++...
++Total: 22,176,227 chunks | 3,721 fetches
++```
++
++---
++
++### Part 2 — Fetch and Diff (`IndexReconciler`)
++
++Takes the query plan produced by Part 1. For each bucket:
++
++1. Fires fetch of `Id` field against Primary and Secondary **concurrently** (`Task.WhenAll`)
++2. Pages through all results for that bucket (guaranteed ≤ 80K chunks per bucket per index)
++3. Accumulates unique `Id` values into a global bag (buckets are disjoint ranges, so no cross-bucket duplicates)
++
++After all buckets complete:
++
++- **Missing from Secondary** = Ids in Primary but not Secondary
++- **Extra in Secondary** = Ids in Secondary but not Primary
++
++**Parallelism:** 16 concurrent buckets by default (configurable via `IndexReconcilerOptions.MaxDegreeOfParallelism`).
++Each bucket fires two concurrent HTTP requests (Primary + Secondary). Effective ~32 concurrent Azure Search requests.
++
++**Output report** (written to `IndexReconcilerOptions.OutputPath` if set):
++
++```
++Index Reconciliation Report
++Generated              : 2026-04-21T...
++Buckets processed      : 3,721
++Primary chunks (plan)  : 22,176,227
++Primary unique Ids     : 450,xxx
++Secondary unique Ids   : 450,xxx
++Missing from Secondary : N
++Extra in Secondary     : N
++
++--- Missing from Secondary (N) ---
++  <guid>
++  ...
++```
++
++---
++
++## Implementation
++
++| Type | File | Notes |
++|---|---|---|
++| `IndexQueryPlanner` | `IndexQueryPlanner.cs` | Part 1 — builds the query plan via recursive count queries |
++| `IndexQueryPlan` / `QueryPlanEntry` | `IndexQueryPlan.cs` | Plan output types |
++| `IndexQueryPlannerOptions` | `IndexQueryPlannerOptions.cs` | `Target` (default 80K), `OutputPath` |
++| `IndexReconciler` | `IndexReconciler.cs` | Part 2 — fetches and diffs at Id grain |
++| `IndexReconciliationResult` | `IndexReconciliationResult.cs` | Diff output type |
++| `IndexReconcilerOptions` | `IndexReconcilerOptions.cs` | `MaxDegreeOfParallelism` (default 16), `OutputPath` |
++
++**Tests** (`Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/`):
++
++- `IndexQueryPlannerTests.BuildQueryPlan_ProducesEvenDistribution` — verifies plan builds against live Primary
++- `IndexReconcilerTests.Reconcile_PrimaryVsSecondary_ReturnsResult` — runs full reconciliation, writes report to `/tmp/index-reconciliation.txt`
++
++Both tests are read-only and hit live Azure AI Search. Expected runtime: ~2 min (plan) + ~5 min (reconcile).
++
++---
++
++## Usage
++
++```csharp
++// Build plan (Part 1)
++var planner = new IndexQueryPlanner(
++    indexingService.PrimarySearchClient,
++    new IndexQueryPlannerOptions { OutputPath = "/tmp/plan.txt" });
++
++var plan = await planner.BuildPlanAsync();
++
++// Reconcile (Part 2)
++var reconciler = new IndexReconciler(
++    indexingService.PrimarySearchClient,
++    indexingService.SecondarySearchClient,
++    new IndexReconcilerOptions { OutputPath = "/tmp/reconciliation.txt" });
++
++var result = await reconciler.ReconcileAsync(plan);
++
++Console.WriteLine($"Missing from Secondary: {result.MissingFromSecondary.Count}");
++Console.WriteLine($"Extra in Secondary:     {result.ExtraInSecondary.Count}");
++```
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+new file mode 100644
+index 0000000..22f659c
+--- /dev/null
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+@@ -0,0 +1,46 @@
++using HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
++using Xunit.Abstractions;
++using Xunit.Microsoft.DependencyInjection.Abstracts;
++
++namespace HMC.Shared.ResearchManagementIndex.Tests.Service;
++
++public class IndexReconcilerTests : TestBed<IndexingTestBedFixture>
++{
++    private readonly IndexingService? _indexingService;
++
++    public IndexReconcilerTests(ITestOutputHelper testOutputHelper, IndexingTestBedFixture fixture)
++        : base(testOutputHelper, fixture)
++    {
++        _indexingService = _fixture.GetService<IndexingService>(_testOutputHelper);
++    }
++
++    [Fact]
++    public async Task Reconcile_PrimaryVsSecondary_ReturnsResult()
++    {
++        var planner = new IndexQueryPlanner(
++            _indexingService!.PrimarySearchClient,
++            new IndexQueryPlannerOptions());
++
++        var plan = await planner.BuildPlanAsync();
++
++        var outputPath = Path.Combine(Path.GetTempPath(), "index-reconciliation.txt");
++
++        var reconciler = new IndexReconciler(
++            _indexingService!.PrimarySearchClient,
++            _indexingService!.SecondarySearchClient,
++            new IndexReconcilerOptions { OutputPath = outputPath });
++
++        var result = await reconciler.ReconcileAsync(plan);
++
++        _testOutputHelper.WriteLine($"Buckets            : {result.BucketsProcessed:N0}");
++        _testOutputHelper.WriteLine($"Primary chunks     : {result.PrimaryChunks:N0}");
++        _testOutputHelper.WriteLine($"Primary unique Ids : {result.PrimaryIdCount:N0}");
++        _testOutputHelper.WriteLine($"Secondary Ids      : {result.SecondaryIdCount:N0}");
++        _testOutputHelper.WriteLine($"Missing secondary  : {result.MissingFromSecondary.Count:N0}");
++        _testOutputHelper.WriteLine($"Extra in secondary : {result.ExtraInSecondary.Count:N0}");
++        _testOutputHelper.WriteLine($"Report             : {outputPath}");
++
++        Assert.True(result.PrimaryIdCount > 0);
++        Assert.Equal(plan.FetchCount, result.BucketsProcessed);
++    }
++}
+-- 
+2.34.1
+

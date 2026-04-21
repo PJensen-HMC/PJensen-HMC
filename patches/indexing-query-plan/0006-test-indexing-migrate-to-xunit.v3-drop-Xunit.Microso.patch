@@ -1,0 +1,710 @@
+From 9342012e3f567266a0df46bf20cec83729068ad4 Mon Sep 17 00:00:00 2001
+From: "Jensen, Pete" <jensenp@hmc.harvard.edu>
+Date: Tue, 21 Apr 2026 16:44:55 +0000
+Subject: [PATCH 6/7] test(indexing): migrate to xunit.v3, drop
+ Xunit.Microsoft.DependencyInjection
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+xunit.runner.visualstudio 3.x requires xunit.v3 — mixing it with
+xunit 2.x broke live ITestOutputHelper output in VS 2026.
+
+Replace TestBed<T>/TestBedFixture pattern with native xunit.v3
+IClassFixture<T> + IAsyncLifetime. Fixtures now own their own
+IServiceProvider built directly via ServiceCollection.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../Clone/IndexSchemaCloneFixture.cs          | 49 +++++-----
+ .../Clone/IndexSchemaCloneTests.cs            | 34 ++-----
+ .../Fixtures/IndexingTestBedFixture.cs        | 51 +++++-----
+ ...hared.ResearchManagementIndex.Tests.csproj |  3 +-
+ .../Service/IndexQueryPlannerTests.cs         | 12 +--
+ .../Service/IndexReconcilerTests.cs           | 15 ++-
+ .../Service/IndexingDangerousTests.cs         | 22 ++---
+ .../Service/IndexingTests.cs                  | 93 +++----------------
+ 8 files changed, 86 insertions(+), 193 deletions(-)
+
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs
+index 5b9cd20..a89454b 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneFixture.cs
+@@ -1,49 +1,42 @@
+-using System;
+-using System.Collections.Generic;
+-using System.Threading.Tasks;
+ using HMC.Shared.ChatAiClient;
+ using HMC.Shared.Configuration;
+ using Microsoft.Extensions.Configuration;
+ using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Logging;
+-using Xunit.Microsoft.DependencyInjection;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
++using Microsoft.Extensions.Logging.Abstractions;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Clone;
+ 
+-public sealed class IndexSchemaCloneFixture : TestBedFixture
++public sealed class IndexSchemaCloneFixture : IAsyncLifetime
+ {
+-    protected override void AddServices(IServiceCollection services, IConfiguration? configuration)
++    public IServiceProvider ServiceProvider { get; private set; } = null!;
++    public IConfiguration? Configuration { get; private set; }
++
++    public async ValueTask InitializeAsync()
+     {
+-        if (configuration == null) throw new ArgumentNullException(nameof(configuration));
++        Configuration = new ConfigurationBuilder()
++            .AddJsonFile("appsettings.Cloud.json", optional: false)
++            .Build();
+ 
+-        var azureConfiguration = AzureConfiguratorConfiguration.Value;
++        var azureConfiguration = new ConfigurationBuilder()
++            .AddAzureConfigurator("HMC.ResearchManagement.Service", "Development")
++            .Build();
+ 
++        var services = new ServiceCollection();
+         services.AddSingleton(azureConfiguration);
+         services.AddIndexing(azureConfiguration);
+         services.AddChatAiClient(azureConfiguration);
++        services.AddSingleton<ILogger<IndexingService>>(_ => NullLogger<IndexingService>.Instance);
+ 
+-        services.AddSingleton<ILogger<IndexingService>>(_ =>
+-            Microsoft.Extensions.Logging.Abstractions.NullLogger<IndexingService>.Instance);
++        ServiceProvider = services.BuildServiceProvider();
++        await Task.CompletedTask;
+     }
+ 
+-    protected override IEnumerable<TestAppSettings> GetTestAppSettings()
++    public async ValueTask DisposeAsync()
+     {
+-        const string settingFileName = "appsettings.Cloud.json";
+-
+-        yield return new TestAppSettings
+-        {
+-            Filename = settingFileName,
+-            IsOptional = false,
+-        };
++        if (ServiceProvider is IAsyncDisposable asyncDisposable)
++            await asyncDisposable.DisposeAsync();
++        else if (ServiceProvider is IDisposable disposable)
++            disposable.Dispose();
+     }
+-
+-    /// <summary>
+-    /// We proxy off of research management because it's the primary location for indexing use.
+-    /// </summary>
+-    private Lazy<IConfiguration> AzureConfiguratorConfiguration => new(ConfigurationBuilder
+-        .AddAzureConfigurator("HMC.ResearchManagement.Service", "Development")
+-        .Build());
+-
+-    protected override ValueTask DisposeAsyncCore() => ValueTask.CompletedTask;
+ }
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneTests.cs
+index 64106f0..7b703b6 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Clone/IndexSchemaCloneTests.cs
+@@ -1,8 +1,5 @@
+ using System.Text.Json;
+ using System.Text.Json.Nodes;
+-using Azure;
+-using Azure.Search.Documents;
+-using Azure.Search.Documents.Models;
+ using Azure.Search.Documents.Indexes;
+ using Azure.Search.Documents.Indexes.Models;
+ using HMC.Shared.ResearchManagementIndex;
+@@ -13,24 +10,26 @@ using Microsoft.Extensions.Configuration;
+ using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Options;
+ using Xunit;
+-using Xunit.Abstractions;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Clone;
+ 
+-public sealed class IndexSchemaCloneTests : TestBed<IndexSchemaCloneFixture>
++public sealed class IndexSchemaCloneTests : IClassFixture<IndexSchemaCloneFixture>
+ {
+     private const string ExpectedTargetIndexName = "hmc-research-index-improved-april-03-path-fixed";
+ 
+-    public IndexSchemaCloneTests(ITestOutputHelper testOutputHelper, IndexSchemaCloneFixture fixture)
+-        : base(testOutputHelper, fixture)
++    private readonly IndexSchemaCloneFixture _fixture;
++    private readonly ITestOutputHelper _testOutputHelper;
++
++    public IndexSchemaCloneTests(IndexSchemaCloneFixture fixture, ITestOutputHelper testOutputHelper)
+     {
++        _fixture = fixture;
++        _testOutputHelper = testOutputHelper;
+     }
+ 
+     [DangerousFact]
+     public async Task ClonedSchema_MatchesEasternSchema()
+     {
+-        var serviceProvider = _fixture.GetServiceProvider(_testOutputHelper);
++        var serviceProvider = _fixture.ServiceProvider;
+         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+ 
+         await serviceProvider.CloneSearchIndexSchemaAsync(
+@@ -58,21 +57,13 @@ public sealed class IndexSchemaCloneTests : TestBed<IndexSchemaCloneFixture>
+     [DangerousFact]
+     public async Task CopiedContent_PrimaryToSecondary_MatchesSelectedChunkSet()
+     {
+-        var serviceProvider = _fixture.GetServiceProvider(_testOutputHelper);
++        var serviceProvider = _fixture.ServiceProvider;
+         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+ 
+-        // await serviceProvider.CloneSearchIndexSchemaAsync(
+-        //     configuration,
+-        //     sourceClientName: IndexingNamedClients.Primary,
+-        //     destinationClientName: IndexingNamedClients.Secondary,
+-        //     overwriteDestination: false);
+-
+         var primaryClient = serviceProvider.GetRequiredKeyedService<Azure.Search.Documents.SearchClient>(IndexingNamedClients.Primary);
+         var secondaryClient = serviceProvider.GetRequiredKeyedService<Azure.Search.Documents.SearchClient>(IndexingNamedClients.Secondary);
+ 
+         var copyOrderBy = new[] { $"{nameof(ResearchIndex.AsOfDate)} desc", $"{nameof(ResearchIndex.Name)} asc" };
+-        // var primaryChunkIds = await primaryClient.GetAllChunkIdsAsync();
+-        // Assert.NotEmpty(primaryChunkIds);
+ 
+         var copyResult = await serviceProvider.CopySearchIndexContentAsync(
+             sourceClientName: IndexingNamedClients.Primary,
+@@ -83,11 +74,6 @@ public sealed class IndexSchemaCloneTests : TestBed<IndexSchemaCloneFixture>
+             maxDegreeOfParallelism: 8);
+ 
+         Assert.Equal(copyResult.ProducedDocuments, copyResult.UploadedDocuments);
+-        // Assert.Equal(primaryChunkIds.Count, copyResult.UploadedDocuments);
+-        //
+-        // var secondaryChunkIds = await secondaryClient.GetAllChunkIdsAsync();
+-        // Assert.Equal(primaryChunkIds.Count, secondaryChunkIds.Count);
+-        // Assert.Equal(primaryChunkIds.OrderBy(s => s, StringComparer.Ordinal), secondaryChunkIds.OrderBy(s => s, StringComparer.Ordinal));
+     }
+ 
+     private static JsonNode NormalizeIndexJson(SearchIndex index)
+@@ -100,7 +86,6 @@ public sealed class IndexSchemaCloneTests : TestBed<IndexSchemaCloneFixture>
+     {
+         if (node is JsonObject obj)
+         {
+-            // ETags are service-generated and expected to differ between regions.
+             obj.Remove("@odata.etag");
+             obj.Remove("eTag");
+ 
+@@ -136,5 +121,4 @@ public sealed class IndexSchemaCloneTests : TestBed<IndexSchemaCloneFixture>
+ 
+         return node;
+     }
+-
+ }
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs
+index ee5665a..9963930 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Fixtures/IndexingTestBedFixture.cs
+@@ -3,46 +3,41 @@ using HMC.Shared.Configuration;
+ using Microsoft.Extensions.Configuration;
+ using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Logging;
+-using Xunit.Microsoft.DependencyInjection;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
++using Microsoft.Extensions.Logging.Abstractions;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
+ 
+-public class IndexingTestBedFixture : TestBedFixture
++public class IndexingTestBedFixture : IAsyncLifetime
+ {
+-    protected override void AddServices(IServiceCollection services, IConfiguration? configuration)
++    public IServiceProvider ServiceProvider { get; private set; } = null!;
++    public IConfiguration? Configuration { get; private set; }
++
++    public async ValueTask InitializeAsync()
+     {
+-        if (configuration == null) throw new ArgumentNullException(nameof(configuration));
++        Configuration = new ConfigurationBuilder()
++            .AddJsonFile("appsettings.json", optional: true)
++            .AddJsonFile("appsettings.Cloud.json", optional: false)
++            .Build();
+ 
+-        // inject configuration and research client into this test pipeline
+-        var azureConfiguration = AzureConfiguratorConfiguration.Value;
++        var azureConfiguration = new ConfigurationBuilder()
++            .AddAzureConfigurator("HMC.ResearchManagement.Service", "Development")
++            .Build();
+ 
++        var services = new ServiceCollection();
+         services.AddSingleton(azureConfiguration);
+         services.AddIndexing(azureConfiguration);
+         services.AddChatAiClient(azureConfiguration);
++        services.AddSingleton<ILogger<IndexingService>>(_ => NullLogger<IndexingService>.Instance);
+ 
+-        // services.AddLogging(builder =>
+-        // {
+-        //     builder.AddFilter("HMC.Shared.ResearchManagementIndex", 
+-        //         LogLevel.Warning);
+-        // });
+-
+-        services.AddSingleton<ILogger<IndexingService>>(sp => 
+-            Microsoft.Extensions.Logging.Abstractions.NullLogger<IndexingService>.Instance);
++        ServiceProvider = services.BuildServiceProvider();
++        await Task.CompletedTask;
+     }
+ 
+-    protected override IEnumerable<TestAppSettings> GetTestAppSettings()
++    public async ValueTask DisposeAsync()
+     {
+-        yield return new TestAppSettings { Filename = "appsettings.json",       IsOptional = true  };
+-        yield return new TestAppSettings { Filename = "appsettings.Cloud.json", IsOptional = false };
++        if (ServiceProvider is IAsyncDisposable asyncDisposable)
++            await asyncDisposable.DisposeAsync();
++        else if (ServiceProvider is IDisposable disposable)
++            disposable.Dispose();
+     }
+-
+-    /// <summary>
+-    /// we proxy off of research management because it's the primary location for indexing use
+-    /// </summary>
+-    private Lazy<IConfiguration> AzureConfiguratorConfiguration => new(ConfigurationBuilder
+-        .AddAzureConfigurator("HMC.ResearchManagement.Service", "Development")
+-        .Build());
+-
+-    protected override ValueTask DisposeAsyncCore() => ValueTask.CompletedTask;
+-}    
++}
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/HMC.Shared.ResearchManagementIndex.Tests.csproj b/Tests/HMC.Shared.ResearchManagementIndex.Tests/HMC.Shared.ResearchManagementIndex.Tests.csproj
+index 3e7e6b5..ef58fdc 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/HMC.Shared.ResearchManagementIndex.Tests.csproj
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/HMC.Shared.ResearchManagementIndex.Tests.csproj
+@@ -16,8 +16,7 @@
+     </PackageReference>
+     <PackageReference Include="HMC.Shared.Configuration" Version="3.0.0.7" />
+     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+-    <PackageReference Include="xunit" Version="2.9.3" />
+-    <PackageReference Include="Xunit.Microsoft.DependencyInjection" Version="8.1.0" />
++    <PackageReference Include="xunit.v3" Version="1.0.0" />
+     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs
+index 5cd7c97..608d421 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexQueryPlannerTests.cs
+@@ -1,17 +1,17 @@
+ using HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
+-using Xunit.Abstractions;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
++using Microsoft.Extensions.DependencyInjection;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Service;
+ 
+-public class IndexQueryPlannerTests : TestBed<IndexingTestBedFixture>
++public class IndexQueryPlannerTests : IClassFixture<IndexingTestBedFixture>
+ {
++    private readonly ITestOutputHelper _testOutputHelper;
+     private readonly IndexingService? _indexingService;
+ 
+-    public IndexQueryPlannerTests(ITestOutputHelper testOutputHelper, IndexingTestBedFixture fixture)
+-        : base(testOutputHelper, fixture)
++    public IndexQueryPlannerTests(IndexingTestBedFixture fixture, ITestOutputHelper testOutputHelper)
+     {
+-        _indexingService = _fixture.GetService<IndexingService>(_testOutputHelper);
++        _testOutputHelper = testOutputHelper;
++        _indexingService = fixture.ServiceProvider.GetService<IndexingService>();
+     }
+ 
+     [Fact]
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+index 2110e52..09fcf6a 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexReconcilerTests.cs
+@@ -1,17 +1,17 @@
+ using HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
+-using Xunit.Abstractions;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
++using Microsoft.Extensions.DependencyInjection;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Service;
+ 
+-public class IndexReconcilerTests : TestBed<IndexingTestBedFixture>
++public class IndexReconcilerTests : IClassFixture<IndexingTestBedFixture>
+ {
++    private readonly ITestOutputHelper _testOutputHelper;
+     private readonly IndexingService? _indexingService;
+ 
+-    public IndexReconcilerTests(ITestOutputHelper testOutputHelper, IndexingTestBedFixture fixture)
+-        : base(testOutputHelper, fixture)
++    public IndexReconcilerTests(IndexingTestBedFixture fixture, ITestOutputHelper testOutputHelper)
+     {
+-        _indexingService = _fixture.GetService<IndexingService>(_testOutputHelper);
++        _testOutputHelper = testOutputHelper;
++        _indexingService = fixture.ServiceProvider.GetService<IndexingService>();
+     }
+ 
+     [Fact]
+@@ -30,9 +30,6 @@ public class IndexReconcilerTests : TestBed<IndexingTestBedFixture>
+             _indexingService!.SecondarySearchClient,
+             new IndexReconcilerOptions { OutputPath = outputPath });
+ 
+-        // Progress<T> marshals through SynchronizationContext and fires on a thread-pool thread,
+-        // which causes ITestOutputHelper to drop output. SyncProgress calls directly on the
+-        // reporting thread so xUnit captures it.
+         IProgress<IndexReconcilerProgress> progress = new SyncProgress<IndexReconcilerProgress>(p =>
+             _testOutputHelper.WriteLine(
+                 $"[{p.Elapsed:mm\\:ss}] {p.BucketsCompleted}/{p.BucketsTotal} buckets ({p.PercentComplete:F1}%)" +
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingDangerousTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingDangerousTests.cs
+index 5d9996b..6e817cb 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingDangerousTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingDangerousTests.cs
+@@ -1,23 +1,22 @@
+ using HMC.Shared.ResearchManagementIndex.Model;
+ using HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
+-using Xunit.Abstractions;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
++using Microsoft.Extensions.DependencyInjection;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Service;
+ 
+-/// <summary>
+-/// Dangerous integration tests for indexing operations that mutate live index state.
+-/// These are skipped automatically in CI via <see cref="DangerousFactAttribute"/>.
+-/// </summary>
+-public class IndexingDangerousTests : TestBed<IndexingTestBedFixture>
++public class IndexingDangerousTests : IClassFixture<IndexingTestBedFixture>
+ {
+     private const string BenchmarksFolderName = "Benchmarks";
++
++    private readonly IndexingTestBedFixture _fixture;
++    private readonly ITestOutputHelper _testOutputHelper;
+     private readonly IndexingService? _indexingService;
+ 
+-    public IndexingDangerousTests(ITestOutputHelper testOutputHelper, IndexingTestBedFixture fixture)
+-        : base(testOutputHelper, fixture)
++    public IndexingDangerousTests(IndexingTestBedFixture fixture, ITestOutputHelper testOutputHelper)
+     {
+-        _indexingService = _fixture.GetService<IndexingService>(_testOutputHelper);
++        _fixture = fixture;
++        _testOutputHelper = testOutputHelper;
++        _indexingService = fixture.ServiceProvider.GetService<IndexingService>();
+     }
+ 
+     [DangerousFact]
+@@ -104,9 +103,6 @@ public class IndexingDangerousTests : TestBed<IndexingTestBedFixture>
+         }
+     }
+ 
+-    /// <summary>
+-    /// Test that verifies a one-paragraph PDF file can be indexed with "force" enabled.
+-    /// </summary>
+     [DangerousFact]
+     public async Task ThatWeCanIndexAOneParagraphPdf()
+     {
+diff --git a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingTests.cs b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingTests.cs
+index 986e262..f2caae9 100644
+--- a/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingTests.cs
++++ b/Tests/HMC.Shared.ResearchManagementIndex.Tests/Service/IndexingTests.cs
+@@ -6,35 +6,25 @@ using HMC.Shared.ResearchManagementIndex.Model;
+ using HMC.Shared.ResearchManagementIndex.Tests.Fixtures;
+ using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Options;
+-using Xunit.Abstractions;
+-using Xunit.Microsoft.DependencyInjection.Abstracts;
+ 
+ namespace HMC.Shared.ResearchManagementIndex.Tests.Service;
+ 
+-/// <summary>
+-/// Unit tests for the IndexingService.
+-/// </summary>
+-public class IndexingTests : TestBed<IndexingTestBedFixture>
++public class IndexingTests : IClassFixture<IndexingTestBedFixture>
+ {
+-    // Folder containing benchmark files for tests.
+     private const string BenchmarksFolderName = "Benchmarks";
+ 
+-    // Shortcut property to retrieve the IndexingService from the test fixture.
++    private readonly IndexingTestBedFixture _fixture;
++    private readonly ITestOutputHelper _testOutputHelper;
+     private readonly IndexingService? _indexingService;
+ 
+-    /// <summary>
+-    /// Constructor initializes the test fixture and creates/updates search indexes.
+-    /// </summary>
+-    public IndexingTests(ITestOutputHelper testOutputHelper, IndexingTestBedFixture fixture)
+-        : base(testOutputHelper, fixture)
++    public IndexingTests(IndexingTestBedFixture fixture, ITestOutputHelper testOutputHelper)
+     {
+-        _indexingService = _fixture.GetService<IndexingService>(_testOutputHelper);
++        _fixture = fixture;
++        _testOutputHelper = testOutputHelper;
++        _indexingService = fixture.ServiceProvider.GetService<IndexingService>();
+ 
+ #if __ADJUSTING_INDEX_SCHEMA
+-        var serviceProvider = fixture.GetServiceProvider(testOutputHelper);
+-        
+-        // Ensure that search indexes are created or updated before tests run.
+-        serviceProvider.CreateOrUpdateSearchIndexes(fixture.Configuration!)
++        fixture.ServiceProvider.CreateOrUpdateSearchIndexes(fixture.Configuration!)
+             .GetAwaiter()
+             .GetResult();
+ #endif
+@@ -42,9 +32,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+ 
+     #region Basic Tests
+ 
+-    /// <summary>
+-    /// Basic no-operation test used as a sanity check.
+-    /// </summary>
+     [Fact]
+     public void NoOpTest() { }
+ 
+@@ -63,7 +50,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+ 
+     #region soft-delete
+ 
+-
+     [Fact]
+     public async Task That_Deleted_Appears_After_EntryType()
+     {
+@@ -99,7 +85,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+             sharedFieldsVersionOne.IndexEntryEntryType = ResearchIndexEntryType.Deleted);
+     }
+ 
+-
+     [Fact]
+     public void That_Flags_Based_Enumerated_Types_Serialize_and_Deserialize_as_Expected()
+     {
+@@ -121,7 +106,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+ 
+         _testOutputHelper.WriteLine($"Deserialized: {deserialized}");
+ 
+-        // Verify that the deserialized value matches the original flags.
+         Assert.True((deserialized & ResearchIndexEntryType.Note) == ResearchIndexEntryType.Note);
+         Assert.True((deserialized & ResearchIndexEntryType.Deleted) == ResearchIndexEntryType.Deleted);
+     }
+@@ -136,42 +120,32 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+             NoteType = new ResearchIndexIdDescription("NOTE", 17)
+         };
+ 
+-        // verify that the initial type is set correctly
+         Assert.Equal(ResearchIndexEntryType.Note, shared.IndexEntryEntryType);
+ 
+-        // log the initial entry type
+         _testOutputHelper.WriteLine($"Initial Entry Type: {shared.IndexEntryEntryType}");
+ 
+-        // set the entry type to a combination of Note and Deleted; in the same way other code would do it
+         shared.IndexEntryEntryType |= ResearchIndexEntryType.Deleted;
+ 
+-        // verify that the type is set correctly
+         Assert.Equal(ResearchIndexEntryType.Note | ResearchIndexEntryType.Deleted, shared.IndexEntryEntryType);
+ 
+-        // verify that the type is set correctly
+         _testOutputHelper.WriteLine($"Updated Entry Type: {shared.IndexEntryEntryType}");
+ 
+-        // Attempt to set the entry type to Deleted only, which should throw an exception
+         Assert.Throws<ArgumentOutOfRangeException>(() => shared.IndexEntryEntryType =
+                 ResearchIndexEntryType.Deleted);
+ 
+-        // attempt to set the entry type to an invalid combination
+         Assert.Throws<ArgumentOutOfRangeException>(() => shared.IndexEntryEntryType =
+             ResearchIndexEntryType.Attachment |
+             ResearchIndexEntryType.Note);
+ 
+-        // attempt to set the entry type to an invalid combination
+         Assert.Throws<ArgumentOutOfRangeException>(() => shared.IndexEntryEntryType =
+             ResearchIndexEntryType.Document |
+             ResearchIndexEntryType.Attachment);
+ 
+-        // attempt to set the entry type to an invalid combination
+         Assert.Throws<ArgumentOutOfRangeException>(() => shared.IndexEntryEntryType =
+             ResearchIndexEntryType.Document |
+             ResearchIndexEntryType.Attachment |
+             ResearchIndexEntryType.Note);
+ 
+-        // attempt to set the entry type to an invalid combination
+         Assert.Throws<ArgumentOutOfRangeException>(() => shared.IndexEntryEntryType =
+             ResearchIndexEntryType.Document |
+             ResearchIndexEntryType.Attachment |
+@@ -204,7 +178,7 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+         Assert.NotNull(_indexingService);
+         Assert.NotNull(_indexingService.Settings);
+ 
+-        var serviceProvider = _fixture.GetServiceProvider(_testOutputHelper);
++        var serviceProvider = _fixture.ServiceProvider;
+         var namedOptions = serviceProvider.GetRequiredService<IOptionsMonitor<IndexingClientOptions>>();
+ 
+         var primaryOptions = namedOptions.Get(IndexingNamedClients.Primary);
+@@ -222,7 +196,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+         _testOutputHelper.WriteLine($"Secondary Client ApiKey: {secondaryOptions.ApiKey}");
+     }
+ 
+-
+ #if __WARNING
+ 
+     [Fact]
+@@ -262,63 +235,44 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+         var indexingService = IndexingService;
+         Assert.NotNull(indexingService);
+         await indexingService.ForceReloadFromCache();
+-    } 
++    }
+ #endif
+ 
+-    /// <summary>
+-    /// Test that verifies combining two non-empty HTML strings returns a valid result.
+-    /// </summary>
+     [Fact]
+     public void ThatBasicHtmlCanBeChained()
+     {
+-        // Arrange
+         var html1 = "<p>hello</p>";
+         var html2 = "<p>world</p>";
+ 
+-        // Act
+         var combined = IndexingService.CombineHtml(html1, html2);
+ 
+-        // Assert
+         Assert.NotNull(combined);
+     }
+ 
+-    /// <summary>
+-    /// Test that verifies combining an HTML string with an empty string returns a valid result.
+-    /// </summary>
+     [Fact]
+     public void ThatBasicEmptyHtmlCanBeChainedTogether()
+     {
+-        // Arrange
+         var html1 = "<p>hello</p>";
+         var html2 = "";
+ 
+-        // Act
+         var combined = IndexingService.CombineHtml(html1, html2);
+ 
+-        // Assert
+         Assert.NotNull(combined);
+     }
+ 
+-    /// <summary>
+-    /// Test that verifies two HTML files can be combined into a valid non-empty HTML.
+-    /// </summary>
+     [Fact]
+     public async Task ThatWeCanCombinedTwoHtmlFiles()
+     {
+-        // Arrange: Read content from two HTML benchmark files.
+         var htmlFile1Text = await File.ReadAllTextAsync(Path.Combine(BenchmarksFolderName, "Html-Structured-Test.html"));
+         var htmlFile2Text = await File.ReadAllTextAsync(Path.Combine(BenchmarksFolderName, "Html-Structured-Test-Medium.html"));
+ 
+-        // Validate that file content was read correctly.
+         Assert.NotNull(htmlFile1Text);
+         Assert.NotEmpty(htmlFile1Text);
+         Assert.NotNull(htmlFile2Text);
+         Assert.NotEmpty(htmlFile2Text);
+ 
+-        // Act: Combine the two HTML contents.
+         var combinedHtml = IndexingService.CombineHtml(htmlFile1Text, htmlFile2Text);
+ 
+-        // Assert: Verify that the combined HTML is not null or empty.
+         Assert.NotNull(combinedHtml);
+         Assert.NotEmpty(combinedHtml);
+     }
+@@ -327,9 +281,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+ 
+     #region Service Initialization Tests
+ 
+-    /// <summary>
+-    /// Test to ensure that the IndexingService is properly instantiated.
+-    /// </summary>
+     [Fact]
+     public void ThatWeCanGetIndexingService()
+     {
+@@ -354,11 +305,9 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+         var indexingService = IndexingService;
+         Assert.NotNull(indexingService);
+ 
+-        // the identity and snap time
+         var id = Guid.NewGuid().ToString();
+         var execDt = DateTime.Now;
+ 
+-        // shared fields for chunk
+         var sharedFields = new ResearchIndexSharedFields(ResearchIndexEntryType.Note | ResearchIndexEntryType.Deleted)
+         {
+             Id = id,
+@@ -372,16 +321,10 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+             NoteType = new ResearchIndexIdDescription(16, "Note"),
+         };
+ 
+-        // get a unique (searchable) *thing* to confirm indexing success
+         var uniqueFingerprint = Guid.NewGuid();
+-
+-        // track the before adding count
+         var beforeAddingCount = await indexingService.GetDocumentCountAsync();
+-
+-        // the number of expected entries
+         const int expectedEntries = 2;
+ 
+-        // create two chunks to index and index the chunks
+         await indexingService.IndexChunksAsync([
+             new ResearchIndex(sharedFields)
+             {
+@@ -399,18 +342,14 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+ 
+         await Task.Delay(2000);
+ 
+-        // track the after adding count
+         var afterAddingCount = await indexingService.GetDocumentCountAsync();
+ 
+-        // make sure that the count has increased and that the document is tracked
+         Assert.True(beforeAddingCount < afterAddingCount);
+ 
+-        // delete the document; track impacted records
+         var impactedRecords = await indexingService.DeleteAsync(id, true);
+ 
+-        // make sure there were precisely two impacted records
+         Assert.Equal(expectedEntries, impactedRecords);
+-    } 
++    }
+ #endif
+ 
+     [Fact]
+@@ -437,23 +376,17 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+         Assert.Equal(idxEntry.EntryType, deserialized.EntryType);
+     }
+ 
+-    /// <summary>
+-    /// Test that verifies indexing of a very small HTML fragment.
+-    /// </summary>
+     // [Fact]
+     public async Task ThatWeCanIndexSomethingUltraSmall()
+     {
+         await Task.Delay(1000);
+ 
+-        // Arrange: Define a small HTML fragment and convert it to bytes.
+         const string sampleHtml = "<p>this is an html fragment</p>";
+         var sampleHtmlBytes = Encoding.UTF8.GetBytes(sampleHtml);
+         var indexingService = _indexingService ?? throw new InvalidOperationException();
+ 
+-        // an identity for the entries
+         var id = Guid.NewGuid().ToString();
+ 
+-        // Index the HTML fragment.
+         await indexingService.IndexObjectAsync(sampleHtmlBytes, "body.html", new ResearchIndexSharedFields(ResearchIndexEntryType.Note)
+         {
+             Id = id,
+@@ -467,7 +400,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+             Links = new() { new() { ObjectName = "", ObjectType = "", ObjectId = "" } },
+         });
+ 
+-        // Optionally retrieve performance tracking info.
+         var performanceInfo = indexingService.PerformanceTracking.ToString();
+ 
+         Assert.NotNull(performanceInfo);
+@@ -480,9 +412,6 @@ public class IndexingTests : TestBed<IndexingTestBedFixture>
+         Assert.True(res > 0);
+     }
+ 
+-    /// <summary>
+-    /// Test that verifies the ability to find missing entries using a random identifier.
+-    /// </summary>
+     [Fact]
+     public async Task ThatWeCanFindMissingEntries()
+     {
+-- 
+2.34.1
+
