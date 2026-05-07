@@ -60,6 +60,7 @@ The major corrections are:
 5. It treats validation capacity as the main bottleneck after generation accelerates.
 6. It makes infrastructure load and token economics first-class rollout concerns.
 7. It caveats vendor and OCR-backed claims explicitly.
+8. It preserves high-signal field texture as architecture evidence, not vendor endorsement.
 
 ## Core Thesis
 
@@ -89,6 +90,10 @@ The clearest cross-day synthesis:
 
 > Agents are not the product. The product is the governed runtime that lets agents act safely, measurably, and economically.
 
+The cleanest internal product metaphor:
+
+> Agents need cockpits, not keys to the building.
+
 ## Field Signals Worth Preserving
 
 These are not vendor proof points. They are field signals: compact anecdotes that make the architecture concrete.
@@ -99,7 +104,17 @@ Evidence: `D2-C005`, `V-C001`
 
 The Apollo booth signal was not simply "GraphQL for agents." The useful observation was that API descriptions can be ingested, normalized, mediated, and exposed as governed capabilities instead of raw endpoint catalogs.
 
-Architecture lesson: `env.API` should not be an endpoint dump. It should be the surface where schema, identity, policy, runtime isolation, audit, and replay meet.
+The field note also matters because it made the idea inspectable: packaging was described in appliance / Docker terms, with a GitHub artifact worth reviewing later. That keeps this as an actionable follow-up, not an endorsement.
+
+Architecture lesson: `env.API` should not be an endpoint dump. It should be the cockpit where schema, identity, policy, runtime isolation, audit, and replay meet.
+
+### Datadog: Observability Becomes A World-Model Substrate
+
+Evidence: `D1-C002`
+
+The Datadog signal was easy to underplay because it sounds like ordinary observability. It was stronger than that: logs, traces, metrics, topology, workflows, and time-series data become the material for prediction, what-if questions, evals, and agent-visible system state.
+
+Architecture lesson: observability is not only after-the-fact monitoring. It becomes part of the runtime model agents and humans use to understand possible futures.
 
 ### DataRobot: The Product Is Below The Waterline
 
@@ -109,6 +124,16 @@ The DataRobot slides gave the best image for production reality: the visible age
 
 Architecture lesson: the durable platform investment is the substrate, not the demo.
 
+### LanceDB / You.com: Context Is A Workload, Not A Feature
+
+Evidence: `D1-C007`, `D1-C012`, `SL-C003`, `SL-C004`, `SL-C005`, `SL-C008`
+
+The LanceDB and You.com signals both pushed past naive RAG. A vector database is not enough for agents. Production context involves branching retrieval paths, structured filters, raw artifacts, provenance, write-path rules, metadata scale, p99 latency, and budget-aware search.
+
+The You.com budget/API angle matters because retrieval is not free ambient intelligence. Search APIs, contents APIs, model calls, long traces, and runtime budgets all become part of the same context-economics problem.
+
+Architecture lesson: HMC search/indexing should be treated as capacity-bearing context infrastructure with provenance, latency targets, metadata scale, and cost controls.
+
 ### Bauplan: Data Needs A Safe Failure Surface
 
 Evidence: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
@@ -117,19 +142,53 @@ The Bauplan signal was the contrast between code and data. Code agents can be wr
 
 Architecture lesson: data agents should propose through sandboxed state, diffs, checks, review, lineage, and controlled promotion.
 
+### NVIDIA: Research, Gates, And Sweeps Are The Operating Model
+
+Evidence: `D2-C010`
+
+The NVIDIA story was not just "AI coding tools got adopted." The stronger operational story was that internal CLI-style tools spread quickly, generation accelerated, and the control system had to become research, gates, and sweeps.
+
+Research helps agents map the system before acting. Gates stop known failure modes before promotion. Sweeps find repeated or cross-cutting rot that one PR cannot see.
+
+Architecture lesson: accelerated generation only works if the software factory becomes more explicit about topology, verification, policy, and repeated inspection.
+
 ### CircleCI/METR: Felt Speed Is Not Measured Throughput
 
 Evidence: `D2-C012`, `SL-C019`, `SL-C020`
 
 The CircleCI/METR signal was a useful warning for leadership: AI can make teams feel faster while the real system bottleneck moves to validation, review, reliability, recovery, and operational confidence.
 
+The sharper operational point is that the fastest path is wrong when validation cannot keep up. More generated work can produce more approvals, more reviewers, more CI pressure, and more uncertainty about whether the organization has enough human taste in the loop.
+
 Architecture lesson: do not measure agent value by generation velocity alone. Measure successful, reviewed, recoverable outcomes.
+
+### Monte Carlo: Agent Failures Can Be Data Failures In Disguise
+
+Evidence: `D2-C013`, `SL-C021`
+
+The Monte Carlo signal was one of the highest-lift observability candidates. It made the failure chain concrete: a bad agent answer may come from stale source data, broken schema, bad chunking, weak embeddings, missing metadata, vector-store behavior, or unexpected access.
+
+The readiness-scorecard and circuit-breaker language matters because it turns AI trust into operational instrumentation rather than vague confidence.
+
+Architecture lesson: HMC should connect data observability, semantic observability, agent traces, and trust controls into one debugging surface.
+
+### Google Commerce: Not One LLM With Tools
+
+Evidence: `D2-C009`
+
+The Google commerce material gave a compact story for agentic commerce: agents cannot safely buy, compare, or act against merchant systems if the world is just webpages and tools. The proposed architecture separated translation, deterministic execution, and judging.
+
+The "coffee machine" flavor of the story is useful because it makes the stakes concrete: misunderstanding, overspend, manipulation, structured product data, and audit all show up when an agent acts for a person in the market.
+
+Architecture lesson: even customer-facing agent systems need deterministic executors, structured data surfaces, and bounded judgment layers.
 
 ### RingCentral: Not Everything Should Be An Agent
 
 Evidence: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
 
 The RingCentral material preserved the cleanest boundary rule: agents belong where ambiguity, research, synthesis, and hypothesis generation matter. Known procedures should remain deterministic.
+
+The stronger orchestration lesson was that multi-agent systems need management structure: agent mandates, swarm-level reflection, quality gates, correlation monitoring, lifecycle management, interpretability, and budget control. Otherwise the system can explore forever and still fail at disciplined execution.
 
 Architecture lesson: agents should prepare, propose, and explain; deterministic systems should execute, enforce, persist, and audit.
 
@@ -139,6 +198,8 @@ Evidence: `D2-C014`, `SL-C022`
 
 The MCP panel produced the smallest useful safety rule: do not hard delete. That line matters because it turns abstract tool-governance concern into an operational default.
 
+The sharper framing is that MCP can be magic or tragic. Prompt injection will happen. Tool sprawl will happen. Trace leakage will happen unless the gateway is designed to constrain, observe, and recover from it.
+
 Architecture lesson: connection standards are not security models. Destructive actions need criticality policy, review gates, audit, and recoverable execution.
 
 ### CockroachDB: Agent Traffic Does Not Breathe
@@ -146,6 +207,8 @@ Architecture lesson: connection standards are not security models. Destructive a
 Evidence: `D2-C011`, `SL-C018`, `V-C003`
 
 The CockroachDB signal was that a thousand agents are not capacity-equivalent to a thousand humans. Agents can retry, fan out, run continuously, inspect everything, and generate load without the natural pauses of human traffic.
+
+The product fit remains uncertain from the booth capture, and that caveat should stay visible. The architectural warning is still strong: if agent-shaped traffic lands on infrastructure designed for human-shaped usage, teams may be forced into rewrites under pressure.
 
 Architecture lesson: agent-shaped load needs separate capacity planning across databases, APIs, auth, queues, CI, search, observability, and inference.
 
@@ -155,7 +218,19 @@ Evidence: `D1-C011`, `D1-C015`, `SL-C011`
 
 The coding-agent thread sharpened the human part of the architecture. AI can generate more candidate work, but the organization still owns taste, boundary judgment, review discipline, and integration quality.
 
+The HMC-relevant details are concrete: AGENTS.md, staff-engineer context gathering, harnesses, preview environments, token efficiency, and distilled review signals are not workspace decoration. They are how humans retain leverage when raw diffs become too numerous to read line by line.
+
 Architecture lesson: generation scales only if review, provenance, tests, harnesses, and ownership scale with it.
+
+### T-Mobile / Distyl: Agency Can Become Containment
+
+Evidence: `D2-C002`
+
+The T-Mobile / Distyl material carried a useful tension. Customer-service agents can help customers navigate options and finish tasks without waiting on scarce expert humans. They can also become bot-mediated containment if success is measured mainly by avoided calls.
+
+The personally emphasized risk is not that customer agents are bad. It is that "customer centric" language can hide a pressure to keep people out of human channels.
+
+Architecture lesson: choose agent use cases where the system increases agency, reduces toil, or improves reliability; be wary when the business case depends on deflection.
 
 ## 1. The Agent Layer Is A Mediated Capability Layer
 
@@ -215,7 +290,7 @@ Internal implication:
 
 ## 3. Context Engineering Has Replaced Naive RAG
 
-Evidence: `D1-C007`, `SL-C003`, `SL-C004`, `SL-C005`, `D2-C006`, `D2-C013`, `SL-C021`
+Evidence: `D1-C007`, `D1-C012`, `SL-C003`, `SL-C004`, `SL-C005`, `SL-C008`, `D2-C006`, `D2-C013`, `SL-C021`
 
 The retrieval story was not "add a vector database." The stronger signal was that context has become governed runtime state.
 
@@ -230,6 +305,8 @@ Production context has to answer:
 - Can the retrieval path be replayed?
 
 Monte Carlo's readiness framing adds the cross-layer observability point: data, semantic behavior, agent build, and trust are one operating plane. A bad answer may originate in stale data, broken schema, weak chunking, embedding drift, missing metadata, or tool behavior. If those layers are not connected, teams will blame the prompt when the real defect lives upstream.
+
+The Day 1 retrieval material adds the capacity point. Branched agent retrieval is not a single lookup. It can become a high-query-rate, low-latency, metadata-heavy serving workload with versioned context, provenance, raw artifacts, and write-path concerns. Budget-aware search and content APIs belong in the same design conversation as retrieval quality.
 
 Internal implication:
 
@@ -270,12 +347,15 @@ NVIDIA, CircleCI, OpenAI/Databricks panel notes, and the coding-agent material a
 
 The CircleCI/METR slide matters because it separates felt speed from measured speed. Developers may feel faster while reliability, recovery, review burden, or total throughput gets worse.
 
+The eval lesson is similarly sharp: single-run scores can lie. Stochastic systems need variance tracking, repeatability, and replay before their measured quality is trustworthy. Today's evals are tomorrow's guardrails only if the traces, labels, and intervention signals are captured deliberately.
+
 The useful primitives are:
 
 - gates to stop known failure modes before promotion;
 - sweeps to find recurring or cross-cutting issues;
 - evals over traces, not just prompts;
 - replayable environments;
+- variance and repeatability checks;
 - small reviewable diffs;
 - provenance on generated artifacts;
 - human intervention labels;
@@ -316,6 +396,8 @@ Deterministic systems should handle:
 
 The strongest architecture keeps these roles separate. The agent proposes, researches, explains, and prepares. Deterministic systems execute, test, enforce, deploy, and measure. Validated outputs cross a visible boundary.
 
+For multi-agent systems, the boundary is not enough by itself. The RingCentral material points toward management structure: specialized mandates, swarm-level reflection, quality gates, correlation monitoring, lifecycle controls, interpretability, exploration budgets, and governance boundaries.
+
 Internal implication:
 
 > Crimson should not collapse reasoning, execution, policy, persistence, and audit into one agent blob. The handoff boundary should be visible in code and operations.
@@ -345,6 +427,8 @@ This is not only a GPU or token-budget concern. It is enterprise capacity planni
 
 The DataRobot token-economics slides add the finance angle: inference capacity needs allocation, admission control, tiers, budgets, and stable enough behavior for planning.
 
+The CockroachDB warning adds the platform angle: if agent-shaped load is treated as a normal traffic increase, infrastructure teams may discover too late that their human-era assumptions force an emergency rewrite.
+
 Internal implication:
 
 > Any agent rollout should model agent-shaped traffic separately from human traffic.
@@ -368,6 +452,8 @@ The practical first rule from the notes is simple and worth preserving:
 
 > Do not hard delete.
 
+The harder rule is that prompt injection should be assumed, not treated as a surprise. The gateway needs to constrain what tools can see, what actions can execute, which traces can persist, and how suspicious behavior is reviewed or rolled back.
+
 Internal implication:
 
 > HMC should wrap MCP-like surfaces in actor identity, user delegation, scoped exposure, criticality policy, audit, trace hygiene, DLP, and review gates.
@@ -379,6 +465,8 @@ Evidence: `D2-C002`, `D2-C003`, `D2-C004`, `SL-C002`
 The T-Mobile / Distyl and Axos / OutSystems material was useful because it showed both enterprise ambition and enterprise risk.
 
 Customer-service agents can increase agency if they help people accomplish tasks, understand options, and escalate cleanly. They become containment systems if success is measured mostly by avoided calls.
+
+The T-Mobile / Distyl reaction is worth preserving as a warning: "good humans do not scale" is a real business pressure, but it can turn customer-centric language into channel deflection if the agent mostly keeps people away from human help.
 
 Banking agents can help wrap legacy cores, analyze logs, reduce SDLC friction, and improve delivery safety. They become surveillance systems when management instrumentation and timecard monitoring become the primary use case.
 
@@ -445,6 +533,9 @@ Required properties:
 - bounded tools;
 - run IDs;
 - prompts and config versions;
+- reusable skills / procedures;
+- agent asset repositories;
+- encoded decision procedures;
 - trace capture;
 - cost tracking;
 - retry policy;
@@ -463,6 +554,7 @@ Required properties:
 - DLP/trace hygiene;
 - rate limits;
 - customer/internal policy separation;
+- prompt-injection response;
 - soft-delete defaults;
 - explicit review gates for destructive actions.
 
@@ -494,6 +586,7 @@ Required properties:
 - cost per successful outcome;
 - variance and repeatability tracking;
 - regression detection;
+- circuit breakers;
 - data/semantic/agent/trust observability.
 
 ### Layer 8: Infrastructure And Economics Control
@@ -551,10 +644,13 @@ SDK primitives should prefer:
 - scoped capabilities over raw clients;
 - typed commands over ad hoc payloads;
 - explicit subject/actor context;
+- reusable skills and encoded decision procedures;
 - provenance-bearing reads;
 - dry-run and diff modes;
 - review-gated writes;
 - audit event emission by default.
+
+The Day 1 Agent OS / Kiro material matters here because it validates a local instinct: durable agent work often becomes specifications, skills, repositories, and repeatable procedures, not only a runtime abstraction.
 
 ### Implication 4: Internal Search And Retrieval Must Become Provenance-Aware.
 
@@ -572,7 +668,23 @@ This matters for:
 - prompt/regression analysis;
 - authorization review.
 
-### Implication 5: Data Agents Need Staged Workflows.
+Search also needs workload design: query rates, p99 latency, metadata scale, index versioning, and retrieval budget must be planned as infrastructure constraints.
+
+### Implication 5: Domain Rules Are Scarcer Than Tokens.
+
+The strongest Day 1 wrap point is that the scarce resource is not tokens. It is domain rules.
+
+HMC's durable work is to capture the judgment that lives in SMEs, legacy workflows, wrappers, and integration seams, then expose that judgment through governed capabilities and reusable procedures.
+
+This means platform work should include:
+
+- SME rule-capture workflows;
+- wrappers around legacy systems;
+- reusable policy/procedure libraries;
+- reviewable domain assumptions;
+- traceable links from rules to source owners.
+
+### Implication 6: Data Agents Need Staged Workflows.
 
 A safe HMC data-agent workflow should look more like software delivery than direct database mutation:
 
@@ -585,7 +697,7 @@ A safe HMC data-agent workflow should look more like software delivery than dire
 7. promote deterministically;
 8. record lineage and audit.
 
-### Implication 6: Evals Should Be Designed Before Rollout.
+### Implication 7: Evals Should Be Designed Before Rollout.
 
 For any pilot, define evaluation before deployment:
 
@@ -597,13 +709,14 @@ For any pilot, define evaluation before deployment:
 - success metric;
 - unacceptable failure modes;
 - replay set;
+- repeated-run / variance expectation;
 - trace schema;
 - intervention labels;
 - cost metric.
 
 Without this, the organization will get demo success and operational ambiguity.
 
-### Implication 7: Infrastructure Cost And Load Must Be Modeled Early.
+### Implication 8: Infrastructure Cost And Load Must Be Modeled Early.
 
 Agent-shaped load should be part of rollout design.
 
@@ -634,8 +747,10 @@ Create a short internal standard covering:
 - capability exposure;
 - action criticality;
 - read/write separation;
+- gateway placement;
 - dry-run requirements;
 - review gates;
+- prompt-injection response;
 - audit event requirements;
 - trace hygiene;
 - DLP;
@@ -701,6 +816,7 @@ Minimum fields:
 
 Choose a pilot that:
 
+- starts with toil rather than vague autonomy;
 - reduces internal toil;
 - has clear ownership;
 - has limited blast radius;
@@ -715,6 +831,7 @@ Good candidate shapes:
 - internal knowledge/retrieval assistant with provenance;
 - PR/change summarizer with required checks;
 - incident/reliability research assistant;
+- data/agent observability or readiness-scorecard pilot;
 - data-quality proposal agent that cannot mutate production directly;
 - API capability discovery assistant over a constrained registry.
 
@@ -724,6 +841,8 @@ Before broad rollout, define:
 
 - gate checks for known failure modes;
 - scheduled sweeps for recurring drift;
+- variance/repeatability checks;
+- eval-to-guardrail promotion rules;
 - human review surfaces;
 - trace sampling;
 - rollback paths;
@@ -737,6 +856,16 @@ The leadership framing should be:
 
 This is more credible than "AI transformation" and more actionable than "build agents."
 
+## Vendor Watchlist / Follow-Up
+
+These are not recommendations or endorsements. They are follow-up leads preserved from booth and hallway evidence.
+
+- Apollo (`V-C001`): review the claimed appliance / Docker packaging and GitHub artifact. The architecture signal is strong, but implementation details should be inspected before internal comparison to `env.API`.
+- Dust / Agent OS (`V-C002`): possible Stack AI replacement or comparison point. Deployment model was not captured and should be treated as an open question.
+- LangSmith (`V-C004`): developer-facing observability/tooling signal, plus evidence that no-code demand is rising because more teams want into agent workflows. Useful for self-service guardrail planning.
+- CockroachDB (`V-C003`): useful infrastructure-load signal and Azure-deployable / Postgres-like positioning, but raw fit assessment remains uncertain.
+- Misc exhibit-hall capture (`V-C005`): do not promote yet. The overheard material is too noisy for output-level use without separate review.
+
 ## Claims Requiring Verification Before Leadership Use
 
 Do not present the following as final external facts without checking raw source detail:
@@ -746,6 +875,8 @@ Do not present the following as final external facts without checking raw source
 - CircleCI/METR speed measurements.
 - Any OCR-caveated slide wording.
 - Apollo product packaging details beyond the booth capture.
+- Dust / Agent OS replacement positioning and deployment model.
+- LangSmith product direction beyond the booth note.
 - RingCentral slide claims where image OCR preserved only partial text.
 - CockroachDB load claims where the claim is directional but not quantified.
 
@@ -755,6 +886,8 @@ The architecture conclusions do not depend on those numbers being exact. The cla
 
 > Agents should not receive raw access to enterprise systems. They should operate through mediated, schema-aware, identity-bound, auditable capabilities.
 
+> Agents need cockpits, not keys to the building.
+
 > The API layer only becomes the agent layer when it stops being an endpoint dump and becomes a governed capability surface.
 
 > Agents are not the product. The product is the governed runtime that lets agents act safely, measurably, and economically.
@@ -763,9 +896,19 @@ The architecture conclusions do not depend on those numbers being exact. The cla
 
 > AI accelerates generation first. The bottleneck moves to validation, review, observability, and operational confidence.
 
+> The fastest is wrong if validation cannot keep up.
+
+> Today's evals are tomorrow's guardrails.
+
 > MCP is a connection pattern, not a security model.
 
-> Agent-shaped traffic is not human-shaped traffic.
+> MCP can be magic or tragic.
+
+> Prompt injection will happen. Design the gateway.
+
+> Humans breathe. Agents do not.
+
+> The scarce resource is not tokens. It is domain rules.
 
 > Use-case choice is moral architecture.
 
@@ -773,22 +916,38 @@ The architecture conclusions do not depend on those numbers being exact. The cla
 
 Primary Day 1 support:
 
+- Observability as world-model substrate: `D1-C002`
+- Enterprise starting heuristic / go for toil: `D1-C003`
+- Embedded workflows, skills, and encoded procedures: `D1-C004`, `D1-C008`
 - Retrieval/context infrastructure: `D1-C007`, `SL-C003`, `SL-C004`, `SL-C005`
+- Budget-aware search / search APIs: `D1-C012`, `SL-C008`
 - Below-waterline production substrate: `D1-C010`, `SL-C006`, `SL-C007`, `SL-C010`, `SL-C011`, `SL-C014`
 - Identity and delegated authority: `D1-C005`, `D1-C010`, `D1-C013`, `SL-C012`, `SL-C013`
 - Evals as operations: `D1-C014`, `SL-C009`
 - Coding-agent review bottleneck: `D1-C011`, `D1-C015`, `SL-C011`
+- Legacy wrappers, SME rules, and domain-rule scarcity: `D1-C015`
 
 Primary Day 2 support:
 
 - API/capability mediation: `D2-C005`, `V-C001`
 - Data-agent safety: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
+- NVIDIA research/gates/sweeps: `D2-C010`
 - Validation bottleneck: `D2-C010`, `D2-C012`, `SL-C019`, `SL-C020`
 - Context engineering and observability: `D2-C006`, `D2-C013`, `SL-C021`
 - Infrastructure load and economics: `D2-C011`, `SL-C018`, `V-C003`
 - MCP governance: `D2-C014`, `SL-C022`
 - Deterministic boundaries: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
+- Google commerce structured-data / deterministic executor boundary: `D2-C009`
 - Customer/banking use-case risk: `D2-C002`, `D2-C003`, `D2-C004`, `SL-C002`
+- Cross-day cockpit / validation / context / infrastructure synthesis: `D2-C016`
+
+Primary vendor/watchlist support:
+
+- Apollo: `V-C001`
+- Dust / Agent OS: `V-C002`
+- CockroachDB: `V-C003`
+- LangSmith / LangChain: `V-C004`
+- Deferred noisy exhibit-hall material: `V-C005`
 
 ## Closing Position
 
