@@ -5,8 +5,10 @@
 | CHAT-DAY1 | `01_raw-evidence/chat/day1-chat-export.pdf` | chat-export | 2026-05-04 | Day 1 GPT conversation | raw | TBD | TBD | Printed GPT conversation export. |
 | CHAT-DAY2 | `01_raw-evidence/chat/day2-chat-export.pdf` | chat-export | 2026-05-05 | Day 2 GPT conversation | raw | TBD | TBD | Printed GPT conversation export. |
 | CHAT-SLIDES | `01_raw-evidence/chat/slides-chat-export.pdf` | chat-export | unknown | Slides-related GPT conversation | raw | TBD | TBD | Not treated as an authoritative slide deck. |
+| NOTES-SCHEDULE | `01_raw-evidence/notes/schedule.md` | schedule | 2026-05-04 to 2026-05-05 | Agent Conference schedule | raw | `02_normalized/day1-timeline.md`; `02_normalized/day2-timeline.md` | TBD | Canonical on-disk schedule export from agentconference.com. No `agentconference_2026_schedule.md` file exists on disk. |
 | NOTES-DAY1 | `01_raw-evidence/notes/day1-notes.md` | note | 2026-05-04 | Day 1 | raw | `02_normalized/day1-timeline.md` | `03_extracted-claims/day1-claims.md` | Initial day 1 note fragment. |
 | NOTES-DAY2 | `01_raw-evidence/notes/day2-notes.md` | note | 2026-05-05 | Day 2 | raw | `02_normalized/day2-timeline.md` | `03_extracted-claims/day2-claims.md` | Main day 2 notes. |
+| NOTES-DAY2-EXTENDED | `01_raw-evidence/notes/day2-notes-extended.md` | note | 2026-05-05 | Day 2 extended GPT capture | raw | `02_normalized/day2-timeline.md` | `03_extracted-claims/day2-claims.md` | Live GPT web note-taking capture with raw notes, takes, reactions, and emerging synthesis. |
 | AUDIO-260504-1020 | `01_raw-evidence/audio-transcripts/260504-1020-random-talk-ending.txt` | transcript | 2026-05-04 | Unknown talk ending | raw | `02_normalized/audio-index.md` | `03_extracted-claims/day1-claims.md` | Short raw transcript fragment. |
 | AUDIO-260504-1044 | `01_raw-evidence/audio-transcripts/260504-1044-noise.txt` | transcript | 2026-05-04 | Noise / unknown | raw | `02_normalized/audio-index.md` | `03_extracted-claims/day1-claims.md` | Very short raw transcript fragment. |
 | AUDIO-260505-0807 | `01_raw-evidence/audio-transcripts/260505-0807-day-2-opening.txt` | transcript | 2026-05-05 | Day 2 opening | raw | `02_normalized/audio-index.md` | `03_extracted-claims/day2-claims.md` | Opening plan for day 2. |
@@ -66,4 +68,3 @@
 | IMG-260505-165626 | `01_raw-evidence/images/20260505_165626.jpg` | image | 2026-05-05 | unknown | unreviewed | `02_normalized/image-index.md` | `03_extracted-claims/slide-claims.md` | Timestamped image; content not reviewed. |
 | IMG-260505-165929 | `01_raw-evidence/images/20260505_165929.jpg` | image | 2026-05-05 | unknown | unreviewed | `02_normalized/image-index.md` | `03_extracted-claims/slide-claims.md` | Timestamped image; content not reviewed. |
 | IMG-260504-082510-CHATGPT | `01_raw-evidence/images/Screenshot_20260504_082510_ChatGPT.png` | screenshot | 2026-05-04 | ChatGPT screenshot | unreviewed | `02_normalized/image-index.md` | TBD | Screenshot; content not reviewed. |
-
