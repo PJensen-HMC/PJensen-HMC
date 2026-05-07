@@ -75,7 +75,7 @@ flowchart LR
     guardrails --> gates
 ```
 
-## What Leadership Should Believe Now
+## What The Evidence Suggests
 
 1. Agents are actors, not users.
    Authorization must distinguish the human subject, the agent actor, the delegated authority, the tool invoked, and the system of record touched. Static keys and broad service accounts are not an agent identity model. [4], [7], [14], [18]
@@ -93,7 +93,7 @@ flowchart LR
    Humans pause. Agents do not. Agent populations can retry, inspect, call tools, generate traces, and load databases continuously. Capacity planning must model agent-shaped load separately from human traffic. [3], [5], [6], [7], [10], [18]
 
 6. Use-case selection is moral architecture.
-   The same substrate can reduce toil, improve reliability, and help users, or it can become surveillance, deflection, and containment. HMC should start with toil and reliability, not opaque authority or worker monitoring. [2], [3], [4], [5], [7]
+   The same substrate can reduce toil, improve reliability, and help users, or it can become surveillance, deflection, and containment. The safer starting point is toil and reliability, not opaque authority or worker monitoring. [2], [3], [4], [5], [7]
 
 ## The HMC Strategic Move
 
@@ -119,26 +119,26 @@ That means moving from:
 
 The durable platform work is not a single impressive agent. It is the substrate that lets many bounded agents exist without surrendering control. [1], [2], [3], [4], [5], [7]
 
-## Executive Decisions To Make
+## Decision Points To Consider
 
-1. Sponsor one bounded toil pilot.
-   Choose work where success is measurable, the blast radius is small, and the first safe mode can be read-only or proposal-first.
+1. A bounded toil pilot.
+   The strongest candidate is work where success is measurable, the blast radius is small, and the first safe mode can be read-only or proposal-first.
 
-2. Approve a capability registry standard.
-   Every exposed action should have an owner, input/output contract, side-effect classification, permissions, actor policy, audit fields, rollback path, and criticality level.
+2. A capability registry standard.
+   Every exposed action would benefit from an owner, input/output contract, side-effect classification, permissions, actor policy, audit fields, rollback path, and criticality level.
 
-3. Require agent identity before agent write access.
-   No broad autonomous write access without subject/actor separation, delegated authority, scoped permissions, immutable audit, and gateway policy.
+3. Agent identity before agent write access.
+   Broad autonomous write access is hard to justify without subject/actor separation, delegated authority, scoped permissions, immutable audit, and gateway policy.
 
-4. Fund context provenance as platform infrastructure.
-   Retrieval should carry source IDs, versions, permissions, freshness, index version, and downstream output references.
+4. Context provenance as platform infrastructure.
+   Retrieval becomes more defensible when it carries source IDs, versions, permissions, freshness, index version, and downstream output references.
 
-5. Establish eval and gateway standards before pilots multiply.
-   Today's evals become tomorrow's guardrails. Prompt injection will happen. Design the gateway.
+5. Eval and gateway standards before pilots multiply.
+   Today's evals become tomorrow's guardrails. Prompt injection will happen. The gateway is the place to make that reality explicit.
 
-## 30/60/90 Day Shape
+## Low-Regret Next Moves
 
-### First 30 Days
+### Clarify The Pilot
 
 - Pick one toil pilot with a named owner and measurable success criteria.
 - Draft the HMC-safe agent execution standard.
@@ -146,7 +146,7 @@ The durable platform work is not a single impressive agent. It is the substrate 
 - Define the minimum agent event schema: run ID, subject ID, actor ID, capability ID, context references, policy decision, cost, latency, human intervention, success/failure.
 - Start SME/domain-rule capture for the pilot domain.
 
-### Next 60 Days
+### Build The Safety Surface
 
 - Build the pilot in proposal-first mode.
 - Add provenance-aware retrieval for the pilot context.
@@ -154,7 +154,7 @@ The durable platform work is not a single impressive agent. It is the substrate 
 - Add eval variance and repeatability checks, not just single-run pass/fail.
 - Create reusable skills or encoded decision procedures from SME review.
 
-### Next 90 Days
+### Decide What Scales
 
 - Run gates and sweeps over agent-created artifacts.
 - Review traces for review burden, cost, latency, and failure classes.
