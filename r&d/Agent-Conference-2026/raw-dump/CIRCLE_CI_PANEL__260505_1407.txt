@@ -1,0 +1,745 @@
+software for the past 40 years, things were different back then. I started on an apple to me.
+We put software on a floppy disk, we put them in cardboard boxes, we put them on the trucks,
+we shipped them to retail outlets. That was the state of software delivery back then.
+Nowadays a little bit different. We live in a wild world, fascinating world, also very
+good mystifying world. I need help to justify that, so to do that. I've got two awesome
+panelists here. We're just going to bring up Kevin Stump from Data Risk. Kevin built ML platform
+with Uber. Now if we go about it ten times, so that's the Data Bricks. Now he's going to be the
+member of technical staff at Data Bricks building awesome ML solutions and improve for Data Bricks.
+So we'll love to bring Kevin up on stage.
+Not to be outdone. Chris Kyle with the multi-cousillion dollar value OpenAI. Kyle,
+awesome person, individual as well. He was with OpenAI, he was building things like
+Agent Dusty King, Agent Kit, currently workspace agents as well. He's going to talk about all this
+stuff with Linda. Welcome on to Stads and Sage. And also, Chris Kyle is also currently one call.
+So he's on page right now, so we're going to try to keep this quick.
+And of course, I'm Ryan Hamilton with the AI lab in CircleCI. My gosh, we see millions and
+millions and millions of pipelines. People take their idea, you know, graphic software applications
+right now, agentically and bicoting software applications. And we all want to send these
+applications to productive, right? Like that's the goal, right? Like he's generating applications,
+we want to send those things to production. And as part of that CircleCI sits right in the middle
+of that, we see a bunch of data, see millions and millions of pipelines. And what I would love to do
+is we've got slides here, you all see that?
+It's just bring up a little bit of data, you can answer us.
+There we go. There we go. All right. So, the Melbourne Experience Study, DX released a
+longitudinal study of 400 companies. Over the course of 14 months and what they found is that we have
+the 10% productivity gain. Now, we see in the media that we kind of like feel from our guy,
+oh yeah, we're going to do like 2, 3, 10 hats, 100 hats are productivity. But the reality of the
+situation, based on his longitudinal study, is that, oh yeah, you know, we can see a month's
+10% gain, not 10% bad or not 3% bad, but yeah, 10% gain, but who wouldn't want that? That's great.
+We also have, we also have 39% speed perception gap. So, this is a meter study done.
+Last year, early 2025 to late 2025, can we even debate about that kind of volume of methodology
+of the study, but what it found is that our own perception of our productivity when we use
+these AI tools and these AI agents is much higher than the actual reality when we actually,
+you know, go, go in like time ourselves. And there's actually a 39-point
+for us, the perception gap between how productive we think we're being and how productive we actually are.
+I'm going to be that slide. I'm going to read it for yourself. I mean, they feel free, again,
+as you see this stuff, like feel free to kind of say, oh, is this a supply room? Are you all
+feeling this? So, there's a growing confidence gap for the code to ship the code we understand.
+And I'm going to unpack all the numbers that, again, we see 28 million pipelines per month.
+The numbers that we see in that, but how this manifests itself in the past year or so,
+is that this growing risk, this growing gap between the code that we ship and the code that we
+understand manifests itself, and oh, yeah, we can generate a lot of code. What ends up happening
+is we generate a lot of future ranches. Very few of those features are actually getting to make,
+you're actually getting the production. And when they do, those pipelines are actually failing
+at a higher rate than we've ever seen. And even if the stuff does get to production,
+what's happening is that we've got solutions and production. They're failing at a higher
+rate than we've ever seen before. What's even worse is that when those incidents happen,
+and we hope this incident doesn't happen across Kyle here during his presentation,
+when those incidents happen, it's taking longer times than ever to actually recover from those
+incidents. So we're saying, slower we have to production, higher failure rates, slower recovery rates.
+And this is the kicker. And we've all felt this, right? We've all kind of heard things in the market
+about leaders in the lab, which is that there have been a 59% increase in throughput,
+PR throughput across the board, but all of those gains are going to the highest,
+probably the highest, the highest of my top performing boards in the space.
+Anyone in the lowest board title, you're seeing very minimal gain. 59% across the board,
+all those gains are going from top to very few up in the bottom. And the bottom four titles,
+only see like four percent lift to zero percent lift, which can't see more. So,
+I mean, you can see the pretty good, is the data, like, how do you know?
+I see the right gain. What do you, what do you see here? In any words?
+I see what we have on a call, but that's all on there, so I'll see that. It's a matter of the PR throughput.
+Sure. Starting from November 2024. Yeah, I do think there was a lot of evictions starting
+around November 2005, so I suspect that if you know how several data again,
+and then the service would probably see a higher number of, in the chart of the increase.
+Absolutely. All of that said, the data rate could look quite closely to figure out how many of our
+goals in the organization are powering through the AI, how does that distribute to the cross-engineering
+and design product. And what we didn't see is that we have about 40% power users at the end of the year,
+not as close as 90% across the organization. And we do see that the PR throughput is increasing,
+and we do also see that that's the core of the election for the city of Oregon.
+More senior people are actually using AI for right now, or ultimately getting a bigger boost.
+And we also see a similar power distribution, where you, of course, have a scholar,
+a group of people who are really ultra-pleaning-assual doctors,
+and they're showing the rest of their own condition, how do you best use it,
+what are the best skills to use for other tips and tricks, and then they are teaching them
+through the rest of their organization. And I suspect that that's probably commented a lot
+about our core religions, right? And then we also see it be about this quite aggressively,
+especially since the record outside of the engineer, where some of the hands at the end
+do not allow to communicate product environments a lot more efficiently than ever before,
+previously got to your e-boss, or is it because of the requirements,
+because you'd probably be able to use the shape, and now you just hack up a prototype,
+and you can play around with it to make it a much better grounds to do data orders,
+so that you can make sure that everybody has the same thing in their heads.
+Absolutely. No, it's interesting what you said about this in your e-bass.
+Because I think the stigma we're doing over the first time that our senior vice president,
+our team's actually sent in PRs to review, and say, hey, why?
+Like, can you donate this production, or do you know what I do?
+Like, you're just going to be actually running a company,
+like, why are you sending this company? That's probably a risk pile.
+Open the app, open the app, respect it, is there a few of these?
+Yeah, I mean, obviously we're probably like higher than that,
+but we can scale it here, we're doing size.
+Yeah, respect it.
+But I think there's no doubt to be building a seniority park.
+It's just knowing, you need to know how to use data,
+and I think it's a smaller word, a smaller word.
+You're going to see smaller words from a smaller word,
+like AI basis, you might not have the right knowledge of the latest sort of
+right system in place, actually, and you're going to see a lot of
+slide, just like the old AI, for the time being,
+building that in that first line.
+We're going to see a lot of, you know,
+our, to the most of the point of our knowledge and technical people using it.
+Our designer is going to use it to then create the PRs and us
+and we can then generate our rents.
+I've got a much more aim for the constructs.
+We don't have to do licenseful shopping,
+and then cruise to the left.
+For sure, you know what I mean?
+I've got a seniority site, you know,
+for your point, yeah, like our designers are in Cursor,
+and people can check them.
+Most of them, he's in plug-up right now,
+since it's really interesting,
+I think I've got people who are shipping PRs.
+So in that way, the seniority, you kind of like seeing PRs like cascading down from above,
+but also like later, you know, seeing like all the passes of the,
+all areas of the company are kind of adopting the sell-in,
+trimestances, rooms are.
+So, and Kevin, you brought it at the very end point, like, you know,
+data is a moment in time.
+Like, you know, we can take a snapshot at the, you know,
+during 2029, and I got, like, it seems prehistoric to you,
+you're talking about 2025,
+just didn't want me seeing, you know, a claw box.
+So, you know, there is, you know, agent news coming out of the early portion of this year.
+You know, let's think about, like, the, it's that year, sir.
+You know, we didn't kind of debate the methodology,
+and again, the method was done kind of in 2029,
+but, you know, is there some truth to that?
+Like, you know, we all think, like, oh, yeah, we're going to,
+it's 100xR for the theory, just on the individual level,
+let alone in, kind of, a world wide level.
+Is there some truth to that kind of perception?
+Yeah, like, I, you know, might as well be, like, better than we actually are.
+You know, and we increase up, because, you, I mean, again,
+you're going to look at the, like, let's use the set,
+and I'll just try to look at the example.
+It was, really funny, but I don't remember for us,
+also, the halfway time.
+Let's just check out the way I was example.
+We, our models at the time were four, five, and one.
+Yes, and three, four, and one, and two.
+So, we had just released our first reading call,
+of that, like, 100.
+The amount of things that have shifted,
+since halfway line, the seismic, to say, well, used, for sure.
+I think, when your client name is,
+when you, with a new tool, I can do that one, also.
+What were, and, what else did I have to say?
+I was, I was in a microphone, like, that,
+I was writing a React components like, and, and doing that,
+to each person, my team, like, in a traditional way.
+And, apparently, I was like, yeah, I was,
+can't even believe I've never done something,
+just like that.
+So, and, I think to say, now that the tool for starting
+to catch up with the model of the model,
+it's animal, it's just sort of proving that, as well.
+And, we're seeing that the product that he gains
+with that, are starting to come through to that,
+especially the 20-way certificate, that's starting to be true,
+to the one thing that, here, actually,
+released a company, the version was that,
+they brought that, saying, people from last year,
+and then they said, great, I don't know now,
+and I was trying to make people, just like,
+why are you, you, gain?
+Yes, they did see that gain,
+and to kind of call up, they, like,
+they'd probably say, people back in the study,
+and some people didn't want it, but you take the study,
+because they didn't much match to these data.
+So, like, I don't know,
+there's always kind of like this, like, oh, my God.
+So, like, don't, don't take away my data,
+like, from the end, so, that's very nice.
+So, just to look at this slide,
+everybody, you know, we all know that code generation can,
+we've seen this kind of proof,
+for liberation of code generation.
+Obviously, as, we've all kind of last year,
+shifted from, right, to all of our code by hand,
+to kind of letting these agents rip,
+with like, Ralph Loose, and this,
+whatever, harnesses, and crazy orchestrations you got.
+Um, I mean, this, this is what it is a generation.
+This kind of proliferation of code generation,
+attempting to get your production,
+like you saw in the data earlier, it's not anything to you.
+And even if it does, it's a problem, royally.
+Um, Kevin, excuse me about this problem.
+Like, we all know about problems.
+What it does that means to you, I guess,
+to do, kind of, uh, uh, see the,
+see this, uh, chart is this problem,
+kind of, way out, uh, and maybe this is what I do.
+Yeah, in any, in any system,
+yeah, we're all, like, it's a room of linear,
+not, like, right now, it's not the right,
+for the code anymore,
+and now it's other parts of the system,
+and it's kind of the problem you're working on,
+the individuals who are involved, um,
+what kind of individual modeling is,
+when it's important to identify which one of these
+is a common element of code generation.
+It's not important.
+The common, all my society and honesty,
+are, could be on, um, the PR,
+redo type, of course,
+like, you'll be surprised to hear,
+what we're investing in,
+impressively, there's, uh,
+ultimately different models,
+actually do the PR review as well,
+I think it's a little bit of a problem.
+The agents who are also doing the PR review,
+um, CI is an interesting,
+where you're using the PR,
+you wait a 12 hours until the CI is completed,
+and then, uh, I can go back and do a little shit,
+tell the left, as much as we possibly can,
+so that CI actually runs on the,
+on the multiple opportunities in the age,
+it's actually,
+we're all in CI basically before you get to the,
+uh, CSD system.
+Um, but I think two of the biggest,
+automatics are one,
+actually just human taste.
+I mean, that still is extremely important
+in building products,
+and the agent can replace that,
+and then it felt these decisions,
+like, how should we build this product?
+What should it actually look like?
+What should the UX be?
+What's the minimal number of concepts,
+the minimal number of knowledge,
+where it's not for future customers?
+That is not, like, a huge problem,
+and then related to that, um,
+this decision to be a key part,
+like I've seen that in basically,
+the other organization of the power up in a second,
+it's not super clear,
+it's the only decision who are just,
+people who are informing the decision,
+and consulting,
+and everything else down.
+Yeah, but what's interesting would be,
+especially to call out, you know,
+about taste, like,
+you know, we can optimize everything
+in the world through all of our bottlenecks,
+and shift products in the world,
+that people don't care about,
+don't like hate, you know,
+um, so, yeah, super good to call out,
+good consideration,
+uh, Chris, your perspective,
+uh, you know, as a corporate,
+I mean, I do look tall on what I can say in there,
+and I think what we value to be,
+the biggest part of our head is,
+become of the PR group is,
+to get anything emerge,
+and say,
+that the code would be marked,
+it's actually the,
+the origin of our view,
+you guys have to hide your foot,
+the PR is just both,
+and you're constantly thinking
+what they apply to them.
+Yeah, like, yeah,
+and so we're trying to find
+these, they need that,
+we're mining that,
+we're using tools,
+such as, you know,
+and things like that,
+that we're designing,
+years and years and years,
+over a very different set of tools,
+and so we're trying to make
+how do we bring those tools
+into a genetic era
+where we pass those tools,
+and that's that sort of what
+can do around this game,
+that's going on,
+so this year,
+it's just trying to get past the path.
+I think,
+the market's a settled venture, right?
+You're going to,
+you're going to hit the
+digital generation part,
+and you're limited by,
+we hit that with a genetic system,
+where you can go with that,
+and you can write a project on it.
+Next up is that you're going to have
+an idea of the PR role,
+and you're going to see
+how it role in it,
+and we don't want these tools
+to fit into your system,
+and we're going to place
+to free out these tools.
+I've got several things,
+you know,
+and because,
+you mentioned,
+PR,
+you know,
+for me to trust,
+automated PR review,
+like,
+we really know you,
+like, oh, yeah,
+this is,
+the first PR review,
+right now,
+that we're talking about,
+it's necessary.
+We still need, like,
+human use in that.
+Yes, I think you do.
+This is for our,
+I think it's necessary
+but not sufficient.
+And it's a very common,
+that you have,
+um,
+the latest bot code,
+the latest product models,
+all together,
+you're going to be the same PR,
+and you're going to be,
+something so,
+I saw,
+I saw,
+I saw,
+you can do all this,
+you can do all this,
+you can do all this,
+in this case,
+it looks pretty unrivaled in the whole,
+you can set it up,
+and then,
+uh,
+have,
+ideally,
+be patient,
+problematic,
+really unrivaled.
+So,
+when you're there,
+you,
+update the PR,
+and then,
+have a client,
+and you,
+you can move,
+that's just a whole thing,
+it still understands it,
+it's a sense of,
+okay,
+let's see.
+And,
+I will say,
+anyway,
+uh,
+we're not,
+we're not doing a production,
+a lot of that,
+it's very,
+um,
+I will give,
+the question is,
+the problem is all,
+when it doesn't just break,
+the question that,
+the breakers,
+you are about,
+you,
+and importantly,
+the right color,
+it has to,
+the problem of the plan,
+it has to go all,
+uh,
+around your research tasks,
+uh,
+how would you do that,
+a problem,
+and then you give that
+to the client,
+how would you,
+it's actually,
+then you'd
+want to go to the
+instance,
+to a few different roles,
+based on the,
+the problem is,
+give it,
+and buy it.
+But,
+the problem is,
+it will do that,
+and the
+thing is,
+it's like,
+the problem,
+from these four of the things.
+All you have to do is start putting it,
+like,
+edit what you've done,
+with all the programs,
+do that again,
+make sure you put it back
+and get all new,
+and I think,
+having a
+multiple pages,
+being able to
+check each other,
+really deals up that obvious gap,
+and allowing you to do,
+like,
+okay, cool,
+different.
+If I get a junior,
+actually,
+I've never do it for per day,
+I think,
+I think,
+I think,
+I think,
+I'm not going to buy this yet.
+Yeah,
+I'm just going to cut it off,
+correct.
+Now,
+why bad,
+even your PR,
+and
+six junior,
+years,
+who are all looking at it,
+and they all look,
+yeah,
+it's good.
+As all of the games,
+do we know that,
+where is that,
+where is that,
+where is that,
+where is that,
+where is that,
+where is that,
+um,
+let's take a look at the five agents.
+Are they,
+have you,
+kind of,
+neatly coded each agent to being,
+like,
+also,
+a different personality,
+or,
+let's say,
+old,
+and just,
+like,
+actually,
+probably the,
+like,
+the overall use of it.
+Yeah,
+it tends to focus on
+different,
+uh,
+subtle,
+within it,
+for all my areas,
+uh,
+schedule,
+considerations,
+there are,
+testing,
+and, uh,
+for falling,
+consideration,
+and there's,
+it's all the actually,
+problem,
+uh,
+is it consistently,
+like,
+there's a bit of,
+and so,
+we should be,
+some of you,
+instead of,
+it's separate,
+go,
+and,
+we should be,
+consider it,
+but,
+that way,
+you're not going to,
+look,
+no,
+but,
+actually,
+problem,
+we're going to,
+like,
+uh,
+and that really meant,
+like,
+brainwilders,
+very clever,
+specific cases,
+you want to do,
+and fall out,
+back to the original agents,
+and the individual problems,
+were sealed,
+allow the event to create a
+error process
+that,
+like,
+consolidated,
+Yeah,
+I did,
+rather,
+and I will call out,
+yeah,
+from kinds of
+circles,
+the ICIC,
+to,
+it's
+Ericien,
+if you're
+late,
+in our case,
+we set up this
+Ralph Moon like,
+you know Kurds hotel,
+and those are very topical
+and we said,
+oh yeah,
+let's try to build,
+we started with a snake,
+and we tried to build a Game of Snake,
+and we just,
+you know,
+put us in fact,
+we left this Ralph Moon
+run, and you try this, you know, be, like, C.I.
+failure back into the, the, the agent loop.
+And you know, like, oh, yeah, I do.
+It's just, it's just, it's C.I.
+I was in, like, after the next run.
+And I, like, I want to go, like,
+get away a little bit quicker.
+So what we're doing is kind of, like, you know,
+getting a little micro C.I.
+is that you're kind of cherry-wicked in, you know.
+Uh, kind of, if you're going to get that closure
+to that narrow room and that end,
+and try to help the N.I.B.E.
+experience to kind of, like, have us tired.
+Have you met them?
+So if you don't get that, or, like, even,
+where to get the failure back out, like, we,
+we're going to engage in that context
+that we're going to be, so, um,
+theater, you can call up the C.I.B.E.
+Park. Yeah.
+Uh, traditional and traditional C.I.
+has been passed a little over here,
+attending the C.I.B.E.
+So, uh, yeah, we're going to do a minute mark.
+Um, yeah, let's, let's, uh,
+help some gym.
+I mean, uh, I haven't been to you.
+And, you know, you, you see a lot of day here.
+Uh, eating the day by.
+Simon, where are we going?
+Like, two or three more hours to pass all this.
+Um, we can't, but, uh, you have, uh,
+kind of, like, some work with them,
+from your perspective, uh,
+well, things to consider,
+just to do in this moment, uh,
+as you move forward.
+I've been working on a lot of activities.
+You've been involved in this,
+uh, you've been involved,
+like, just to make sure you're actually here,
+uh, those, uh,
+and being able to focus on the economy,
+and, uh,
+I think, um, um,
+like, yeah, the project that's not going as fast
+as you, the thing you should be doing,
+I would look at,
+does it actually feel a little bit decision-making for this?
+Because that's what I've seen.
+You can be such a common,
+and, um, unnecessary, wrongly,
+um, that your agents are not going to solve for you.
+And then, set up to that,
+and, um,
+just, having plenty of agents,
+organization agents,
+generally, I wouldn't necessarily,
+have a week,
+and, um,
+temporarily,
+you know,
+other agents are doing,
+because they can't match for you.
+Okay.
+First, first, first,
+this guy,
+I'm going to drop a few,
+uh,
+few jewels for people.
+Yeah, absolutely.
+I mean, I think,
+I think, I think,
+I'm going to wait my secretive,
+courage,
+and, so,
+I think,
+I think,
+for me,
+what I've done for you,
+because,
+I have a whole,
+that,
+I'm not trying to define the role,
+I guess,
+the job,
+the fastest,
+because it does that as well.
+It's,
+not faster,
+we're going to do it again.
+So, like,
+really confident,
+and kicking off,
+and,
+I think,
+a lot of you need to actually get it.
+That's pretty,
+and,
+you know,
+multiple reviewers,
+and,
+being the rest of your life,
+great.
+You are not stopping,
+until you are aware,
+and confident that this is correct.
+And it's,
+it sounds,
+because it sounds like you
+would slower by doing that.
+But,
+the reality is,
+you're free right now,
+you're free.
+That's doing that,
+that is separated.
+Let me do three other things,
+or, you know,
+I'm afraid,
+as well,
+thinking,
+you're free yourself,
+you're free,
+mother,
+but having one higher,
+that's not all the time correct.
+Absolutely.
+And,
+I guess that would be,
+we have five seconds left,
+that would be perfectly,
+because I had jeweled,
+and I would wrap,
+and it's like,
+yeah, this is a lot of practice.
+Like, yeah.
+Then, in the day,
+you can reach your mind,
+confidence,
+and what we should,
+to the extent that you can,
+you know,
+the triad jewel,
+wisdom,
+like,
+a better place,
+once you get your sex right,
+if you're nuts in a row,
+if you're documentation right,
+set up your guard bills,
+set up your sex-yd,
+whatever that means,
+where you give that
+back up front,
+and then,
+once you have that set,
+let's have a beautiful trip,
+and on that,
+um,
+yeah.
+I,
+I,
+have,
+I,
+I,
+have,
+I,
+have,
+I,
+have,
+I,
+have,
+I,
+have,
+I,
+have,
+to the 4 of the end of the chart, if you are leaving the room, it's going to be a problem.
+Again, now what I was showing you in the beginning.
+That filter is not your room.

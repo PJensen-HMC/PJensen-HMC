@@ -1,0 +1,437 @@
+All right, now we're talking about the interest of the O of 10 billion ages,
+like the R2, yeah, R3, I don't think it's right there yet,
+but there's a little bit of interest.
+And then how much more could we load before it's $100 million,
+so does it, really?
+Like, that represents orders of magnitude more scale,
+a more K-dunder management, more exhaust,
+more transactions per second.
+And so this is a calm, how many load calls
+and every agent's doing a lot more work.
+So, when you look at the history of K-dunder management,
+and the amount of transactions per second
+that are handled by the system,
+it's been very close to 10x every 10 years, 10x per decade.
+And that's been a very steady growth trend.
+They don't allow all of the systems to keep pace.
+How many DCP and DCP you're going to do about it?
+Which means how much can one work a day
+with Android?
+Memory is on an SSD drop.
+And generally, right now, I would say
+that all of human traffic is still
+quite a bit larger than all of the agent's traffic.
+And it's not true on any individual basis,
+kind of, one worker, but true across the aggregate.
+Now, the question is, how much more quickly
+than 10 years are we going to get at that?
+And I think the conservative destination
+is somewhere around $1.30, where
+the agent traffic puts a student traffic,
+I think, a little more realistically,
+somewhere like $1.27, maybe $1.28, somewhere like $1.30.
+And then the crazy thing is that's an x and say,
+reunified network.
+What will the next kind of answer the one year?
+And this has profound limitations for all of the working
+billion and also the cost.
+This is a first time competing history
+that machines are going to be driving
+binary forces around low-income status people.
+So all given the structure that we've been built on
+is that we'll be back in India.
+And this is the end.
+Take the pilot, right?
+Even the year of human, then the time of humans
+has been passed on from the global billion world.
+In 2005, I actually started to show
+some of the structural strain in the system.
+We saw a huge average of it, Google, the AWS,
+the Microsoft, a lot of other different scene
+and it's our best way to get into this.
+And these are fundamental patterns that are starting to emerge.
+And all of the passing planning assumptions
+are going to be great because we're going to keep
+an upkeep and keep this low from the session-based access
+to exhaustive upon this period pattern.
+No human case of all means the machines
+being a system pounding.
+The next frame is going to show up
+or at the core, then at the end.
+Like there is no real trouble
+if you're scaling out state and surfaces
+that are, you know, under the grip group.
+The bottleneck is the system of the record
+and the connected tissue that joined them
+for example, in like a massive existence
+and pops up between.
+Consistency, durability, resilience,
+the core records under extraordinary elastic scale.
+This is, these are the new strengths.
+There's no surge that's going to subside.
+I'm just going to be a certain concert, concert.
+And extra teaching points, but it's actually done by a turn.
+You probably see some of the quotes in these slides
+down at the bottom.
+This is from a survey of 1,000 IT executives
+in professional, across the industry.
+We've just did it earlier this year.
+It's called the state of AI, up to 1026.
+And 63% of leaders are saying that their leadership
+is fundamentally underestimating the stress
+that they're expecting to come
+on the AI level on the first round.
+This is a big one that I think this is
+some of our major aircraft around
+what an exponential fundamental need.
+What's interesting is that AI's making building software
+nearly free as that is covered on our opportunity to be.
+I think it has not yet been building infrastructure
+relatively free.
+And if it is you have to try to build
+any kind of large scale or a scalable system
+and you make all the right architectural decisions
+kind of way we use to build things.
+And you move down to this agenda code
+and you're using Focus 4.7 to create a system.
+Here, it's kind of shocking how well it goes.
+And it's also kind of shocking how poor
+it's architectural decisions all.
+They're actually ruined because they can pound
+and toss with those things.
+So it actually has turbo-dubment
+from building the distributed system.
+And these are architectural barriers
+that some decades to get ready.
+Our first thing needs to banner,
+it's also these are magical technologies
+come with a more common.
+Because what's interesting is we're living
+in a little bit forever right now.
+I think there's a gap of some number of years,
+it might be one year, it might be three years,
+somewhere you can see.
+Where the system is these AI systems
+that we're using to build a software
+and light speed, they can't yet build
+the infrastructure underneath them.
+And I've got a little quote.
+And there is a period right now
+where it's going to be kind of easy
+to work on kind of technology
+and to run a magical light speed with the AI today.
+So that is an interesting thing now.
+I think the world is building all the data
+that we've got.
+Nobody wants to build the data block better
+to build one, right?
+So you know, you know, you don't really want to take
+the time to create a built-in system.
+And that is the right thing, because eventually
+AI will build a built-in system.
+But if you're building on a full technology,
+model that takes basic technology,
+you're actually going to have an architecture
+that's going to have a multiple-footed
+of cost in terms of the compounding friction
+and drag, you think you're going to get
+from having something that can't scale your success.
+I didn't know that was going to work, sorry, guys.
+So, yeah, I'm just going to, like I said,
+I thought it's going to be an analysis.
+What's going to happen when you haven't
+looked on the regular infrastructure?
+See, start and put pressure in the main system.
+It's a great business to start,
+but there isn't one on the main system.
+You have to run a main system, use your skill,
+they get in front of you, and you're getting
+an interesting hit of wall.
+Like your customers, what's the big deal
+with customers to be eating a thing
+on a single note any while?
+So you're asking for voting, and you ask for a visit
+to solve your policies, no problem.
+I can make any skill here, you're thinking
+it's not making sure of it.
+Think of an application to wear it.
+I mean, if I answered your short quote,
+then you say, you know what?
+I don't actually send queries across people.
+No problem, but they'll do it very later.
+So actually, we can just see across the show.
+And, okay, no problem, they'll do the script
+and talk to you.
+This is the pattern that's been going on for literally
+three decades in the industry.
+Everyone's doing building these systems,
+not flying systems, like particles,
+and it's just in the first place.
+I want you to actually address your AI
+and go to a format that's distributed in a daily way.
+And you're going to spend years trying to laugh at them.
+I don't think you've been survived at all.
+And the weird, cruel irony right now
+is that they don't need to start your vote, though.
+You can actually start on a distributed database.
+All those of you who've seen the complexity
+that might have made that a little bit too unfamiliar,
+and I just need to get started back.
+If you let AI run the database for you,
+and help you with the design decisions,
+and help you debug its vote barrier,
+and understand any dodgy, graphic, lady's,
+or something like that,
+because they're also getting a building that's survived at all.
+Regional algorithms are going to be amazing,
+and you can have a lot of security to vote for.
+Those things are almost as free now.
+You can ask the AI to build on proper processes
+you can ask it to build on purpose,
+which I know people that can build a AI memory system.
+And I actually build proper originally
+started working on it,
+because I wanted to use it for my next project.
+And I have to go to a level here
+and you'd be surprised to get that done next project,
+because it's like nobody's supposed to build new things.
+And it basically doesn't have a nice,
+out-of-the-step project, not an operator.
+AI could run it, and it runs very markedly in love,
+and it has been kind of low in seconds,
+even though none of it has ever worked,
+because it's been out there for years,
+where it's available for 11 years,
+because of all of these models that we've ran out of.
+So, I'll say this also,
+if you start on a model of the database,
+that gets built into your code base,
+into every line, into your steam,
+into all the assumptions,
+the fact that you've been in,
+for example, a bunch of serial queries,
+where you ask the database to do something,
+and that finishes the database to something again.
+Those kinds of assumptions don't fold out
+when you want to supply a regional algorithm,
+because you're going to have to do that,
+play the CD, play every single one of those.
+But if you start the right way,
+then you actually are building different assumptions
+into every line, but that kind of literally means
+is that on my version,
+to a more capable set of infrastructure,
+you need to have a full feedback.
+Because this is easier to do a full feedback,
+and it's ever done,
+but that's not something you want to do,
+when your business is taking off,
+and you're getting a massive success right in.
+So, the re-trying to find a message,
+we've made it pop up to pop up because it's survival.
+The resiliency is always got our number one differentiator,
+quite a couple of times,
+the true emission critical workload
+in your database state,
+I feel about pop up.
+But the interesting thing is,
+the higher the concern is,
+it's probably not going to be shifting now.
+This big wave of data pressure that's coming,
+they scale up a huge constraint,
+that's ultimately the one that's going to be
+to find how architecture is part of my year.
+So, the interesting thing is that both give resilience
+and their fundamental elastic skill ability,
+they're still on the same level
+on the premise,
+which is a lot, a lot, a lot, a lot,
+a commodity partner, a chain together,
+and not even just in the same graph,
+or the same data center, but across facilities,
+across abilities, and across regions,
+even across cloud vendors.
+Now, the interesting and uncomfortable part
+of the process is a database vendor,
+is that we are seeing as a premium to the expensive,
+and we have it.
+We've got it to the premium product,
+and it's expensive.
+It's expensive, in terms of not much hardwareing,
+we're triplicating the data,
+we've got networking costs,
+egress, and egress,
+and we're going across cloud vendors,
+this is all very expensive, plus.
+This complex disease,
+and I said before,
+it kind of dissolved that complexity now in the AI,
+and we just passed it,
+the higher people that could understand these things,
+that was probably one of the biggest costs
+in your total cost of my year.
+Now, what's really interesting here is that,
+if you know the cost of intercostals,
+you could cross all very hard-to-do things,
+like if you're running on your workloads,
+you're running on those kinds of things,
+and we have two to three X scale
+that are living depends on what you have.
+They operate a bigger machine,
+they're going to go for 32,
+they're super easy things, whatever it is.
+That's a test of time scale,
+that's available right now.
+We're talking about 10 X in short,
+and then 100 X,
+and what happened there,
+and of course, what happened to the expensive database there?
+And this is the unhappened report,
+like, who wants to spend 100 times more on the database?
+And that's other questions for customers.
+So you have to make databases less expensive,
+and that is where a huge amount of our effort
+and innovation has gone.
+Last year, we actually doubled the amount of performance
+you get out of the same hardware and software.
+This year we're actually building an EBS class
+to screen the storage substrate,
+and it's like the purpose built for software
+is home on EBS,
+and that's how 10 X is the throughput,
+and then it can go to latencies,
+and actually class is passed by about 70 percent.
+We think we can double the performance
+on a certain hardware spend, again, in X here.
+So you add those other multi-multiposite fixtures,
+that's about a 12 X decrease in the cost.
+Why is this possible?
+It's fundamentally the distributed architecture.
+The same thing that gives you the ability to do
+these kind of outside and the scales and the resilience,
+is actually the same thing where you can act,
+you can talk about incredible efficiencies.
+When you think about aging starts,
+this is actually an area where you want the database
+to be used in the last couple of turns
+of how it's time you use work.
+Our first aging server was like six years ago,
+but this is a very core concept.
+You want all of the scale.
+You want that actually get all of the area in your server.
+The agent is not busy for a day,
+or a little way for a month, and then it comes back.
+You want a little scale to do it
+that's impossible nothing to run.
+Because you want them to actually, every enterprise,
+wants to run probably a million digits,
+in several years.
+I was saying that nonprofits can be used
+to be used to be used to substrate the
+enterprise, and in about two months,
+our five-year-old person company,
+that wants to have a thousand applications,
+because this agent substrates,
+it goes to be out of the issue.
+A thousand applications, combined with people,
+and all of them have run properties.
+And as properties are just server-assisted,
+it's used in one of the physical properties.
+They cost them back as it is actually negligible
+for an aging worker.
+That is the case for millions of databases,
+and the database out, by every enterprise.
+That's where the world's going to run.
+So there's three locations here.
+Costs of this is when they determine
+the fundamental winners in the industry.
+If it's the standard that's what she does,
+people will figure out how to do that transaction.
+Because the cost of the 10x, and then the 100x,
+is going to be yours.
+Also, we only load as velocity.
+Now, I'm saying all these great things about Docker,
+but the reality is, the switching costs,
+everything are going down.
+And so, if you're innovating, you have to put that on my screen.
+This is for a new on-loss idea,
+and it is absolutely right there in the age of AI.
+And in front of us, we have a system
+of reveriastic and non-indosable, being indestructible.
+This is probably the most important
+in the meeting under appreciating faster.
+I would even think today is not absolute,
+but it's pretty in physical basis.
+So, people are out of this meeting,
+this another report last year,
+where we're asking people about the cost of a downtime.
+And the number for it, I will.
+And now we're down on it.
+So, some companies are looking at the dollar.
+They're customers that are like that.
+So, that actually is only going in one direction.
+That the total IT dependence,
+when you're replacing human critical human workload,
+with automated features, is near-assuming.
+If your Rachel's can't handle work,
+your company is not running that bad.
+I wasn't going to talk about it,
+because it isn't just the development sense
+law that they have, it's the brand recommendation
+as switching costs for down people
+over the different circles.
+It's very important that these things correct.
+So, it wasn't getting carried over here.
+I think the most consequential decision
+is what model is it, right?
+I think everyone already has problems
+with it, and lots of model.
+If you're tiering it,
+you're figuring out the right device
+for which is the capability.
+But it's probably going to be a lot of power.
+That's a kind of a disadvantage.
+The foundation is either going to carry you through
+exponential success,
+or it's going to force your read-writing.
+And now read-writing has come to a worse possible moment
+for your person.
+And with modern AI,
+building tools complexity differences
+between distributed and the model
+that make the whole place even new,
+that's collapsed.
+1.0, yeah, the best direction is headed.
+And starting right is actually a three month right now.
+It really doesn't cost you that much.
+Starting over can cost you everything
+that does the worst possible moment.
+So this is really a challenge
+to build your foundation on raw, non-standard.
+The next era of elements is paramountry.
+It's going to be not limited by the model for where it goes.
+It's actually going to be abundantly
+to help proceed.
+And some of the harder improvements,
+and we're talking about shoulders of magnitude.
+So we're going to go,
+we'll see,
+I don't know if you can start with some of the money to see.
+What the implementation is,
+whether it's a sharp or a survival or a success,
+that's not bad.
+Thank you very much.
+It's a pleasure.
+Applause.
+Thank you.
+Ladies and gentlemen,
+please welcome Senior Software Engineer, EIT,
+from Circle CI, Ryan Hamilton.
+Thank you.
+Applause.
+Thank you very much.
+Thank you very much.
+Thank you.
+Thank you, everybody.
+Please sit down for a part of the time.
+So.

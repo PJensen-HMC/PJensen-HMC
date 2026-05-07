@@ -1,0 +1,615 @@
+And the answer to this quote in the most authentic failure is blind spots in the lack of trust.
+Black trust, actually, why not all the seeding production is slowing us down,
+and is a barrier that we faster than the injection reported that we want.
+I spoke to CTO, a large sports company last week.
+And you told me, you know, we want to grow this axillary growth from two ages to 20 years.
+And we're planning on running it to 20 to 200 this year.
+And the only thing that's stopping us is actually trusting assistance, not only by the builders,
+but also the people using them.
+Let's look at what that actually means.
+So more information from the survey.
+64% can say that incorrect or hallucinated response limits their trust in AI.
+Who here has asked, you know, why a fraction and confident they've got the wrong answer, right?
+Yeah, I guess almost everyone.
+Here's the funny thing.
+We all experienced wrong data all the time.
+Our mind was just a hot second ago.
+We were using dash to work.
+We're just asking our peers.
+And we got the wrong answer when we were asking them to.
+But the next ones don't speak confidently in your opinion.
+But that's for one confidently lie to you.
+AI does.
+And that's a difference here.
+Trust actually has a different definition when it comes to AI.
+A couple of other articles here.
+40% that actually can say that performance issues are backwards.
+Most respondents do not have confidence that they actually have visibility to what they will.
+I should have been about the table stage, right?
+I build something and so I expect that it will work.
+I would have thought here as a worker is an entrepreneur.
+I'm trying to act a little self.
+49% of this is the last set of stack view that I love to think of.
+49% have discovered that an AI agent was accessing the AI system if they were not aware of.
+That's a pretty powerful statement.
+Actually, my bet is that I was going to be a lot closer.
+But that's a lot.
+That means that I'm going to deploy an agent out of their production in the wild.
+There's a lot of two chances.
+It acts as a random data set that you didn't intend to do.
+And that's when human people are in production.
+That's probably going to be a kind of higher.
+And so if I cut that time here, we'll bring the cute little robot back.
+Is that what you see in the hospital?
+Yes.
+And so oftentimes, the tip of the ice where we build is not the full story.
+That is certainly a case where we're building AI class.
+And so oftentimes, once we get boldly,
+agent failures may be the fact that you have data errors in disguise.
+Not always, but sometimes.
+And so sometimes, when you might hear from your team,
+or from your fear is agent hallucinated.
+The moment isn't good enough, we have to wait for the next one.
+Or, you know, my parents are not good enough.
+Any other thoughts?
+But actually, when you look into it,
+the underlying driver is superior than that.
+Maybe this source came in wasn't refreshed.
+You can really know what's going on.
+We're trying not to look at that side of the thing.
+We can't really hear.
+Yeah, that's where that actually is.
+Maybe it's key to change.
+So the next way we made a change,
+that's really wrong looking at it.
+I'm just looking at the agent.
+Here's the problem.
+When we don't look at the data,
+I'm going to analyze it.
+It actually compounds and multiplies.
+We're actually clear of the agents.
+So where can they go wrong,
+just a brief overview, right?
+The first thing is that the source data can be wrong.
+It's very simple.
+If you're using data for whatever source,
+then just make it later wrong or not.
+But when you start with the cell key,
+with the embedding,
+when you start at a vector store,
+each of these tasks,
+through towns,
+each of these columns,
+create even more problem events,
+downstream,
+you might be serving docs,
+and no longer exist,
+if you're alone and stay up.
+You might have the knowledge
+that you got,
+about what you got in.
+Then, finally, your tree will save.
+You might actually have a tool called
+that pull it goes out of which one.
+And so having one problem at the beginning of the chain,
+let's compound significantly down the line.
+All of this is to say,
+I think one of the common mistakes
+that we've done in the last decade
+is seeing about data AI systems separately.
+We've had different teams,
+we have different organizations,
+and we have different systems.
+But the problem is that data AI systems are intertwined,
+and therefore they must be viewed
+as alliances together.
+We're actually the most resilient team,
+and the fastest moving team
+are those that think about the data AI escape as well.
+So when you think about what needs to be observed,
+and what needs to be observed
+in order to generate a trust,
+then why do you observe something?
+You can observe it because it gives us that trust.
+What I see is what I trust.
+It's a human being going back
+in the definition of
+what does it mean to actually trust something.
+I have a higher degree of trust
+from Gemini,
+and it shows me the source of this insight
+and it goes into the scene.
+I even have a higher degree of confidence
+that I'll tell you,
+it's a great confidence.
+Even in that state too, right?
+If you know what I'm saying,
+then probably there's something in you,
+just like I'd actually do.
+Right?
+You might be totally false,
+but there's something about that psychology
+that gives us that sense.
+That stems from having strong vulnerability,
+having the ability to view
+what's going on in this first.
+Second,
+understanding the first to know about the truth,
+not hear about it,
+that discrimination is already going on.
+And three, being able to come to the community of states.
+All of them in a genetic first grade.
+So one of the core things that needs to look at,
+the person in the comments,
+that's what I was talking about until now,
+is that data can be correct.
+Is the agent actually following the right data?
+Is that data I'm calling it?
+That's not sufficient.
+That's just the one thing that I was talking about earlier today.
+Performance.
+This agent is going to be served your customers.
+Being able to answer your customers on time is important.
+You know, knowing your ones will lose a user
+just because the agent is on fax.
+That happens today.
+The third is,
+the agent decision made.
+The agent behavior.
+One of the things that happened,
+the agent is that, you know,
+it taxes the data,
+and then based on that data,
+make decisions.
+What does agent flip that work?
+It'll first make the decision
+and make a recommendation,
+and then it'll look at the data.
+Clearly, for a human being,
+that decision is making no sense.
+But for an agent,
+that's just a decision tree of what to call a glove.
+How do we make sure that they're actually
+pulling right to the right time?
+And then, finally,
+all three of these might be right.
+You can have a right context,
+which can work well.
+They can be the right decision making,
+and it can still close any.
+And so,
+bringing that back to ground truth,
+understanding the quality of the output,
+making sure that it's as good as a unit
+or better,
+is what helps us bring confidence
+to building agents this day.
+I want to show you an example of this
+in the wild,
+and not just to the high level.
+Wish me luck.
+This is the part where I need everyone's
+power of technology to break.
+Okay.
+Look at that.
+That's a video.
+We can have agents,
+but I'm still not going to make a video
+or properly, for sure.
+Okay.
+So, what I have here is,
+you can see,
+as an example of an agent,
+troubleshooting and honoring an agent.
+And so,
+one of the things that you can see here
+on the top left side,
+this is in a look where you can see
+the recognition of the technique
+drops to 94%.
+You know, holding brains for users
+complaining,
+but two thousand conversations
+are actually inaccurate.
+That's in the top level here.
+And so, this is an agent that automatically
+identify problems.
+This is from here,
+someone said,
+I need a backflip from JFK
+to L.A.X.
+This Thursday,
+preferably the morning,
+a pretty reasonably reasonable user request.
+And the agent that runs your conference
+is well-formed,
+and it will split,
+except it's the latest phrase today.
+Right?
+And there are two thousand instances of this,
+but only 34 user complaints,
+and you can actually identify that.
+Our agent is actually going to not only
+detect it,
+troubleshooting the incident,
+and actually looking for a moment
+for a thousand conversations
+with traces that actually identify you as well.
+And it's found that the upstream pipeline failure
+is identified.
+And it's even poorly that,
+at the same time that this pipeline failed,
+it is connected with 97% confidence.
+And so,
+we're reaching some pretty high degree
+that that pipeline failure caused,
+so the agents have misdehated.
+But not not only that,
+the agent can then draw a full image
+and say that there is an upstream airflow dam
+that failed,
+that caused a source deal to be new to a unit,
+that caused all the layers of the agent
+out of the hood to make.
+And so you can see how powerful it is
+to be able to use
+an energetic workflow
+to trace all the way
+through the agent out of the hood,
+all right on the stream
+to the air flow dam.
+Now here's the paper.
+It took the agent 12 seconds to do it.
+It takes me weeks to do this.
+Right?
+And so,
+on top of that,
+you don't only get fast,
+here I was also getting a radiation action
+at the bottom,
+you get the backwards black message.
+That's the most important part
+in each layer of pure notes.
+You're here to know backwards,
+but you can also identify how to
+add a surface layer
+so that in the next time that there is a figure,
+you can stop the agent
+from having these conversations,
+so not allow these things
+to pop at the end of the stream.
+And all of this is done in production,
+in agents running in production,
+and the agents are monitoring
+troubleshooting and radiating the agents.
+I think in today's world,
+where people,
+people who have,
+you know, a little dozen,
+up to 100 or so,
+agents in production,
+they can maybe monitor them
+by hand,
+we can make sure that we trust them.
+So pretty quickly,
+I'm pretty sure that this is one of my facts.
+We're going to need to start thinking about
+how do we use the eye
+to train the eye.
+And so, this in my opinion
+is one of the areas
+where you can see
+that how you select
+for your organization.
+The inner thing,
+in fact,
+we do manually
+and we track
+the very little automation.
+So, hopefully,
+this example gives you
+a little bit of inspiration.
+I want to leave you with something
+that's tangible,
+so I think sometimes
+this has to be very high level.
+I want to make sure
+that there's something
+that you can take
+for your organization.
+The first is,
+often times people
+will tell me,
+what else do I get?
+I'm just going to have
+all these things,
+but what's the first step
+that they can do?
+And so,
+I'm kind of helpful
+to think about
+the data that I state,
+broken down,
+and so,
+for your organization,
+like this,
+for your organization.
+The first section,
+which is really
+the data foundation
+in the data platform,
+I'm going to change
+that I've been building
+for a very long time,
+and I can include,
+you know, technologies
+like skill plate,
+or data breaks,
+or a bowl,
+or whatever you want.
+I'm talking about this
+as an amateur player,
+which basically
+offers a structured way
+to surface that information
+in a way that's shared
+with a lot of people,
+who don't have
+the same knowledge
+they can do.
+I'm talking about
+as an agent,
+does later.
+They can build there,
+if you will ever
+agent it,
+it's most enterprises
+that I work with,
+have a heterogeneous environment.
+That means that they have
+many data sources,
+and they have
+many adjacent platforms.
+They're not building
+agents in one platform.
+It can be a combination
+of crew with
+our AI,
+our banking,
+our data first
+of a set,
+our Sierra,
+our department,
+whatever it is,
+it's very hard
+for me to see an enterprise
+that actually has
+only one of those files.
+And so,
+often times,
+and folks think about
+their way of seeing it,
+they're probably
+going to actually need
+to pop up,
+what it's actually
+need to lay down.
+Where do these
+or the data,
+where do we build
+agents,
+what is our semantic way of?
+And then the fourth
+layer is,
+how do we play trust?
+We're building
+all this stuff.
+Great.
+How do we use
+what one of
+the things that we need
+to trust back?
+So, once we have
+an annual on these
+layers,
+it actually created
+this little
+score for our
+station.
+It's very detailed.
+So, I want to play
+me a few
+on this score yourself,
+like that.
+But this is something
+that I need to take,
+go all the way.
+Maybe I'll start with
+the reviews.
+I'm adding some annual
+out-of-stage three
+of all.
+Like, not a single
+person,
+if you're out there
+in the world
+and you've learned
+everything,
+like they go
+to other things.
+Like, that
+on your resume.
+Most people,
+are either
+level one blind,
+or at best
+level two in the
+afternoon.
+Maybe I'm
+bold for you.
+And how are you
+going to move one
+step ahead?
+Does it have to be
+the whole way?
+And how can
+you get to know the
+level yet?
+But how do you
+get one step
+by the end of this
+year?
+For six months.
+So, just briefly,
+do you have
+actually have
+a lineage
+that connects
+with age
+of today?
+Are you able to trace
+what kind of
+data sources
+in your age
+before?
+As a semantic
+later, do you have
+a sense of what's
+the retrieval form?
+Have you
+looked at that recently?
+And at the age
+of later, do you
+actually look at the
+game here,
+you look at
+rules of age
+and how
+you interact with
+together,
+or do you just need
+to start with
+basic tracing?
+And at the test
+later, are you
+doing these things
+manually, or do you
+actually have
+ages during the
+early four
+years?
+Again, that's
+the only level.
+We've got to think
+about what we're
+really doing.
+And so, for you
+a whole
+little bit of
+pressure for you is,
+score yourself
+on each of you
+scores.
+Where am I
+spending?
+Where should my
+organization
+excel?
+Be with it
+a few months.
+And one of the
+things that I
+actually get there.
+Here's the
+best thing.
+A.I. actually
+allows me to
+surpass the level
+of me.
+I think in the
+prior world, you
+have to go one
+by one.
+You have to start
+making the lead.
+Joe, I'm
+actually seeing
+organizations leap
+from all
+the way to the
+step three by
+using ages.
+And it's a very,
+very nice
+compromise for
+folks who are
+able to do that.
+We actually
+don't have to do
+this little step at
+all.
+All the systems
+and all the
+frameworks.
+The ones who
+realize that I can
+remember the fact that
+I can't tell
+they knew the
+position.
+Is there anything
+that you want
+to information for
+actually published
+this survey?
+So if you want to
+get more, the
+builder's
+perspective, one of
+the most effective
+users of this
+builder's survey is
+actually taking this
+back to
+organization and say,
+hey, I'm not
+home.
+It's me and
+60% of my
+friends are in the same
+spot.
+So this survey
+can actually be very
+powerful, especially
+with peers and
+colleagues.
+And I'm close by saying,
+let's have a
+drink.
+All of our A.I.
+troubles.
+We're also
+happy to actually
+listen right.
+And share about
+sure your troubles
+come in there.
+And I'm happy to
+both share more
+embarrassing
+stories of A.I.
+age and failures.
+And here for you
+all as well.
+Thank you so
+much.
+Good
+�
+A.I.
+Well
+been
+is
+well
+actually conversations today about collaborative
+agents in our organizations in a way that
+we're going to be doing.
