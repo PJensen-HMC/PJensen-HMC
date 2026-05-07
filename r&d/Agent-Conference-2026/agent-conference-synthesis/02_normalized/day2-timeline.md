@@ -1,21 +1,36 @@
 # Day 2 Timeline
 
-| time | source_id | source | status | notes |
-| --- | --- | --- | --- | --- |
-| schedule | NOTES-SCHEDULE | `../01_raw-evidence/notes/schedule.md` | raw | Canonical conference schedule covering Day 1 and Day 2; source URL recorded in raw file. |
-| 08:07 | AUDIO-260505-0807 | `../01_raw-evidence/audio-transcripts/260505-0807-day-2-opening.txt` | raw | Opening plan for day 2. |
-| 09:30 | BOOTH-MISC-MOVING | `../01_raw-evidence/booth-notes/misc-moving-260505-0930.txt` | raw | Moving to exhibit hall. |
-| 09:31 | BOOTH-MISC-OVERHEARD | `../01_raw-evidence/booth-notes/misc-overheard-260505-0931.txt` | raw | Exhibit hall capture. |
-| 09:42 | BOOTH-APOLLO | `../01_raw-evidence/booth-notes/apollo.md` | raw | Apollo booth note. |
-| 09:48 | BOOTH-AGENT-OS | `../01_raw-evidence/booth-notes/agent-os.md` | raw | Dust / Agent OS booth note. |
-| 09:56 | BOOTH-COCKROACHDB | `../01_raw-evidence/booth-notes/cockroachdb.md` | raw | CockroachDB booth note. |
-| 10:07 | BOOTH-LANGCHAIN | `../01_raw-evidence/booth-notes/langchain.md` | raw | LangChain / LangSmith booth note. |
-| 13:51 | AUDIO-260505-1351 | `../01_raw-evidence/audio-transcripts/260505-1351-unknown-talk.txt` | raw | Unknown talk. |
-| 14:07 | AUDIO-260505-1407 | `../01_raw-evidence/audio-transcripts/260505-1407-circle-ci-panel.txt` | raw | CircleCI panel. |
-| 15:03 | AUDIO-260505-1503 | `../01_raw-evidence/audio-transcripts/260505-1503-panel.txt` | raw | Panel, needs identification. |
-| 15:20 | AUDIO-260505-1520 | `../01_raw-evidence/audio-transcripts/260505-1520-panel.txt` | raw | MCP / auth panel. |
-| 15:42 | AUDIO-260505-1542 | `../01_raw-evidence/audio-transcripts/260505-1542-unknown-talk.txt` | raw | Unknown talk. |
-| unknown | NOTES-DAY2 | `../01_raw-evidence/notes/day2-notes.md` | raw | Main day 2 notes. |
-| multi-session | NOTES-DAY2-EXTENDED | `../01_raw-evidence/notes/day2-notes-extended.md` | raw | Extended GPT web capture with approximate session times and cross-day/day-2 emerging patterns. |
+Normalized chronology for 2026-05-05. Schedule time is the primary spine. Raw note, audio, booth, and image IDs are evidence overlays and resolve through `source-ledger.md`, `audio-index.md`, `booth-index.md`, and `image-index.md`.
 
-Images from 2026-05-05 are indexed in `image-index.md`.
+Normalization cautions:
+
+- Day 2 has overlapping raw streams: scheduled-session notes and booth-note timestamps conflict in the 09:30-10:10 range. Preserve both until source order is confirmed.
+- Afternoon audio filenames appear about one hour earlier than the scheduled sessions their content maps to. Timeline rows use schedule time and call out the filename-time mismatch.
+- Image IDs are timestamp anchors only until image content is reviewed.
+
+| time | room / track | schedule / event | evidence | status | normalized notes |
+| --- | --- | --- | --- | --- | --- |
+| 08:07 | pre-day | Day 2 capture strategy | AUDIO-260505-0807 | captured | Audio sets the Day 2 plan: attend sessions, switch to booths, take short booth summaries, and evaluate whether vendors have legs. |
+| 09:00-09:10 | Grand Ballroom / General | Opening Remarks: Beyond the Horizon | NOTES-SCHEDULE | schedule-only | No separate normalized capture identified. |
+| 09:10-09:30 | Grand Ballroom / General | How to break the AI hype cycle - Akamai | NOTES-SCHEDULE | schedule-only | No separate normalized capture identified. |
+| 09:30-09:50 | Grand Ballroom / General | Lessons from an AI Native Company for Large Enterprise at Scale - Distyl / T-Mobile | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; IMG-260505-093015 | captured; time discrepancy | Extended notes label this as approx. 09:50-10:10, but the schedule maps Distyl / T-Mobile to 09:30-09:50. Preserve schedule time as canonical and raw note time as approximate. |
+| 09:30-10:07 | Exhibit hall / booth stream | Booth capture stream overlapping morning sessions | BOOTH-MISC-MOVING; BOOTH-MISC-OVERHEARD; BOOTH-APOLLO; BOOTH-AGENT-OS; BOOTH-COCKROACHDB; BOOTH-LANGCHAIN; IMG-260505-093015; IMG-260505-094923; IMG-260505-101406 | overlapping raw stream | Booth file timestamps indicate movement to exhibit hall plus Apollo, Dust / Agent OS, CockroachDB, and LangChain / LangSmith summaries. This overlaps scheduled-session notes and needs source-order confirmation before claim extraction. |
+| 09:50-10:10 | Grand Ballroom / General | Humans and AI: Reliability, Context, and Guardrails - Upwork / Kustomer / Cresta / Discord | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED; IMG-260505-094923 | captured | Notes decompose work into deciding, doing, and evaluating; preserve skepticism toward "AI magic," interest in outcome-driven framing, customer support as simulation/test loop, and humans as advisers/verifiers. |
+| 10:10-10:30 | Grand Ballroom / General | How Agentic AI and AI Development Platforms are Rewriting the Banking Playbook - Axos / OutSystems | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED; IMG-260505-101406 | captured | Notes capture wrapping the core, moderate trust, agent workbench, log-analysis first agent, code-review ROI claim, recurring regression patterns, and concern about management/timecard surveillance drift. |
+| 10:35-11:00 | 3rd Floor | Morning break | NOTES-SCHEDULE | schedule-only | No separate normalized capture identified. |
+| 11:00-11:20 | Trianon Ballroom / Agentic Engineering | The API Layer Is the Agent Layer - Apollo GraphQL / American Airlines | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; BOOTH-APOLLO | captured as hallway / field interview | Extended notes say the formal talk was missed, but the Apollo hallway/booth conversation captured the core signal: schema, identity, Docker packaging, Swagger ingestion, wrapping APIs, and avoiding raw endpoint piles. |
+| 11:20-11:40 | Trianon Ballroom / Agentic Engineering | Building with Mistral AI | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; IMG-260505-112339 | captured | Notes capture cost gravity, small-model right-sizing, open weights, fine-tuning, context engineering over naive RAG, production harnesses, evals, long traces, ground truth, and multilingual benchmark concerns. |
+| 11:40-12:00 | Trianon Ballroom / Agentic Engineering | Coding Agents for Data at Scale - Bauplan | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED; IMG-260505-114307; IMG-260505-115251; IMG-260505-115605 | captured | Notes emphasize safe failure harnesses, Git-like branching for data/code, blast-radius reduction, data failure as catastrophic/shared, and "do not assume the agent is trustworthy." |
+| 12:00-14:00 | Agentic Halls | Expo & lunch | NOTES-SCHEDULE | schedule-only | No separately normalized Day 2 lunch evidence attached yet. |
+| 14:00-14:05 | Trianon Ballroom / Agentic Engineering | Agentic Engineering Remarks by Rasa | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED | captured | Notes capture developer-first enterprise agents, hosting in customer environments, multimodal/voice, multi-team and multi-agent enterprise sprawl, and Rasa's product positioning. |
+| 14:05-14:25 | Trianon Ballroom / Agentic Engineering | Architecting for the Agentic Customer - Google | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED | captured | Notes capture smart-speaker limits, agentic commerce, UCP/AP2/protocol emergence, manipulation risks, and the translator / deterministic executor / judge architecture. |
+| 14:25-14:45 | Trianon Ballroom / Agentic Engineering | Workflow Democratization & Operating in an Accelerated Development Environment - NVIDIA | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED | captured | Notes capture internal CLI explosion, velocity gap, research/gates/sweeps, layered PR gates, coverage ratchets, dependency pinning, migration guards, CODEOWNERS, and sweeps as ongoing evolution. |
+| 14:45-15:05 | Trianon Ballroom / Agentic Engineering | Agentic AI Makes Infra Scale an Urgent Problem - Cockroach Labs | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; AUDIO-260505-1351; BOOTH-COCKROACHDB; IMG-260505-144848; IMG-260505-145000 | captured; audio time mismatch | Audio filename time is 13:51, but transcript content maps to CockroachDB / infra scale: agent traffic, stateful systems, TPS/load growth, system-of-record bottlenecks, consistency, durability, and resilience. |
+| 15:05-15:30 | Trianon Ballroom / Agentic Engineering | From hype to reality: shipping software in an AI-enabled world - CircleCI / OpenAI / Databricks | NOTES-SCHEDULE; NOTES-DAY2; NOTES-DAY2-EXTENDED; AUDIO-260505-1407; IMG-260505-151015; IMG-260505-151956 | captured; audio time mismatch | Audio filename time is 14:07, but transcript content maps to the scheduled CircleCI panel. Notes preserve 10% productivity reality, perception gap, CI failure pressure, PR throughput, validation bottlenecks, and human taste as constraint. |
+| 15:30-16:00 | 3rd Floor | Afternoon break | NOTES-SCHEDULE | schedule-only | No separate normalized capture identified. |
+| 16:00-16:20 | Trianon Ballroom / Agentic Engineering | Garbage Data. Garbage Agents. - Monte Carlo | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; AUDIO-260505-1503; IMG-260505-161706; IMG-260505-161718 | captured; audio time mismatch | Audio filename time is 15:03, but transcript content maps to Monte Carlo. Notes capture data failures masquerading as agent failures, source/chunk/embed/retrieve chain, observability, circuit breakers, agent readiness, and data/semantic/agent/trust layers. |
+| 16:20-16:40 | Trianon Ballroom / Agentic Engineering | The Thin Line Between Magic and Tragic: Getting MCPs Right | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; AUDIO-260505-1520; IMG-260505-162032 | captured; audio time mismatch | Audio filename time is 15:20, but transcript content maps to the MCP/auth panel. Notes capture tool sprawl, user-vs-agent auth, service-account limits, internal vs customer-facing agents, traces as sensitive data, DLP, criticality, and "do not hard delete." |
+| 16:40-17:00 | Trianon Ballroom / Agentic Engineering | Multi-Agent Orchestration - RingCentral | NOTES-SCHEDULE; NOTES-DAY2-EXTENDED; AUDIO-260505-1542; IMG-260505-164221; IMG-260505-164539; IMG-260505-164557; IMG-260505-164810; IMG-260505-165026; IMG-260505-165239; IMG-260505-165626; IMG-260505-165929 | captured; audio time mismatch | Audio filename time is 15:42, but transcript content maps to RingCentral. Notes capture the deterministic-vs-agentic boundary, specialized agents, quality gates, swarm-level reflection, interpretability, exploration budgets, and architecture as management structure. |
+| 17:30-evening | Throughout New York City | AI Agent Week 2026 | NOTES-SCHEDULE | schedule-only | No direct normalized evidence attached yet. |
+
+Cross-day / Day 2 emerging patterns in `NOTES-DAY2-EXTENDED` are synthesis material, not independent chronological events. Keep them available for `03_extracted-claims`, but do not treat them as separate sessions.
