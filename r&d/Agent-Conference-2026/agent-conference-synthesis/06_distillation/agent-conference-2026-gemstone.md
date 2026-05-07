@@ -175,6 +175,7 @@ These are field signals, not vendor endorsements.
 - CockroachDB: humans breathe; agents do not. Agent-shaped traffic changes load on databases, APIs, queues, auth, CI, and observability. [5], [6], [7], [12], [18]
 - Monte Carlo: bad agent answers can be data failures in disguise. Readiness needs data, semantic, agent-build, and trust observability in one debugging surface. [5], [7], [12], [18]
 - DataRobot: the demo is above the waterline; the production product is below it: identity, auth, audit, evals, governance, observability, CI/CD, connectors, and token economics. [4], [7], [9], [18]
+- Bauplan: data agents need a safe failure surface. Code agents can be wrong inside branches, diffs, tests, and pull requests; data agents need sandboxed state, lineage, reviewable deltas, checks, and controlled promotion before touching authoritative data. [5], [7], [10], [18]
 - LanceDB / You.com: context is a workload with scale, latency, provenance, and budget, not a vector search checkbox. [4], [7], [9], [14], [18]
 - Google commerce: customer-facing agents need structured data and deterministic executors, not one model wandering around the market with tools. [5], [10], [15], [16]
 - T-Mobile / Distyl: agency can become containment. Use-case choice determines whether the substrate liberates work or tightens control. [5], [10], [15], [16]
