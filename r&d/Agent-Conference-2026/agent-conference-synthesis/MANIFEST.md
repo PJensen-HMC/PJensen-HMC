@@ -37,3 +37,9 @@ Primary analysis files:
 | --- | --- |
 | `04_analysis/day1-synthesis.md` | Day 1 interpretation grounded in extracted claim IDs. |
 | `04_analysis/day2-synthesis.md` | Day 2 interpretation grounded in extracted claim IDs and OCR-backed slide claims. |
+
+Primary output files:
+
+| File | Purpose |
+| --- | --- |
+| `05_outputs/agent-conference-2026.md` | Claim-backed internal memo synthesizing the conference into HMC architecture implications. |

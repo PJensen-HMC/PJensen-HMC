@@ -1,1086 +1,731 @@
-# Internal Memo v1.0
+# Agent Conference 2026: Production Agent Architecture, Control Planes, and HMC Implications
 
-# NYC Agent Conference — Production Agent Architecture, Control Planes, and HMC Implications
+Stage: `05_outputs`
 
-**Audience:** AI team / engineering leadership
-**Purpose:** Internal synthesis from Day 1 + Day 2 conference capture, slide OCR, audio transcripts, booth notes, and live synthesis
-**Status:** Internal working memo; suitable as deck substrate after final verification of quoted numbers
+Prepared: 2026-05-07
 
----
+Audience: AI team, engineering leadership, platform/security stakeholders
+
+Status: Internal working memo. Suitable as deck substrate after final verification of quoted vendor numbers and OCR-caveated slide details.
+
+Evidence base:
+
+- `02_normalized/source-ledger.md`
+- `02_normalized/day1-timeline.md`
+- `02_normalized/day2-timeline.md`
+- `03_extracted-claims/day1-claims.md`
+- `03_extracted-claims/day2-claims.md`
+- `03_extracted-claims/vendor-claims.md`
+- `03_extracted-claims/slide-claims.md`
+- `04_analysis/day1-synthesis.md`
+- `04_analysis/day2-synthesis.md`
+
+This memo is an output artifact. It is not raw evidence. Any externally quoted claim should be traced back through the claim IDs and then to the raw source ledger.
 
 ## Executive Summary
 
-The strongest conclusion from the conference is that production agents are not primarily a model-selection problem. They are an enterprise control-plane problem.
+The strongest conclusion from Agent Conference 2026 is that production agents are not primarily a model-selection problem. They are an enterprise control-plane problem.
 
-Across the serious talks, panels, booth conversations, and slide captures, the same architecture kept reappearing: schema, identity, governed capability surfaces, context engineering, evals, observability, data lineage, deterministic execution boundaries, replayable environments, cost controls, and human verification. The model was no longer the center of gravity. The substrate around the model was.
+Across Day 1 talks, Day 2 talks, booth captures, panels, and OCR-reviewed slides, the same architecture kept reappearing:
 
-The conference was useful less because any single vendor had the answer and more because unrelated speakers converged on the same missing enterprise layer. Apollo validated schema-mediated API surfaces. NVIDIA validated CLI-style workflows, gates, and sweeps over governed substrate. Bauplan validated safe failure surfaces for data agents. Monte Carlo validated data-to-agent observability. CircleCI / OpenAI / Databricks validated that generation velocity is outpacing validation capacity. The MCP panel exposed the ugly side of unmanaged tool exposure. RingCentral gave the clearest rule for where agents belong: use agents for ambiguity, research, and hypothesis generation; keep known-procedure execution deterministic.
+- mediated capability surfaces instead of raw endpoint access;
+- explicit subject, actor, and delegated authority;
+- governed context with provenance, freshness, and permission-aware retrieval;
+- deterministic execution boundaries for known procedures;
+- staged data mutation surfaces;
+- evals, replay, gates, sweeps, and human verification;
+- observability across data, semantic, agent, and trust layers;
+- infrastructure cost and load modeling for agent-shaped traffic.
 
-For HMC, the implication is not “adopt agents broadly.” The implication is: build the governed operating substrate that allows agents to act safely, measurably, and economically.
+The model was not the center of gravity. The operating substrate around the model was.
 
-The most important internal line:
+For HMC, the practical implication is not "adopt agents broadly." The implication is:
+
+> Build the governed substrate that lets non-human actors act safely, measurably, and economically.
+
+The most important internal architecture line:
 
 > Agents should not receive raw access to enterprise systems. They should operate through mediated, schema-aware, identity-bound, auditable capabilities.
 
-That is the core architecture.
+## What Changed In This Version
 
----
+This version replaces the earlier broad conference memo with a claim-backed synthesis aligned to the normalized timeline, extracted claims, slide OCR, vendor claims, and Day 1/Day 2 analysis.
 
-## Method Note: Why This Synthesis Is Credible
+The major corrections are:
 
-This was not normal conference attendance or vendor networking. The capture method was explicitly designed to filter for architecture, not slogans.
-
-The Day 1 operating mode was to classify each talk quickly: real system versus narrative, topology versus vibes, constraints versus capabilities, failure modes versus success theater, builders versus vendors. Talks were evaluated for architecture shape, explicit constraints, real eval method, and admitted failure. Talks without concrete topology, constraints, evals, or scars were treated as low signal.
-
-The field card was blunt: sample hard, move clean, compress immediately. Capture format was claim, system, constraint, eval, verdict. The mission was to leave with three real patterns, two missing pieces, and one sharp take.
-
-That matters. This memo is not a general-purpose conference recap. It is a filtered map of what survived scrutiny.
-
-The Day 2 notes make this explicit: the day functioned as a live scanner for whether the industry is converging on the same architecture we have already been circling internally: mediated systems, schema, identity, deterministic execution, evals, observability, data lineage, replay, and controlled blast radius.
-
----
+1. The memo now treats `env.API` and Crimson-style `env.*` surfaces as the strategic agent execution layer, not as integration plumbing.
+2. It elevates identity, delegated authority, and audit lineage from "security concerns" to core architecture.
+3. It separates agentic reasoning from deterministic execution.
+4. It treats retrieval/context as governed runtime state, not RAG garnish.
+5. It treats validation capacity as the main bottleneck after generation accelerates.
+6. It makes infrastructure load and token economics first-class rollout concerns.
+7. It caveats vendor and OCR-backed claims explicitly.
 
 ## Core Thesis
 
-The conference confirmed that enterprise agents require a governed substrate.
+Enterprise agent systems should be designed as mediated execution architectures for non-human actors.
 
 A production agent system is not:
 
-* a chatbot
-* a workflow builder
-* a model wrapper
-* a pile of tools
-* an MCP server catalog
-* a prompt chained to APIs
+- a chatbot;
+- a workflow builder;
+- a model wrapper;
+- a pile of tools;
+- an MCP catalog;
+- a prompt wired to APIs.
 
 A production agent system is closer to:
 
-* identity-bound actor
-* scoped capabilities
-* governed context
-* deterministic handoff boundaries
-* eval / replay
-* observability
-* cost and runtime controls
-* audit and incident response
+- identity-bound actor;
+- scoped capabilities;
+- governed context;
+- deterministic handoff boundary;
+- eval and replay system;
+- observability surface;
+- cost and runtime control loop;
+- audit and incident-response substrate.
 
-The clearest phrasing:
+The clearest cross-day synthesis:
 
 > Agents are not the product. The product is the governed runtime that lets agents act safely, measurably, and economically.
 
----
+## 1. The Agent Layer Is A Mediated Capability Layer
 
-## 1. The Agent Layer Is Really a Mediated Capability Layer
+Evidence: `D2-C005`, `V-C001`, `D1-C010`, `SL-C006`, `SL-C007`
 
-The strongest proprietary implication is the `env.API` / governed capability-surface thesis.
+The cleanest proprietary implication is the `env.API` / governed capability-surface thesis.
 
-The bad pattern is obvious:
+The weak pattern:
 
-* Agent gets a large bag of tools.
-* Agent gets broad endpoint access.
-* Agent receives ambiguous permissions.
-* Agent decides what matters.
-* Audit is bolted on later.
+- Agents receive a bag of tools.
+- Agents see broad endpoint catalogs.
+- Permissions are ambiguous.
+- Tool choice is left to the model.
+- Audit is bolted on after behavior exists.
 
-The better pattern:
+The stronger pattern:
 
-* Enterprise systems stay behind a mediated layer.
-* Capabilities are schema-normalized.
-* Identity is explicit.
-* Actions are constrained.
-* Reads and writes are separated.
-* Calls are logged and replayable.
-* Blast radius is deliberate.
+- Enterprise systems stay behind a mediated layer.
+- Capabilities are schema-normalized.
+- Inputs and outputs are typed.
+- Identity and delegation are explicit.
+- Reads and writes are separated.
+- Side effects are known.
+- Calls are logged and replayable.
+- Blast radius is deliberate.
 
-This is not integration plumbing. It is the agent safety boundary.
+Apollo was the clearest booth validation. The booth capture described API-schema ingestion, GraphQL-style mediation, identity, control-layer packaging, and avoidance of raw endpoint sprawl. That matters because an agent should not discover the enterprise through arbitrary endpoints. It should operate through curated capability surfaces.
 
-### Apollo as Validation
+Internal implication:
 
-Apollo was one of the cleanest booth validations. The booth capture described Apollo as using GraphQL to unify APIs, with a control layer, Docker/appliance-style packaging, and a GitHub artifact to inspect later.
+> `env.API` should be treated as a first-class product surface where semantics, authorization, audit, action policy, and non-human actors meet.
 
-The Day 2 raw notes sharpened this further: Apollo ingests Swagger/OpenAPI files, wraps existing APIs, applies schema and identity, and avoids offering agents piles of raw tools and endpoints. The key recognition was mutual: enterprises cannot just expose endpoint sprawl and call that agent-readiness.
+This is not just an SDK concern. It is the safety boundary.
 
-This maps directly to `env.API`.
+## 2. Identity Is The Security Boundary
 
-The important correction is that GraphQL should be called out explicitly. GraphQL is not magic, but it is a plausible mediation mechanism: it forces a typed, queryable, schema-aware surface across messy underlying services. In the agent context, that matters because the agent should not discover the enterprise through raw endpoints. It should operate through a curated capability graph.
+Evidence: `D1-C005`, `D1-C010`, `D1-C013`, `SL-C012`, `SL-C013`, `D2-C014`, `SL-C022`
 
-Internal line:
+Several conference threads converged on the same warning: static API keys are not an identity model for agents.
 
-> The API layer only becomes the agent layer when it stops being an endpoint dump and becomes a governed capability surface: typed schema, identity, runtime isolation, policy, observability, and replay.
+Agent systems need to distinguish:
 
-Crimson-style implication:
+- who requested the action;
+- what actor executed the action;
+- which authority chain was used;
+- which capabilities were in scope;
+- which policy allowed the action;
+- what was observed, changed, denied, or escalated.
 
-> `env.API` should be treated as a first-class product surface, not a proxy. It is where semantics, authorization, audit, action policy, and non-human actors meet.
+The missing primitive is the subject/actor distinction. A human user, service account, autonomous agent, scheduled job, and external customer-facing agent are not interchangeable. When these collapse into one credential, the system loses chain of custody.
 
----
+The stronger pattern is intersection authorization: effective permissions should be the strict intersection of user scope and agent scope, with immutable audit lineage across hops.
 
-## 2. CLI Tools Over Governed Substrate Are a Serious Pattern
+Internal implication:
 
-NVIDIA’s talk should be elevated in the memo. The useful story was not “NVIDIA uses AI.” The useful story was that once coding harnesses and CLIs spread internally, velocity increased, and validation became the constraint.
+> Do not give agents broad, long-lived credentials. Give them scoped, delegated, auditable capabilities mediated by the platform.
 
-The key pattern was:
+## 3. Context Engineering Has Replaced Naive RAG
 
-* research
-* gates
-* sweeps
+Evidence: `D1-C007`, `SL-C003`, `SL-C004`, `SL-C005`, `D2-C006`, `D2-C013`, `SL-C021`
 
-Research means using agents to map the system, inspect history, find seams, generate diagrams, and understand topology before changing code.
+The retrieval story was not "add a vector database." The stronger signal was that context has become governed runtime state.
 
-Gates mean blocking rot from entering production: layered PR checks, fast feedback, intelligent test selection, behavioral verification in real containers, drift checks, conflict checks, security checks, architecture alignment, and coverage checks.
+Production context has to answer:
 
-Sweeps mean cleaning what gates cannot see: nightly or repeated checks, recurring review-pattern detection, and standards tightening over time.
+- Which source version produced this embedding?
+- Which index served this answer?
+- Which metadata traveled with the retrieved passage?
+- Which permissions applied at retrieval time?
+- Why was this memory visible to this actor?
+- How fresh was the source?
+- Can the retrieval path be replayed?
 
-This is one of the most useful engineering-practice takeaways.
+Monte Carlo's readiness framing adds the cross-layer observability point: data, semantic behavior, agent build, and trust are one operating plane. A bad answer may originate in stale data, broken schema, weak chunking, embedding drift, missing metadata, or tool behavior. If those layers are not connected, teams will blame the prompt when the real defect lives upstream.
 
-The value is not chat. The value is commandable infrastructure.
+Internal implication:
 
-CLI-style tools around a governed substrate give both humans and agents a shared operating surface: explicit operations, reproducible runs, validation gates, logs, repeatability, and controlled execution. That is much more useful to internal platform work than generic agent UIs.
+> HMC search/indexing work should be designed as provenance-aware context infrastructure, not as prompt support.
 
-Internal line:
+The right target is a context cockpit: narrow, explainable, permission-aware, source-linked, and replayable.
 
-> CLI and GraphQL point toward governed operating surfaces. MCP sprawl points toward unmanaged capability exposure.
+## 4. Data Agents Need Safe Failure Surfaces
 
----
+Evidence: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
 
-## 3. MCP Is Useful, but MCP Sprawl Is an Anti-Pattern
+Bauplan's data-agent material made the data version of agent safety concrete.
 
-MCP is clearly important. It gives agents a way to discover and call tools. But the conference also showed why MCP can go wrong quickly.
+Code agents can fail inside relatively forgiving surfaces:
 
-The Day 1 notes described MCP/tool gateways as mandatory: schema and resource-aware tools, detection/response, blocked unsafe actions, traceability, scope correctness, incident response time, and kill switches. The anchor was clear: agents should not call tools directly; they should pass through a governed gateway.
+- branches;
+- diffs;
+- tests;
+- preview environments;
+- pull requests;
+- rollback paths.
 
-The MCP panel was useful because it exposed the failure mode: MCP auth, tool explosion, data leakage, service-account confusion, user-vs-agent ambiguity, and audit problems. The Day 2 notes specifically call out Arcade / HubSpot / PagerDuty / Groupon as surfacing these issues.
+Data agents do not automatically have those surfaces. Data failures are shared, slow, and often expensive. A bad mutation can pollute analytics, workflows, decisions, compliance artifacts, and customer outcomes.
 
-HubSpot’s reported thousands of MCP servers/tools should be treated as the negative case. A huge inventory of MCP surfaces is not evidence of maturity. It may simply be endpoint sprawl in a new costume.
+"Git for data" is compelling because it imports the safety model from software delivery into data mutation. The implementation details need verification, but the architectural need is clear: data agents require isolated change surfaces, reviewable deltas, statistical checks, lineage, merge discipline, and controlled promotion.
 
-Professional framing:
+Internal implication:
 
-> A large MCP catalog without identity, scopes, gateway policy, audit, tool hygiene, action-specific controls, and kill switches is not a control plane. It is a blast-radius multiplier.
+> HMC agents should not directly mutate authoritative business data. They should propose changes through dry run, sandbox state, diff, test, review, audit, and controlled promotion.
 
-Internal line:
+## 5. Validation Is Now The Bottleneck
 
-> MCP servers are not governance. MCP is a connection pattern. Governance lives in identity, policy, scopes, audit, mediation, and runtime enforcement.
+Evidence: `D1-C011`, `D1-C014`, `D1-C015`, `SL-C009`, `D2-C010`, `D2-C012`, `SL-C019`, `SL-C020`
 
----
+The most operational conference signal was that AI accelerates generation before it accelerates validation.
 
-## 4. Identity and Delegated Authority Are First-Order Architecture Problems
+NVIDIA, CircleCI, OpenAI/Databricks panel notes, and the coding-agent material all pointed in the same direction: the bottleneck moves from creating candidate work to proving that the work is correct, safe, reviewable, deployable, and recoverable.
 
-The conference repeatedly reinforced that API keys are not sufficient. Agents need delegated identity: who is acting, on whose behalf, with what scope, through which system, under which policy, and with what audit trail.
+The CircleCI/METR slide matters because it separates felt speed from measured speed. Developers may feel faster while reliability, recovery, review burden, or total throughput gets worse.
 
-The Day 1 memo captured the key point: the agent SDK is not a helper library; it becomes a security boundary. Identity, scopes, observability, cost control, and gateway behavior must be encoded into the operating model from the beginning.
+The useful primitives are:
 
-The rogue-agent notes made the same point operationally. Standard traces, standard scopes, standard delegation, and consumable audit surfaces matter because security friction causes teams to bypass controls. Raw logs are not usable audit. Security and developer tooling need to share a runtime view of what happened.
+- gates to stop known failure modes before promotion;
+- sweeps to find recurring or cross-cutting issues;
+- evals over traces, not just prompts;
+- replayable environments;
+- small reviewable diffs;
+- provenance on generated artifacts;
+- human intervention labels;
+- cost per successful outcome.
 
-This leads to a concrete internal requirement.
+Internal implication:
 
-Every agent action should be attributable across at least four dimensions:
+> HMC should design verification surfaces before broad agent deployment, not after the first agent demo works.
 
-* **Subject:** the user or business principal on whose behalf the action occurred
-* **Actor:** the agent/runtime that executed the action
-* **Capability:** the specific mediated operation invoked
-* **Authority:** the intersected permission set that allowed the operation
+## 6. Deterministic Boundaries Matter More, Not Less
 
-Without this, we will not be able to distinguish a user action from an agent action, an intended operation from a drifted operation, or a valid delegated action from a privilege leak.
+Evidence: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
 
----
+The RingCentral material crystallized a rule that should govern HMC architecture:
 
-## 5. Data Safety Is the Hardest Version of Agent Safety
+> Use agents where ambiguity earns the complexity cost. Keep known-procedure execution deterministic.
 
-Bauplan was one of the most important talks because it made the data problem concrete.
+Agents are useful for:
 
-People are becoming increasingly comfortable letting agents write code because software development already has safe failure surfaces: Git, branches, diffs, pull requests, tests, review, and rollback. Data workflows are different. A bad data mutation can corrupt tables, break pipelines, create inconsistent state, burn expensive runtime, or silently damage downstream workflows.
+- research;
+- ambiguity;
+- hypothesis generation;
+- comparison;
+- synthesis;
+- proposal generation;
+- user assistance where intent is unclear.
 
-The Day 2 memo captured the clean line:
+Deterministic systems should handle:
 
-> Code can fail locally. Data fails socially.
+- known procedures;
+- validated execution;
+- deployment;
+- enforcement;
+- persistence;
+- audit;
+- repeatable policy;
+- critical destructive actions.
 
-That line should stay.
+The strongest architecture keeps these roles separate. The agent proposes, researches, explains, and prepares. Deterministic systems execute, test, enforce, deploy, and measure. Validated outputs cross a visible boundary.
 
-The data world needs equivalent safe-failure primitives:
+Internal implication:
 
-* branches
-* snapshots
-* dry runs
-* statistical checks
-* lineage
-* review
-* conflict handling
-* rollback
-* sandbox state
-* preflight validation
-* staged promotion
+> Crimson should not collapse reasoning, execution, policy, persistence, and audit into one agent blob. The handoff boundary should be visible in code and operations.
 
-The internal implication is direct:
+## 7. Infrastructure Load Is Underpriced
 
-> Agents should not mutate authoritative business data directly. Any write path needs mediation, preflight, review, audit, rollback, and ideally synthetic or sandbox state before real systems are touched.
+Evidence: `D1-C010`, `SL-C014`, `D2-C011`, `SL-C018`, `V-C003`
 
-This is especially important for HMC. Agentic data workflows will be attractive because they promise leverage over analysis, data discovery, pipeline repair, data-quality investigation, and research operations. But the failure mode is much worse than a bad draft or a broken local build.
+Agent traffic is not human traffic.
 
-Internal line:
+Humans pause, read, think, and leave. Agents can call tools continuously, retry aggressively, inspect everything, run 24/7, and multiply as teams deploy more of them.
 
-> The right near-term posture is agent-as-proposer, deterministic-system-as-executor.
+That changes load on:
 
----
+- databases;
+- APIs;
+- auth systems;
+- queues;
+- CI/test systems;
+- search indexes;
+- logging and tracing;
+- observability platforms;
+- systems of record;
+- model gateways and inference capacity.
 
-## 6. The Bottleneck Has Moved from Generation to Validation
+This is not only a GPU or token-budget concern. It is enterprise capacity planning.
 
-This was one of the most repeated signals across both days.
+The DataRobot token-economics slides add the finance angle: inference capacity needs allocation, admission control, tiers, budgets, and stable enough behavior for planning.
 
-The slide OCR captured it cleanly: the bottleneck migrated from code generation to code validation. AI accelerates the inner loop: high-volume patches, AI-generated code, debug, build. But the outer loop becomes the constraint: tests, deploy queues, manual review, compliance, security, slow feedback, and noisy signals.
+Internal implication:
 
-NVIDIA’s gates/sweeps framing reached the same conclusion from engineering practice. CircleCI / OpenAI / Databricks reached it from software-delivery data. Bauplan reached it from data safety. Monte Carlo reached it from trust and observability.
+> Any agent rollout should model agent-shaped traffic separately from human traffic.
 
-This is a fundamental shift.
+## 8. MCP Is A Connection Pattern, Not A Security Model
 
-The scarce resource is no longer code production. It is verification capacity.
+Evidence: `D2-C014`, `SL-C022`
 
-Implications:
+MCP is useful because it simplifies tool connection. That same convenience makes governance risk more visible.
 
-* Review becomes the bottleneck.
-* CI/CD becomes load-bearing agent infrastructure.
-* Security review must become more automated and more contextual.
-* Evals need to move earlier and run continuously.
-* Trace quality becomes a production concern.
-* Human intervention must be tracked as a first-class signal.
-* Accepted outcomes matter more than generated artifacts.
+The conference signal was not "MCP is bad." The signal was:
 
-The conference also surfaced a perception gap: subjective acceleration can diverge sharply from measured throughput. One slide cited a 39-point speed-perception gap between felt speed and measured speed. That specific number should be verified before leadership presentation, but the underlying point is important: “feels faster” is not an engineering metric.
+- tool sprawl is easy;
+- trace leakage is real;
+- service-account ambiguity is dangerous;
+- internal and customer-facing agents need different policies;
+- destructive action requires stronger controls;
+- transport/runtime standards do not replace authorization, audit, DLP, or action policy.
 
-Internal metric direction:
+The practical first rule from the notes is simple and worth preserving:
 
-> Do not measure “agent usage.” Measure accepted outcomes.
+> Do not hard delete.
 
-Examples:
+Internal implication:
 
-* time from issue to accepted PR
-* review burden
-* test failure rate
-* pipeline failure rate
-* rework rate
-* production incident rate
-* time to recover
-* cost per successful outcome
-* human intervention rate
-* trace completeness
-* policy violation rate
-* rollback frequency
+> HMC should wrap MCP-like surfaces in actor identity, user delegation, scoped exposure, criticality policy, audit, trace hygiene, DLP, and review gates.
 
----
+## 9. Customer And Banking Use Cases Reveal The Moral Edge
 
-## 7. Evals Are Infrastructure, Not a Test Suite
+Evidence: `D2-C002`, `D2-C003`, `D2-C004`, `SL-C002`
 
-The Day 1 eval synthesis is one of the strongest architecture fragments.
+The T-Mobile / Distyl and Axos / OutSystems material was useful because it showed both enterprise ambition and enterprise risk.
 
-The captured model:
+Customer-service agents can increase agency if they help people accomplish tasks, understand options, and escalate cleanly. They become containment systems if success is measured mostly by avoided calls.
 
-* evals run before, during, and after execution
-* offline evals support design
-* runtime evals observe real behavior
-* LLM judges are expensive and rich
-* judges should be distilled into cheaper guardrails
-* SLMs / single-token classifiers can become cheap in-loop checks
-* evals integrate with observability, KPI tracking, identity, and governance
-* cost per successful outcome is the primary executive metric
-* trajectory quality matters more than final answer alone
-* variance matters
-* human takeover/intervention rate matters
+Banking agents can help wrap legacy cores, analyze logs, reduce SDLC friction, and improve delivery safety. They become surveillance systems when management instrumentation and timecard monitoring become the primary use case.
 
-The final anchor from the notes is worth preserving:
+The same substrate can reduce toil or intensify control.
 
-> An agent system is only as good as its ability to continuously measure, constrain, and correct itself under cost, variance, and real-world feedback.
+Internal implication:
 
-This should become a core architecture principle.
+> Use-case choice is moral architecture. Prefer pilots that improve user agency, reduce toil, or increase system reliability. Treat worker surveillance, opaque deflection, and automated authority as red flags.
 
-For HMC, evals should not be bolted on after a demo. They should be part of the system design:
+## HMC Reference Architecture
 
-* golden task sets
-* synthetic task sets
-* regression cases
-* trajectory scoring
-* tool-call scoring
-* retrieval-quality checks
-* source-version replay
-* cost-per-success tracking
-* human intervention labels
-* failure taxonomy
-* runtime guardrails derived from expensive evals
-* approval thresholds by risk class
+The conference points toward an HMC agent substrate with eight layers.
 
-Internal line:
+### Layer 1: Subject And Actor Identity
 
-> If we cannot replay it, score it, and explain it, we should not trust it.
+Distinguish human requester, service principal, agent actor, delegated authority, session, and execution context.
 
----
+Required properties:
 
-## 8. Context Engineering Is Replacing Naïve RAG
-
-The conference repeatedly moved away from “RAG solves it” toward a broader model of governed context.
-
-LanceDB’s strongest slide was not “use a vector database.” It was that a vector database is not enough for agents. Production retrieval needs to answer operational questions: which source version produced the embedding, which index served the eval run, and when derived context became visible.
-
-Day 2 synthesis tied this to Mistral, Cockroach, Monte Carlo, and HMC’s search instincts: curated knowledge domains, source lineage, chunking/embedding/vector-store failure modes, and governed context rather than dumped context.
-
-Monte Carlo made the failure chain especially clear:
-
-source data → chunking → embedding → vector store → retrieval → agent behavior → output trust
-
-The important point: agent failures are often data failures in disguise. Teams may blame prompts or models when the true failure is stale source data, a schema change, broken chunking, retrieval drift, or an embedding/index issue.
-
-Internal requirement:
-
-Every agent answer over internal knowledge should be traceable to:
-
-* source document/data ID
-* source version
-* retrieval/index version
-* embedding model/version
-* retrieval query/filters
-* chunks returned
-* visibility time
-* model/tool path
-* final answer
-* confidence/eval result
-
-Context is not “stuff in the prompt.” Context is governed runtime state.
-
----
-
-## 9. Observability Must Cross Data, Semantic, Agent, and Trust Layers
-
-The slide OCR captured a useful maturity model with four layers: data layer, semantic layer, agent-build layer, and trust layer. Production-grade maturity means end-to-end lineage from agent output to source, embedding drift monitors, retrieval quality alerts, tool-call traces, behavior anomaly alerts, and unified observability across layers.
-
-This is a strong framework because it prevents the common mistake: treating agent observability as prompt/response logging.
-
-Prompt logs are insufficient.
-
-A production agent observability layer needs:
-
-* data freshness
-* data schema drift
-* document/source lineage
-* embedding/index drift
-* retrieval quality
-* tool-call traces
-* model outputs
-* policy decisions
-* approval events
-* cost/latency
-* behavior anomalies
-* outcome feedback
-* human intervention
-* incident correlation
-
-The notes also emphasize that observability must be consumable. Security and developers need readable traces. Raw logs do not create governance. If observability is too hard to use, teams bypass it.
-
-Internal line:
-
-> Agent observability is not “what did the model say?” It is “what happened across data, context, tools, policy, model, user, and outcome?”
-
----
-
-## 10. Deterministic Boundaries Matter More, Not Less
-
-The RingCentral / “Bright Line” slide was likely the clearest architectural rule in the entire pile.
-
-The slide asks: when do agents earn their complexity cost?
-
-Deterministic systems:
-
-* downloading and normalizing market data
-* computing signals from a defined strategy
-* executing trades against a rulebook
-* order management
-* position reconciliation
-
-Agentic systems:
-
-* generating hypotheses for why a strategy is underperforming
-* designing and evaluating new trading strategies
-* deciding which research direction to pursue
-* evaluating whether an edge is decaying or structural
-
-Bottom line from the slide:
-
-> If a task has a known procedure and predictable output, it does not need an agent. It needs a well-engineered pipeline.
-
-The follow-on swarm architecture slide made this concrete: specialized research agents operate above a strategy-deployment boundary; validated strategies cross that line into a deterministic pipeline for data ingestion, signal computation, order management, and trade execution. The bottom layer explicitly says: no agents here; deterministic pipeline.
-
-This is extremely relevant to HMC.
-
-Agents should operate where ambiguity is the work:
-
-* research
-* synthesis
-* classification
-* triage
-* proposal generation
-* data-quality investigation
-* document analysis
-* hypothesis generation
-* strategy exploration
-* codebase understanding
-* operational diagnosis
-
-Agents should not be handed direct execution authority where procedure is known and consequences are high:
-
-* trade execution
-* reconciliation
-* authoritative data mutation
-* entitlement changes
-* production config changes
-* security policy changes
-* financial operations
-* record-of-truth updates
-
-Internal line:
-
-> Agents belong above the ambiguity boundary. Deterministic systems should retain execution authority.
-
----
-
-## 11. Infrastructure Pressure Is Under-Discussed and Likely Underestimated
-
-Cockroach’s infrastructure warning should stay in the leadership deck. The specific vendor fit may be unclear, but the infrastructure argument is real.
-
-Day 2 synthesis captured the point: agent-driven load is not human-driven load. If the number of actors explodes, systems of record, databases, queues, auth, logging, and CI/CD become compression points.
-
-The raw Cockroach capture also described this as a stateful infrastructure problem: systems of record and the connected tissue around them become bottlenecks under extraordinary elastic scale.
-
-This matters because early prototypes hide the problem. Low-volume agent demos do not reveal what happens when agents:
-
-* run continuously
-* retry aggressively
-* fan out across tools
-* poll systems repeatedly
-* generate many intermediate artifacts
-* trigger CI repeatedly
-* perform large retrieval fanout
-* write logs/traces for every step
-* call APIs faster than humans
-* hold state across long tasks
-
-The infrastructure question is not only token cost. It includes:
-
-* database load
-* auth load
-* queue load
-* logging volume
-* trace volume
-* retrieval QPS
-* index refresh pressure
-* CI/CD pressure
-* rate limits
-* cache invalidation
-* workflow retries
-* backpressure
-* kill switches
-* incident blast radius
-
-Internal line:
-
-> Agent adoption is capacity planning.
-
----
-
-## 12. Small Models Are Back Because Economics Are Back
-
-The Day 2 memo made a useful point: small models and deterministic systems are coming back hard. Mistral’s model-size/right-sizing theme and RingCentral’s deterministic execution boundary point away from one giant reasoning blob and toward heterogeneous architecture: small models, frontier models, deterministic layers, and strict boundaries.
-
-This is important for HMC because it argues for engineering the surface, not simply paying for maximum cognition.
-
-When a task is bounded, the right question is not “what is the smartest model?” The right question is:
-
-> What is the smallest, cheapest, fastest, most controllable model that can reliably perform this bounded job inside a governed workflow?
-
-This reinforces the platform thesis. Better substrate reduces ambiguity. Reduced ambiguity makes smaller/cheaper models viable.
-
-Potential internal split:
-
-* frontier models for ambiguity, synthesis, research, planning
-* smaller models for classification, routing, validation, guardrails, extraction
-* deterministic services for known execution
-* static checks for policy/format/security constraints
-* human review for high-consequence judgment
-
-Internal line:
-
-> Model strategy follows substrate quality. Better surfaces reduce the need for brute-force reasoning.
-
----
-
-## 13. Coding Agents Require a Software-Factory Redesign
-
-Coding agents do not remove software engineering constraints. They amplify the importance of the software factory.
-
-The Day 1 memo captured the core: the PR/review loop becomes the true control surface. AGENTS.md, preview environments, harnesses, stacked diffs, and code-review compression become necessary infrastructure. Agents increase code volume and make review the bottleneck.
-
-NVIDIA’s gates/sweeps framing and CircleCI’s validation-pressure data point in the same direction.
-
-For internal repositories, coding-agent readiness should include:
-
-* clear ownership
-* strong tests
-* small change units
-* stable local execution
-* documented architecture constraints
-* agent-readable instructions
-* explicit forbidden patterns
-* good CI feedback
-* preview environments
-* repeatable review loops
-* traceable provenance
-* repo history preservation
-* migration notes
-* decision records
-
-A coding agent in a clean repository is leverage. A coding agent in a messy, undocumented repository is velocity applied to entropy.
-
-Internal line:
-
-> Agents magnify repo quality. They do not replace it.
-
----
-
-## 14. Security Posture: Treat Agents Like Untrusted Actors
-
-The rogue-identity notes were strong: a bad agent can look like rogue behavior. Monitoring is not optional. Agents can drift, act outside intent, and scale impact. The suggested evaluation dimensions were anomaly detection, false positives/false negatives, time-to-detect, and time-to-stop.
-
-Prompt injection was also framed correctly: the LLM is an untrusted transformer. Inputs can contain instructions. Tool calls can be hijacked by tainted context. Policy needs to sit before and after tool calls.
-
-Practical controls:
-
-* separate instructions from data
-* allowlist tools and schemas
-* enforce runtime policy at gateway
-* validate inputs and outputs
-* scope capabilities narrowly
-* monitor behavior
-* detect anomalies
-* rate-limit actions
-* require approval for high-risk operations
-* record complete traces
-* support kill switches
-* red-team prompt/tool-call paths
-* measure response time
-
-Internal line:
-
-> Security cannot live outside the agent runtime. It must be in-path.
-
----
-
-## 15. Vendor / Capability Map
-
-This is not a procurement recommendation. It is a capability map from the field scan.
-
-### Apollo
-
-**Signal:** High
-**Theme:** GraphQL/API mediation, schema, identity, control layer, deployable wrapper
-**Internal relevance:** Validates `env.API` / governed capability surface
-**Risk/question:** Need to inspect actual product depth, auth model, observability, policy model, and whether GraphQL unification becomes too permissive
-**Evidence summary:** Booth capture described GraphQL API unification, control layer, Docker/appliance packaging. Day 2 notes described Swagger/OpenAPI ingestion, schema, identity, and API wrapping.
-
-### NVIDIA
-
-**Signal:** High
-**Theme:** CLI workflows, research/gates/sweeps, validation bottleneck, governed substrate
-**Internal relevance:** Validates commandable internal tooling around constrained operations and verification gates
-**Risk/question:** Avoid mistaking velocity tooling for governance; gates must be real
-
-### Bauplan
-
-**Signal:** High
-**Theme:** Safe agents for data pipelines, branch/review/merge model, safe failure surfaces
-**Internal relevance:** Data agents must not mutate authoritative systems directly
-**Risk/question:** Whether “Git for data” works at enterprise scale or is a useful metaphor hiding hard infrastructure
-
-### Mistral
-
-**Signal:** Medium-high
-**Theme:** Smaller models, model right-sizing, evals, messy enterprise data, harnesses
-**Internal relevance:** Encourages heterogeneous model strategy and bounded-task design
-**Risk/question:** Exact deployment and governance fit
-
-### CockroachDB
-
-**Signal:** Medium-high for infrastructure thesis; unclear vendor fit
-**Theme:** Stateful infrastructure under agent-shaped load
-**Internal relevance:** Capacity planning for systems of record, queues, auth, logging, CI/CD, databases
-**Risk/question:** Product fit unclear; argument more important than vendor
-
-### Monte Carlo
-
-**Signal:** High
-**Theme:** Garbage data → garbage agents; data/AI observability
-**Internal relevance:** Agent trust requires lineage from source data through retrieval/tool path to output
-**Risk/question:** How much integrates with existing internal observability and data platforms
-
-### CircleCI / OpenAI / Databricks Panel
-
-**Signal:** High
-**Theme:** AI software delivery data; modest gains; speed perception gap; validation bottleneck
-**Internal relevance:** Measure accepted outcomes, not generated output
-**Risk/question:** Verify exact numbers before leadership deck
-
-### MCP Panel / HubSpot / PagerDuty / Groupon / Arcade
-
-**Signal:** High as warning
-**Theme:** MCP auth, tool explosion, leakage, user-vs-agent ambiguity
-**Internal relevance:** MCP must sit behind governed gateway and identity model
-**Risk/question:** Unmanaged MCP server/tool sprawl. HubSpot’s thousands-of-tools pattern should be treated as negative evidence, not maturity.
-
-### RingCentral
-
-**Signal:** Very high
-**Theme:** Deterministic-vs-agentic boundary; specialized research swarms; deployment boundary
-**Internal relevance:** Cleanest architecture rule for HMC-style financial workflows
-**Risk/question:** Implementation specifics need scrutiny, but the boundary principle is sound
-
-### Dust
-
-**Signal:** Medium / incomplete
-**Theme:** Agent operating system, possible Stack AI replacement
-**Internal relevance:** Possible workspace/runtime category
-**Risk/question:** Deployment model needs follow-up
-
----
-
-## 16. Proposed Internal Reference Architecture
-
-A production-safe internal agent architecture should look roughly like this:
-
-```text
-Business user / workflow
-→ authenticated subject
-→ agent actor identity
-→ policy and delegation layer
-→ governed capability plane
-→ governed context plane
-→ model/router/harness
-→ tool gateway
-→ deterministic service boundary
-→ eval / replay / observability
-→ audit / incident response
-```
-
-### Layer 1: Subject and Actor Identity
-
-Separate the human or business principal from the non-human actor executing work.
-
-Capture:
-
-* user/subject
-* agent/actor
-* session/task ID
-* delegated authority
-* scope intersection
-* approval state
-* risk class
+- subject/actor separation;
+- scoped delegation;
+- intersection authorization;
+- immutable audit lineage;
+- short-lived credentials;
+- policy-aware capability grants.
 
 ### Layer 2: Governed Capability Plane
 
-Expose sanctioned operations, not raw endpoints.
+Expose actions as sanctioned capabilities, not endpoint dumps.
 
-Capabilities should be:
+Required properties:
 
-* typed
-* schema-normalized
-* identity-aware
-* policy-gated
-* auditable
-* rate-limited
-* separated by read/write/action class
-* replayable
-* versioned
+- typed inputs and outputs;
+- known side effects;
+- read/write separation;
+- action criticality;
+- policy hooks;
+- replayable call logs;
+- versioned capability definitions.
 
-This is the `env.API` / GraphQL/Apollo validation point.
+This is where `env.API` becomes strategically central.
 
 ### Layer 3: Governed Context Plane
 
-Expose authorized, versioned context.
+Provide permission-aware context with provenance and freshness.
 
-Context should include:
+Required properties:
 
-* source IDs
-* source versions
-* index versions
-* embedding versions
-* visibility windows
-* retrieval parameters
-* metadata filters
-* access policy
-* eval lineage
+- source IDs;
+- source versions;
+- index versions;
+- retrieval traces;
+- metadata lineage;
+- permission checks;
+- expiration/freshness rules;
+- replayable context assembly.
 
-This is the LanceDB / Monte Carlo / search-provenance point.
+### Layer 4: Agent Runtime And Harness
 
-### Layer 4: Agent Runtime / Harness
+Run agents inside constrained execution environments.
 
-The runtime coordinates model calls, tools, task state, budgets, and traces.
+Required properties:
 
-Requirements:
-
-* model routing
-* task decomposition
-* state management
-* tool-call planning
-* retry policy
-* cost budgets
-* latency budgets
-* trace emission
-* guardrail hooks
-* human checkpoint hooks
+- bounded tools;
+- run IDs;
+- prompts and config versions;
+- trace capture;
+- cost tracking;
+- retry policy;
+- sandboxing;
+- deterministic stop conditions where possible.
 
 ### Layer 5: Tool Gateway
 
-Agents do not call tools directly. They call through a gateway.
+Centralize tool exposure and policy.
 
-Gateway responsibilities:
+Required properties:
 
-* schema validation
-* policy enforcement
-* scope checks
-* input/output validation
-* prompt-injection controls
-* rate limits
-* approval gates
-* logging
-* kill switches
-* blocked-action telemetry
+- tool registry;
+- scoped grants;
+- criticality classification;
+- DLP/trace hygiene;
+- rate limits;
+- customer/internal policy separation;
+- soft-delete defaults;
+- explicit review gates for destructive actions.
 
 ### Layer 6: Deterministic Execution Boundary
 
-Known-procedure, high-consequence work should be deterministic.
+Keep known procedures in testable systems.
 
-Agents can propose.
-Agents can prepare.
-Agents can validate.
-Agents can summarize.
-Agents can diagnose.
-Agents can recommend.
+Required properties:
 
-But deterministic systems should execute where the procedure is known and the consequence is material.
+- workflow engines;
+- typed commands;
+- validation layers;
+- idempotency;
+- rollback/compensation;
+- CI/CD;
+- deployment controls;
+- policy enforcement outside the model.
 
-### Layer 7: Evals, Replay, and Observability
+### Layer 7: Evals, Replay, And Observability
 
-Every serious workflow needs:
+Treat evals as continuous operations, not a one-time prompt test.
 
-* offline evals
-* runtime evals
-* golden cases
-* synthetic cases
-* trajectory scoring
-* retrieval scoring
-* tool-call scoring
-* cost-per-success
-* human intervention tracking
-* input-to-output lineage
-* replayable traces
-* failure taxonomy
-* incident correlation
+Required properties:
 
----
+- trace sampling;
+- replay datasets;
+- human intervention labels;
+- task success metrics;
+- cost per successful outcome;
+- variance and repeatability tracking;
+- regression detection;
+- data/semantic/agent/trust observability.
 
-## 17. HMC Implications
+### Layer 8: Infrastructure And Economics Control
 
-### Implication 1: Do Not Build “Agents.” Build Governed Execution Surfaces.
+Model agent load separately.
 
-The platform goal should not be maximum autonomy. It should be constrained autonomy over explicit capabilities.
+Required properties:
 
-This is the shift:
+- token budgets;
+- model gateway metering;
+- admission control;
+- rate limits by actor/capability;
+- database/API/queue capacity plans;
+- CI/test capacity plans;
+- observability volume plans;
+- SLA tiers for high-priority vs low-priority agent work.
 
-> from “what can the agent do?”
-> to “what capability is safe to expose, under which identity, with which policy, with which trace, and with which rollback path?”
+## HMC Implications
+
+### Implication 1: Do Not Build "Agents." Build Governed Execution Surfaces.
+
+The dangerous internal question is "what agents should we build?"
+
+The better question is:
+
+> What actions are we willing to let a non-human actor propose, prepare, execute, or escalate, under which identity, policy, and audit boundary?
+
+Agents are consumers of the substrate. The substrate is the durable platform investment.
 
 ### Implication 2: `env.API` Is Strategically Central.
 
-`env.API` should be treated as an internal control plane, not a convenience wrapper.
+`env.API` should be designed as the mediated capability layer for both humans and non-human actors.
 
-It should encode:
+That means it should carry:
 
-* semantics
-* authorization
-* audit
-* routing
-* rate limits
-* read/write/action separation
-* tool hygiene
-* runtime policy
-* replayable calls
-* agent-safe verbs
+- schema;
+- semantics;
+- auth;
+- delegated authority;
+- action policy;
+- observability;
+- replay;
+- audit;
+- criticality classification;
+- deterministic execution hooks.
 
-The Apollo/GraphQL signal strengthens this. The agent should see the cockpit, not the whole machine.
+If `env.API` becomes merely a proxy, it misses the strategic moment. If it becomes the governed surface where business capability meets non-human actors, it becomes the foundation of HMC's agent architecture.
 
-### Implication 3: A Crimson-Style SDK Must Be Designed as a Security Boundary.
+### Implication 3: A Crimson-Style SDK Must Be Designed As A Security Boundary.
 
-If we create or formalize an internal agent SDK, it cannot just be helper glue. It should encode identity, scopes, trace emission, cost accounting, gateway behavior, context provenance, and policy checks by default.
+The SDK should not just make calls easy. It should make unsafe calls hard.
 
-Convenience without governance will create fragile adoption.
+SDK primitives should prefer:
 
-### Implication 4: Internal Search/Retrieval Must Become Provenance-Aware.
+- scoped capabilities over raw clients;
+- typed commands over ad hoc payloads;
+- explicit subject/actor context;
+- provenance-bearing reads;
+- dry-run and diff modes;
+- review-gated writes;
+- audit event emission by default.
 
-Search is not just a user feature. It becomes the memory/context substrate for agents.
+### Implication 4: Internal Search And Retrieval Must Become Provenance-Aware.
 
-We need to know:
+Search quality alone is not enough.
 
-* what source version was visible
-* what index served the result
-* what chunk was retrieved
-* what model embedded it
-* what filters applied
-* what access policy allowed it
-* what answer depended on it
+HMC needs to know which source, version, permission state, embedding/index version, and retrieval path produced the context an agent used.
 
-This maps directly to current search/index/recon work.
+This matters for:
+
+- debugging;
+- compliance;
+- user trust;
+- eval repeatability;
+- incident response;
+- prompt/regression analysis;
+- authorization review.
 
 ### Implication 5: Data Agents Need Staged Workflows.
 
-Near-term data agents should operate in propose/review mode.
+A safe HMC data-agent workflow should look more like software delivery than direct database mutation:
 
-Safe pattern:
-
-1. inspect
-2. hypothesize
-3. generate candidate query/change
-4. run in sandbox
-5. produce diff/statistical summary
-6. request approval
-7. execute through deterministic service
-8. log/replay outcome
-
-Bad pattern:
-
-> agent gets database credentials and starts making changes.
+1. propose;
+2. dry run;
+3. create isolated state;
+4. produce diff;
+5. run checks;
+6. route review;
+7. promote deterministically;
+8. record lineage and audit.
 
 ### Implication 6: Evals Should Be Designed Before Rollout.
 
-Any internal agent pilot should include eval strategy up front:
+For any pilot, define evaluation before deployment:
 
-* what success means
-* what failure means
-* what evidence is logged
-* what ground truth exists
-* what human intervention means
-* what cost-per-success target applies
-* what regression suite runs
-* what guardrails are derived from evals
+- intended task;
+- allowed context;
+- allowed actions;
+- expected output;
+- human review point;
+- success metric;
+- unacceptable failure modes;
+- replay set;
+- trace schema;
+- intervention labels;
+- cost metric.
 
-### Implication 7: Infrastructure Cost/Load Must Be Modeled Early.
+Without this, the organization will get demo success and operational ambiguity.
 
-Agent volume will hit systems unevenly. Tokens are obvious; databases, queues, auth, logs, retrieval, CI/CD, and observability may be less obvious but equally important.
+### Implication 7: Infrastructure Cost And Load Must Be Modeled Early.
 
-A serious pilot should include budgets:
+Agent-shaped load should be part of rollout design.
 
-* token budget
-* tool-call budget
-* retrieval budget
-* query budget
-* trace/log budget
-* runtime budget
-* retry budget
-* human review budget
+For each proposed agent, estimate:
 
----
+- model calls;
+- tool calls;
+- database/API reads and writes;
+- auth checks;
+- queue volume;
+- CI/test usage;
+- search/index usage;
+- observability volume;
+- retry behavior;
+- run frequency;
+- worst-case fanout.
 
-## 18. Recommended Next Steps
+The infrastructure question is not only "can we pay for tokens?" It is "what does continuous non-human action do to every shared system?"
 
-### Step 1: Define an HMC-Safe Agent Execution Standard
+## Recommended Next Steps
 
-Create a short internal standard that defines:
+### Step 1: Define An HMC-Safe Agent Execution Standard
 
-* identity model
-* delegation model
-* capability exposure
-* tool gateway requirements
-* context provenance
-* eval/replay requirements
-* observability requirements
-* approval levels
-* forbidden patterns
+Create a short internal standard covering:
 
-This should be platform guidance, not a 40-page policy document.
+- subject vs actor identity;
+- delegated authority;
+- capability exposure;
+- action criticality;
+- read/write separation;
+- dry-run requirements;
+- review gates;
+- audit event requirements;
+- trace hygiene;
+- DLP;
+- hard-delete policy.
 
-### Step 2: Build a Minimal Capability Registry
+### Step 2: Build A Minimal Capability Registry
 
-Inventory candidate capabilities and classify them:
+For one bounded domain, list capabilities instead of endpoints.
 
-* read-only
-* draft/propose
-* sandbox write
-* approved write
-* deterministic execution
-* never agent-exposed
+For each capability, define:
 
-Each capability should have:
+- name;
+- owner;
+- inputs;
+- outputs;
+- side effects;
+- read/write classification;
+- required permissions;
+- allowed actor types;
+- criticality;
+- audit fields;
+- rollback/compensation path.
 
-* schema
-* owner
-* risk class
-* auth model
-* audit fields
-* rate limits
-* approval rule
-* replay support
+### Step 3: Create An Agent Event Schema
 
-### Step 3: Create an Agent Event Schema
+Define a shared event schema before pilots proliferate.
 
-At minimum:
+Minimum fields:
 
-* event ID
-* task ID
-* user subject
-* agent actor
-* model used
-* capability invoked
-* tool/input schema
-* source/context IDs
-* index/source versions
-* policy decision
-* approval state
-* output
-* cost
-* latency
-* trace links
-* result/outcome
-* human intervention flag
+- run ID;
+- task ID;
+- subject ID;
+- actor ID;
+- capability ID;
+- tool call;
+- input reference;
+- output reference;
+- source/context references;
+- decision rationale summary;
+- policy decision;
+- human intervention;
+- cost counters;
+- latency counters;
+- success/failure classification.
 
-### Step 4: Define a Retrieval Provenance Model
+### Step 4: Define A Retrieval Provenance Model
 
-For any agent answer over internal data, capture:
+Make source traceability a first-class context feature.
 
-* source artifact
-* source version
-* index version
-* embedding version
-* retrieval parameters
-* chunks returned
-* visibility time
-* access scope
-* final answer dependency
+Minimum fields:
+
+- source ID;
+- source version;
+- index version;
+- retrieval query;
+- retrieved object ID;
+- permission check;
+- timestamp;
+- freshness/expiration;
+- downstream output reference.
 
 ### Step 5: Choose One Bounded Pilot
 
+Choose a pilot that:
+
+- reduces internal toil;
+- has clear ownership;
+- has limited blast radius;
+- can run read-only or proposal-first;
+- has measurable success;
+- has reviewable output;
+- can be replayed;
+- avoids worker-surveillance or customer-containment incentives.
+
 Good candidate shapes:
 
-* research/document analysis
-* internal search assistant with provenance
-* data-quality investigation assistant
-* codebase analysis assistant
-* operational triage assistant
-* agent-assisted PR review
-* agent-generated reports with human approval
+- internal knowledge/retrieval assistant with provenance;
+- PR/change summarizer with required checks;
+- incident/reliability research assistant;
+- data-quality proposal agent that cannot mutate production directly;
+- API capability discovery assistant over a constrained registry.
 
-Avoid first pilots that directly mutate authoritative data or execute high-consequence business actions.
+### Step 6: Build Gates And Sweeps Around Agent-Created Artifacts
 
-### Step 6: Build Gates and Sweeps Around Agent-Created Artifacts
+Before broad rollout, define:
 
-Borrow the NVIDIA model.
+- gate checks for known failure modes;
+- scheduled sweeps for recurring drift;
+- human review surfaces;
+- trace sampling;
+- rollback paths;
+- incident playbooks.
 
-Gates:
+### Step 7: Prepare Leadership Narrative Around Control Plane, Not Hype
 
-* fast checks before acceptance
-* policy checks
-* security checks
-* retrieval/source checks
-* test selection
-* containerized verification
-* approval thresholds
+The leadership framing should be:
 
-Sweeps:
+> We are not betting on autonomous magic. We are building the control plane that lets non-human actors operate within explicit boundaries.
 
-* nightly trace review
-* recurring failure-pattern detection
-* stale context detection
-* prompt/tool drift detection
-* retrieval-quality monitoring
-* policy exception review
+This is more credible than "AI transformation" and more actionable than "build agents."
 
-### Step 7: Prepare Leadership Deck Around Control Plane, Not Hype
+## Claims Requiring Verification Before Leadership Use
 
-Suggested deck spine:
+Do not present the following as final external facts without checking raw source detail:
 
-1. Conference thesis: model is no longer the center; control plane is.
-2. Evidence of convergence: Apollo, NVIDIA, Bauplan, Monte Carlo, CircleCI, MCP panel, RingCentral.
-3. Architecture rule: mediated capability surface, not raw access.
-4. Risk rule: known procedure means deterministic system, not agent.
-5. Platform implication: identity, context, evals, observability, cost, audit.
-6. HMC opportunity: build the substrate before broad autonomy.
-7. Recommended pilot: constrained, measurable, replayable, human-gated.
+- Any vendor-specific performance number or adoption percentage.
+- Bauplan's 90% agent-driven development framing.
+- CircleCI/METR speed measurements.
+- Any OCR-caveated slide wording.
+- Apollo product packaging details beyond the booth capture.
+- RingCentral slide claims where image OCR preserved only partial text.
+- CockroachDB load claims where the claim is directional but not quantified.
 
----
+The architecture conclusions do not depend on those numbers being exact. The claims should still be verified before formal leadership presentation.
 
-## 19. Claims Requiring Verification Before Leadership Use
+## Strongest Memo Lines To Preserve
 
-The directional signals are strong, but some numbers should be verified against source slides or external references before being used in an executive deck:
+> Agents should not receive raw access to enterprise systems. They should operate through mediated, schema-aware, identity-bound, auditable capabilities.
 
-* 10–15% productivity gain / DX or related study
-* 39-point speed perception gap
-* 59% PR throughput increase
-* pipeline failure and production failure rate claims
-* specific CircleCI pipeline-volume figures
-* survey percentages from Monte Carlo / agent trust slides
-* HubSpot exact count of MCP servers/tools
-* Cockroach timeline/traffic-scale projections
+> The API layer only becomes the agent layer when it stops being an endpoint dump and becomes a governed capability surface.
 
-These can be used internally as conference-captured signals, but they should be footnoted or softened until verified.
+> Agents are not the product. The product is the governed runtime that lets agents act safely, measurably, and economically.
 
-Recommended phrasing for unverified numbers:
+> Use agents where ambiguity earns the complexity cost. Keep known-procedure execution deterministic.
 
-* “The panel cited...”
-* “The slide claimed...”
-* “Conference-captured, not independently verified...”
-* “Directionally consistent with the broader pattern...”
+> AI accelerates generation first. The bottleneck moves to validation, review, observability, and operational confidence.
 
----
+> MCP is a connection pattern, not a security model.
 
-## 20. Strongest Memo Lines to Preserve
+> Agent-shaped traffic is not human-shaped traffic.
 
-The conference confirmed that enterprise agents are not a model problem; they are a control-plane problem.
+> Use-case choice is moral architecture.
 
-Agents need governed capability surfaces, not endpoint piles.
+## Traceability Map
 
-The API layer only becomes the agent layer when it becomes schema-aware, identity-bound, auditable, and policy-mediated.
+Primary Day 1 support:
 
-CLI and GraphQL point toward governed operating surfaces. MCP sprawl points toward unmanaged capability exposure.
+- Retrieval/context infrastructure: `D1-C007`, `SL-C003`, `SL-C004`, `SL-C005`
+- Below-waterline production substrate: `D1-C010`, `SL-C006`, `SL-C007`, `SL-C010`, `SL-C011`, `SL-C014`
+- Identity and delegated authority: `D1-C005`, `D1-C010`, `D1-C013`, `SL-C012`, `SL-C013`
+- Evals as operations: `D1-C014`, `SL-C009`
+- Coding-agent review bottleneck: `D1-C011`, `D1-C015`, `SL-C011`
 
-MCP servers are not governance.
+Primary Day 2 support:
 
-The agent SDK is not helper glue. It is a security boundary.
-
-Code can fail locally. Data fails socially.
-
-The bottleneck has moved from generation to validation.
-
-If we cannot replay it, score it, and explain it, we should not trust it.
-
-Context is not stuff in the prompt. Context is governed runtime state.
-
-Agent observability is input-to-output lineage across data, retrieval, tools, model behavior, policy, and outcome.
-
-Known procedure means deterministic system, not agent.
-
-Agents belong above the ambiguity boundary. Deterministic systems should retain execution authority.
-
-Agent adoption is capacity planning.
-
-A bad agent does not fail quietly. It behaves like a rogue actor.
-
-The near-term objective is not broad autonomy. It is constrained autonomy over explicit capabilities.
-
----
+- API/capability mediation: `D2-C005`, `V-C001`
+- Data-agent safety: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
+- Validation bottleneck: `D2-C010`, `D2-C012`, `SL-C019`, `SL-C020`
+- Context engineering and observability: `D2-C006`, `D2-C013`, `SL-C021`
+- Infrastructure load and economics: `D2-C011`, `SL-C018`, `V-C003`
+- MCP governance: `D2-C014`, `SL-C022`
+- Deterministic boundaries: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
+- Customer/banking use-case risk: `D2-C002`, `D2-C003`, `D2-C004`, `SL-C002`
 
 ## Closing Position
 
-The conference validated the internal architecture direction more than any single product.
+The conference did not make the case for agents everywhere.
 
-The serious talks converged on one conclusion: agents only become enterprise-usable when wrapped in a governed substrate. That substrate has recognizable parts: identity, delegated authority, scoped capabilities, schema, context provenance, replay, evals, observability, deterministic execution boundaries, cost controls, and human verification.
+It made the case for a governed execution architecture where agents are one class of actor inside a broader system of identity, capability mediation, context provenance, deterministic execution, evals, observability, infrastructure controls, and human verification.
 
-For HMC, the right response is not to chase general agent autonomy. The right response is to build the control plane that makes constrained agentic work safe.
-
-The practical architecture is:
-
-* agents for ambiguity
-* deterministic systems for known execution
-* mediated capabilities between them
-* observability and evals around the whole loop
-
-That is the shape worth taking forward.
+For HMC, the durable bet is not one impressive agent. The durable bet is the substrate that makes many bounded agents possible without surrendering control.
