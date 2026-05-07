@@ -44,9 +44,16 @@ Primary output files:
 | --- | --- |
 | `05_outputs/agent-conference-2026.md` | Claim-backed internal memo synthesizing the conference into HMC architecture implications. |
 
-Primary distillation files:
+Primary everything files:
 
 | File | Purpose |
 | --- | --- |
 | `06_everything/agent-conference-2026-everything.md` | Everything together, companies, people, takeaways. |
-| `06_everything/README.md` | Stage guide for the executive distillation layer. |
+| `06_everything/README.md` | Stage guide for the full executive packet layer. |
+
+Primary final distillation files:
+
+| File | Purpose |
+| --- | --- |
+| `07_everything_distilled/agent-conference-2026-everything-distilled.md` | Final concise leadership packet distilled from `06_everything`. |
+| `07_everything_distilled/README.md` | Stage guide for the final distilled layer. |
