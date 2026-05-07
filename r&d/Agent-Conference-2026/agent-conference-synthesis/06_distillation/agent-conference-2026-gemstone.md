@@ -190,6 +190,29 @@ This is a follow-up list, not a procurement recommendation.
 - CockroachDB: interesting infrastructure-load signal and Azure-deployable/Postgres-like positioning. Product fit remains unclear. [6], [13]
 - Misc exhibit-hall capture: keep out of leadership material until separately reviewed. The capture is too noisy. [6], [13]
 
+## Company And Reference Index
+
+Convenience links for external companies and named external references in this distillation. These links are public official pages, not endorsements.
+
+| Name | Why it appears | Link |
+| --- | --- | --- |
+| Apollo GraphQL | API orchestration / capability-surface field signal | https://www.apollographql.com/ |
+| Bauplan | Data-agent safety surface / Git-for-data signal | https://www.bauplanlabs.com/ |
+| CircleCI | Validation bottleneck / speed-confidence signal | https://circleci.com/ |
+| Cockroach Labs / CockroachDB | Agent-shaped infrastructure load signal | https://www.cockroachlabs.com/ |
+| DataRobot | Below-waterline production substrate signal | https://www.datarobot.com/ |
+| Distyl AI | T-Mobile agency-vs-containment field signal | https://distyl.ai/ |
+| Dust | Vendor watchlist; Agent OS positioning captured in booth note | https://dust.tt/ |
+| Google | Commerce / structured-data field signal | https://about.google/ |
+| LanceDB | Context workload / retrieval infrastructure signal | https://www.lancedb.com/ |
+| LangChain / LangSmith | Developer-facing agent observability and eval tooling signal | https://www.langchain.com/langsmith/ |
+| METR | Measurement / validation signal paired with CircleCI material | https://metr.org/ |
+| Model Context Protocol | Open standard referenced in MCP governance signal | https://modelcontextprotocol.io/ |
+| Monte Carlo | Data and AI observability field signal | https://www.montecarlodata.com/ |
+| NVIDIA | Agentic-coding CLI adoption and Research/Gates/Sweeps signal | https://www.nvidia.com/ |
+| T-Mobile | Customer-service agency-vs-containment field signal | https://www.t-mobile.com/about-us |
+| You.com | Budget-aware search / context economics signal | https://you.com/ |
+
 ## Leadership Caveats
 
 The architecture conclusions do not depend on exact vendor numbers, but the following should stay caveated before formal leadership or external use. [4], [5], [6], [7], [14], [15], [16], [18]
