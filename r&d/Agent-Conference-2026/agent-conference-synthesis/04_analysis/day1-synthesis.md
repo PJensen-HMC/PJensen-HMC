@@ -1,81 +1,165 @@
-Below is a condensed memo draft.
+# Day 1 Analysis
 
-## Internal Memo: NYC Agent Conference — Day Synthesis
+Stage: `04_analysis`
 
-The strongest signal from the day was clear: the hard part is not the agent. The hard part is the operating environment around the agent: context, identity, permissions, evaluation, observability, runtime cost, and organizational control.
+Evidence base:
 
-The useful talks converged on the same point from different angles. Agents are not just chat interfaces or task runners. In production, they become distributed systems with identity, budgets, traces, failure modes, and security exposure.
+- `03_extracted-claims/day1-claims.md`
+- `03_extracted-claims/slide-claims.md`
+- `02_normalized/day1-timeline.md`
+- `02_normalized/source-ledger.md`
 
-### Core takeaway
+This file interprets what the Day 1 claims likely mean. It is not a raw source and should not be used as a claim source without following the claim IDs back to `03_extracted-claims`.
 
-Enterprise agent adoption is not primarily a model-selection problem. It is an infrastructure, governance, and measurement problem.
+## Executive Read
 
-The model is only one component. The actual production stack needs:
+Day 1's strongest signal is that "agent" is the least interesting word in production agent systems.
 
-Data and context substrate
-Agents require high-quality, versioned, provenance-aware context. LanceDB framed this well: agent workloads push retrieval systems into database-scale problems, with billions of rows, high QPS, p99 latency constraints, HNSW indexing, sharding, metadata explosion, and versioned context. The key point: agents create pathological context workloads.
+The durable object is the governed runtime around the agent: context substrate, identity, permissions, gatewaying, evaluation, observability, cost control, CI/CD, and organizational review. The talks that mattered most did not make agents feel magical. They made agents feel like distributed systems with non-human actors, budgets, traces, blast radius, and failure modes.
 
-Execution layer
-Coding-agent talks showed that the PR/review loop becomes the true control surface. AGENTS.md, preview environments, harnesses, stacked diffs, and code-review compression are becoming necessary infrastructure. Agents do not eliminate review; they increase code volume and make review the bottleneck.
+That matters for HMC because the internal architecture should not start from "which model" or "which agent framework." It should start from the operating surface we are willing to expose to non-human actors.
 
-Identity and capability control
-Multiple talks reinforced that API keys are not sufficient. Agents need delegated identity: who is acting, on whose behalf, with what scope, through which system. “On behalf of” semantics, Entra-style agent identity, MCP scopes, and governed gateways came up repeatedly. The agent SDK is not a helper library; it becomes a security boundary.
+## What Day 1 Added
 
-Runtime and cost layer
-The “below the waterline” talk was one of the most useful. Agents require scheduling, model routing, token pools, budget awareness, multi-tenancy, observability, and centralized runtime management. Tokens become a managed enterprise resource. Agents must reason about cost as part of the execution loop, not after the fact.
+### 1. Retrieval became infrastructure, not a feature
 
-Security layer
-The rogue-agent discussion was blunt: prompt injection will happen. The goal is not perfect prevention; it is containment. Agent systems need defense in depth: identity, scopes, gateways, validation, behavioral monitoring, automated response, and security escalation. A bad agent can look like rogue behavior. Monitoring is not optional.
+Evidence:
 
-Evaluation layer
-The eval panel completed the stack. Evals are not a point-in-time test suite. They are a continuous measurement system over traces. Strong points included: eval engineering starts before agent design, LLM judges do not scale, judges must be converted into cheaper guardrails, cost per successful outcome is a critical metric, and human intervention should be labeled/tagged as a first-class signal.
+- D1-C007
+- SL-C003
+- SL-C004
+- SL-C005
 
-### Emerging model
+LanceDB's material sharpened the retrieval problem. The message was not "use a vector database." The stronger claim was that vector search alone cannot carry production agent context.
 
-The production agent stack looks like this:
+The important questions are operational:
 
-1. Context substrate
-   Versioned retrieval, provenance, structured filters, raw artifacts, write paths.
+- Which source version produced this embedding?
+- Which index served this eval run?
+- When did derived context become visible?
+- What metadata and provenance travel with the retrieved context?
+- Can the system explain why a memory was available to the agent at that point in time?
 
-2. Execution harness
-   Task decomposition, sandboxing, preview environments, tests, PRs, review gates.
+Analysis:
 
-3. Identity and capability plane
-   Delegated identity, scoped permissions, capability discovery, governed gateways.
+This moves retrieval from application helper to infrastructure substrate. The enterprise context layer needs versioning, lineage, metadata, query performance, write-path rules, and reproducibility. This maps directly to HMC's search/indexing instincts: retrieval quality is not enough if the system cannot explain freshness, provenance, and authority.
 
-4. Runtime control plane
-   Model routing, token budgets, token pools, scheduling, observability, cost controls.
+Implication:
 
-5. Security loop
-   Behavior monitoring, anomaly detection, prompt-injection containment, automated response.
+HMC should treat context as governed runtime state, not prompt stuffing. A useful agent should receive a narrow, explainable context cockpit with source lineage and permission-aware visibility.
 
-6. Evaluation and governance
-   Trajectory eval, simulation, variance tracking, KPI alignment, guardrails, cost per outcome.
+### 2. The below-waterline stack is the product
 
-### Implications for HMC
+Evidence:
 
-The most relevant implication is that we should not treat agents as standalone tools. We should treat them as workloads running inside a governed runtime.
+- D1-C010
+- SL-C006
+- SL-C007
+- SL-C010
+- SL-C011
+- SL-C014
 
-For HMC, the near-term focus should be:
+DataRobot's "below the waterline" framing was the cleanest Day 1 productization signal. The visible demo is the small part. Production readiness sits underneath: developer experience, auth, audit, eval, governance, CI/CD, observability, connectors, logging, regression detection, cost management, and token economics.
 
-Define governed capability surfaces
-Avoid giving agents raw access to systems. Wrap enterprise capabilities behind scoped, auditable, policy-aware interfaces.
+Analysis:
 
-Build or standardize an agent SDK carefully
-A Crimson-style agent SDK is directionally right, but it must encode identity, scopes, observability, cost control, and gateway behavior. It cannot just be convenience glue.
+This is the clearest argument against one-off agent projects. If every team invents its own auth, logging, tracing, prompt promotion, regression detection, and cost controls, production agent systems become unrecoverable messes. The platform layer matters because it turns non-functional requirements into shared capability rather than repeated project tax.
 
-Prioritize observability early
-Several speakers emphasized that observability must come before architecture hardens. We need traces that explain why an agent acted, not just what happened.
+The "token factory" slides make this economic, not just architectural. Inference capacity has to become allocatable and governable. If token consumption swings with prompt length, retries, tool calls, and GPU coupling, finance cannot model the product.
 
-Make cost visible
-Cost per successful outcome is likely the cleanest executive metric. Token budget, model routing, and runtime cost must be visible from the start.
+Implication:
 
-Treat eval as infrastructure
-Agent evals need to run continuously. We need offline evals, runtime evals, trace review, intervention tagging, variance measurement, and guardrails derived from expensive evaluations.
+An internal HMC agent platform should make production readiness default. Auth, audit, traces, eval hooks, cost budgets, and deployment promotion should not be optional afterthoughts.
 
-Do not retrofit governance
-The repeated warning was that retrofitting governance is extremely hard. Rules, scopes, approvals, and audit surfaces need to be built into the operating model from the beginning.
+### 3. Identity is the security boundary
 
-### Strongest one-line synthesis
+Evidence:
 
-Agents are not the product; the product is the governed runtime that lets agents act safely, measurably, and economically.
+- D1-C005
+- D1-C010
+- D1-C013
+- SL-C012
+- SL-C013
+
+Several Day 1 threads converged on the same warning: static API keys are not an identity model. Agent identity has to distinguish who requested an action from what actor executed it, through which authority chain, and under which effective permissions.
+
+Analysis:
+
+The subject/actor distinction is the missing primitive in a lot of agent demos. A human user, service account, and autonomous agent are not interchangeable. When these collapse into one credential, the system loses chain of custody. When authorization is binary rather than contextual, the blast radius becomes invisible.
+
+The important pattern is intersection authorization: effective permissions should be the strict intersection of user scope and agent scope, with immutable audit lineage across hops.
+
+Implication:
+
+HMC should avoid broad, long-lived agent credentials. If `env.API` or Crimson SDK becomes the mediated action layer, it needs first-class actor identity, delegated authority, scoped capabilities, and audit lineage from the start.
+
+### 4. Evaluation is continuous operations
+
+Evidence:
+
+- D1-C014
+- SL-C009
+
+The eval thread was not just "test your prompts." The useful move was treating evals as a continuous measurement system over traces. The OCR-backed You.com eval slide adds a harder edge: agentic evals are stochastic, single-run scores are suspect, and repeatability matters.
+
+Analysis:
+
+Agent evaluation cannot be a launch gate alone. It has to become an operational loop:
+
+- collect traces;
+- tag human interventions;
+- measure cost per successful outcome;
+- track variance and repeatability;
+- convert expensive judge evaluations into cheaper runtime guardrails;
+- align metrics with business outcomes.
+
+This also reframes human review. Humans are not just approving outputs. They are producing labels that can harden future checks.
+
+Implication:
+
+HMC should design trace capture and intervention tagging early. Waiting until the agent exists will produce opaque behavior that is expensive to retrofit.
+
+### 5. Coding agents move the bottleneck to review
+
+Evidence:
+
+- D1-C011
+- D1-C015
+- SL-C011
+
+The coding-agent material made a practical point: AI increases the volume of candidate change. That does not remove review. It moves pressure onto review, validation, provenance, and signal compression.
+
+Analysis:
+
+The engineering system becomes the control surface. AGENTS.md, preview environments, harnesses, stacked diffs, PR review, eval logs, and code-review summaries are no longer peripheral. They are the way humans keep leverage as generation accelerates.
+
+The Day 1 note "you cannot outsource the care" is the human version of this. AI can generate candidate work. The organization still needs taste, ownership, boundary judgment, and integration discipline.
+
+Implication:
+
+For HMC, agent-generated artifacts should be shaped for review. That means small diffs, explicit provenance, deterministic checks, clear ownership, and summaries that compress signal without hiding risk.
+
+## HMC Architecture Read
+
+Day 1 points toward a specific architecture posture:
+
+1. Agents should not receive raw systems. They should receive governed capabilities.
+2. Context should be versioned, provenance-aware, and permission-aware.
+3. Identity must distinguish user, service, and agent actor.
+4. Evaluation must run continuously across traces, not only at release time.
+5. Runtime cost must be modeled as a managed resource.
+6. Engineering workflows must assume increased artifact volume and review load.
+
+The right mental model is not "agent app." It is "non-human actor operating inside a governed distributed system."
+
+## Open Risks
+
+- Some Day 1 image rows remain unreviewed, so not every timestamp anchor is claim-bearing.
+- Several talks were vendor-positioned; the analysis treats them as architectural signals, not proof of product capability.
+- The strongest identity/economics claims are OCR-backed and should remain caveated where slide text was cut off or uncertain.
+
+## Sharp Synthesis
+
+Agents are not the product. The product is the operating environment that lets agents act safely, measurably, and economically.
+
+For HMC, that means the durable bet is not a single agent. It is the governed capability layer beneath many agents.

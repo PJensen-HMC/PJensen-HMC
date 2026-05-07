@@ -30,3 +30,10 @@ Primary extracted claim files:
 | `03_extracted-claims/day2-claims.md` | Day 2 source-level claims and field observations. |
 | `03_extracted-claims/vendor-claims.md` | Booth and vendor/hallway claims. |
 | `03_extracted-claims/slide-claims.md` | Image-derived claims promoted from `01_raw-evidence/images/images-ocr.md`. |
+
+Primary analysis files:
+
+| File | Purpose |
+| --- | --- |
+| `04_analysis/day1-synthesis.md` | Day 1 interpretation grounded in extracted claim IDs. |
+| `04_analysis/day2-synthesis.md` | Day 2 interpretation grounded in extracted claim IDs and OCR-backed slide claims. |

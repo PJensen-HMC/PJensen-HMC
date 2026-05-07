@@ -1,310 +1,316 @@
-# NYC Agent Conference — Day 2 Memo
+# Day 2 Analysis
 
-## Executive summary
+Stage: `04_analysis`
 
-Day 2 was high signal because the serious talks converged on the same architecture from different directions. The conference was not really about “agents” as chatbots. It was about what has to exist around agents before enterprises can safely let them do work.
+Evidence base:
 
-The repeated primitives were:
+- `03_extracted-claims/day2-claims.md`
+- `03_extracted-claims/vendor-claims.md`
+- `03_extracted-claims/slide-claims.md`
+- `02_normalized/day2-timeline.md`
+- `02_normalized/source-ledger.md`
 
-schema
-identity
-context engineering
-evals
-observability
-data lineage
-deterministic execution
-blast-radius control
-infrastructure scaling
-human verification
+This file interprets what the Day 2 claims likely mean. It is not a raw source and should not be used as a claim source without following the claim IDs back to `03_extracted-claims`.
 
-The strongest takeaway: the model is no longer the center of the conversation. The control plane is.
+## Executive Read
 
-Agents need mediated capability surfaces, not raw endpoint access. They need deterministic execution layers, replayable environments, eval harnesses, data observability, permission boundaries, and clear human verification points. This showed up in the Apollo hallway conversation, Bauplan’s data-branching model, Google’s non-human actor systems design, NVIDIA’s gates/sweeps framing, Cockroach’s infrastructure warning, Monte Carlo’s trust layer, the MCP panel’s auth/security concerns, and RingCentral’s deterministic-versus-agentic boundary. 
+Day 2 validated the same architecture from multiple angles:
 
-The meta-observation: this was not networking. It was field validation. The day functioned as a live scanner for whether the industry is converging on the same architecture we have already been circling internally.
+Agents should not be trusted. Systems should be built so agents do not need to be trusted.
 
-## 1. The agent layer is really a mediated capability layer
+The strongest talks and captured slides converged on a mediated execution architecture:
 
-The Apollo hallway conversation was one of the cleanest validations of the day. Their framing was basically: ingest Swagger/OpenAPI, wrap existing APIs, apply schema and identity, and avoid handing agents a pile of raw endpoints. That maps directly to the `env.API` thesis.
+- schema-normalized capability surfaces;
+- explicit identity;
+- governed context;
+- deterministic execution layers;
+- safe failure harnesses;
+- gates and sweeps;
+- data lineage;
+- evals and observability;
+- infrastructure capacity planning;
+- human verification leverage.
 
-The important distinction:
+The model was not the center of gravity. The control plane was.
 
-Bad pattern:
-Agent gets a large bag of tools.
-Agent gets broad endpoint access.
-Agent receives ambiguous permissions.
-Agent decides what matters.
-Audit is bolted on later.
+## What Day 2 Added
 
-Better pattern:
-Enterprise systems stay behind a mediated layer.
-Capabilities are schema-normalized.
-Identity is explicit.
-Actions are constrained.
-Reads and writes are separated.
-Calls are logged and replayable.
-Blast radius is deliberate.
+### 1. The API layer is becoming the agent layer
 
-This is not integration plumbing. It is the agent safety boundary.
+Evidence:
 
-Crimson implication: `env.API` should be treated as a first-class product surface. It is not just a route proxy. It is where semantics, authorization, audit, action policy, and non-human actors meet.
+- D2-C005
+- V-C001
 
-## 2. Data safety is the hardest version of agent safety
+The Apollo hallway capture was a high-value field validation. The useful architecture is not "give the model many endpoints." It is ingest API descriptions, normalize schema, attach identity, package runtime boundaries, and expose constrained capabilities.
 
-Bauplan’s talk was one of the most useful because it made the danger concrete: people are increasingly comfortable letting agents write code, but almost nobody is comfortable letting agents touch production data.
+Analysis:
 
-Their core distinction was correct:
+This is the difference between endpoint access and capability mediation. Raw APIs are too granular, too permission-ambiguous, and too easy to misuse. A production agent should see sanctioned actions with typed inputs, known side effects, authorization policy, logging, and replay.
 
-Code can fail locally.
-Data fails socially.
+This makes `env.API` strategically important. It should not be framed as integration glue. It is the control surface where semantics, authorization, audit, and non-human actors meet.
 
-With code, we have Git, branches, diffs, pull requests, tests, and rollback patterns. Agents can fail safely because the development harness allows controlled failure. With data, failure can mean corrupted tables, broken pipelines, inconsistent states, expensive 8-hour runs, or silent downstream damage. 
+Implication:
 
-The phrase worth preserving: move fast, fail fast, break local things.
+HMC should make capability design explicit. For every exposed action, define:
 
-That is exactly the missing primitive for data agents. The data world needs safe failure surfaces: branches, snapshots, statistical checks, lineage, review, dry runs, and conflict-resolution models.
+- what the agent can read;
+- what it can write;
+- who authorized it;
+- what system executes it;
+- what gets logged;
+- what rollback or compensation exists;
+- whether the action is deterministic, review-gated, or autonomous.
 
-Your reaction was right: “Git for data” is attractive, but the hard question is whether data branching is real enough at enterprise scale, or whether it is a useful metaphor hiding a hard infrastructure problem.
+### 2. Data agents need safe failure surfaces
 
-Crimson implication: agents should not mutate authoritative business data directly. They should operate through mediated, staged, inspectable workflows. Any write path needs preflight, review, audit, rollback, and ideally synthetic/sandbox state before touching real systems.
+Evidence:
 
-## 3. The bottleneck has moved from generation to validation
+- D2-C007
+- SL-C015
+- SL-C016
+- SL-C017
 
-NVIDIA’s talk was probably the clearest engineering-practice talk of the day. The useful story was not “NVIDIA uses AI.” It was that once coding harnesses and CLIs spread internally, velocity exploded and validation became the constraint.
+Bauplan's material made the data version of agent safety concrete. Code can fail locally because Git, branches, diffs, tests, pull requests, and rollback give agents a safe place to be wrong. Data failures are shared, slow, and often catastrophic.
 
-Their framing of research, gates, and sweeps is important.
+Analysis:
 
-Research:
-Use agents to map the system.
-Inspect history.
-Find seams.
-Generate diagrams.
-Understand topology before changing code.
+"Git for data" is compelling because it imports the safety model from software delivery into data mutation. The important idea is not that the implementation is easy. It is that agents need an isolated change surface, reviewable deltas, statistical checks, lineage, and merge discipline before touching authoritative data.
 
-Gates:
-Block rot from entering production.
-Run layered PR checks.
-Use fast feedback.
-Choose test suites intelligently.
-Run behavioral verification in real containers.
-Check drift, conflicts, security, architecture alignment, and coverage.
+The 90% agent-driven development slide should be treated as a marketing-heavy extreme, but it still exposes the intended operating model: agents do the attempted implementation; humans validate through a review interface.
 
-Sweeps:
-Clean what gates cannot see.
-Run nightly or repeated checks.
-Detect recurring review patterns.
-Tighten standards over time.
+Implication:
 
-Your reaction was right: this matches the real enterprise problem. We can now generate more change than existing engineering systems can absorb. The scarce resource becomes verification capacity, not code production. 
+HMC agents should not directly mutate authoritative business data. They should propose changes through staged workflows: dry run, sandbox state, diff, test, review, audit, and controlled promotion.
 
-The strongest concept: the velocity gap.
+### 3. Validation is now the bottleneck
 
-Writing code accelerates first.
-Understanding, validating, reviewing, integrating, and governing code lag behind.
+Evidence:
 
-This also appeared in the CircleCI / OpenAI / Databricks panel. The reported productivity gains were more modest than the hype — around 10–15% in the notes — while CI failures and pipeline pressure are increasing. The room’s “aha” moment around multiple agents reviewing one another matters: confidence is becoming a systems problem, not an individual-review problem. 
+- D2-C010
+- D2-C012
+- SL-C019
+- SL-C020
 
-Crimson implication: we need explicit gates and sweeps around agent-created artifacts. Not vibes. Not “the agent passed tests.” Real gates: provenance, ownership, semantic checks, execution traces, environment-specific validation, and rollback paths.
+NVIDIA and CircleCI made the same point from different angles. Generation accelerates first. Validation, review, compliance, security, deployment, and operational confidence lag behind.
 
-## 4. Context engineering is replacing naïve RAG
+The CircleCI/METR slide is especially important because it separates felt speed from measured speed. Subjective velocity is not proof. AI can make developers feel faster while throughput, reliability, or recovery gets worse.
 
-Several talks independently moved away from “RAG solves it” and toward a broader context-engineering model.
+Analysis:
 
-Mistral emphasized smaller models, fine-tuning, steering, evals, observability, calls, and messy enterprise data. The signal was that model access is no longer enough. Production requires a pipeline: define the task, organize data, steer behavior, evaluate outputs, observe calls, and manage cost. 
+The system-level bottleneck migrates from inner-loop generation to outer-loop validation. This is why gates and sweeps matter:
 
-Cockroach’s talk landed on a similar point from the infrastructure/data side: every agent needs a curated knowledge domain it can safely draw from. They described an ontology built from customer-call transcripts, Q&A pairs, and canonical questions. Your reaction was immediate: this is governance, recall, and point-in-time context, not a new idea dressed up as magic. 
+- Gates prevent known rot from entering production.
+- Sweeps catch recurring or cross-cutting issues gates miss.
+- Research helps agents map system topology before changing it.
 
-Monte Carlo made the failure chain more explicit:
+This is not process overhead. It is the new throughput constraint.
 
-source data
-chunking
-embedding
-vector store
-retrieval
-agent behavior
-output trust
+Implication:
 
-The important point: agent failures are often data failures in disguise. Teams blame prompts or models while the actual issue is a source table, schema change, stale pipeline, broken chunking strategy, bad embedding, or retrieval drift. 
+Crimson/HMC work should invest in verification surfaces before broad agent deployment:
 
-Crimson implication: data and AI cannot be managed as separate planes. The agent layer needs observability into source freshness, semantic meaning, lineage, retrieval behavior, and output quality. Context is not “stuff in the prompt.” Context is governed runtime state.
+- small reviewable diffs;
+- provenance on generated artifacts;
+- layered test selection;
+- behavioral verification in real environments;
+- security and architecture checks;
+- repeated sweeps for drift and recurring failure patterns.
 
-## 5. Small models are back because economics are back
+### 4. Context engineering replaced naive RAG
 
-Mistral’s model-size framing was useful because it cut through the frontier-model default. The production question is not “what is the smartest model?” It is “what is the smallest, cheapest, fastest model that can reliably do this bounded job?”
+Evidence:
 
-Notes called out 1B, 2B, 3B, 24B, edge use cases, latency, connectivity, cost, and open-weight deployment. The implied architecture is heterogeneous: frontier models for ambiguous reasoning and synthesis; smaller models for narrow, repeated, latency-sensitive, cost-sensitive, private, or edge-bound work. 
+- D2-C006
+- D2-C013
+- SL-C021
 
-The important economic line: subsidies are going away.
+Mistral, Monte Carlo, and the image OCR all point away from "just use RAG." Context is a governed system with data freshness, schema, distribution, embeddings, vector stores, metadata, retrieval quality, tool traces, and output lineage.
 
-The POC phase hid inference economics. Production brings them back. Tokens in, tokens out, latency, hardware, deployment footprint, and evaluation cost all become architectural constraints.
+Analysis:
 
-Crimson implication: if we build strong capability surfaces and deterministic layers, we do not always need the largest model. Narrower surfaces make smaller models more viable.
+The important failure mode is misattribution. Teams will blame the model or prompt when the real defect lives upstream:
 
-## 6. Infrastructure is the sleeping monster
+- stale source data;
+- broken schema;
+- bad chunking;
+- embedding drift;
+- weak retrieval;
+- missing metadata;
+- disconnected observability.
 
-Cockroach delivered the most aggressive infrastructure warning: agent-driven load has not fully landed yet.
+Monte Carlo's readiness scorecard is useful because it splits the system into layers: data, semantic, agent-build, and trust. Production-grade means cross-layer lineage and observability, not isolated dashboards.
 
-The distinction matters:
+Implication:
 
-Human load is paced by human attention.
-Agent load is not.
+HMC should treat data and AI as one operating plane. Search/indexing quality, data freshness, permissions, retrieval behavior, and agent output quality need shared traceability.
 
-A thousand humans and a thousand agents are not equivalent. Agents can proliferate, retry, query exhaustively, inspect logs, generate code, trigger CI, call tools, and hammer systems of record in patterns that legacy capacity planning did not assume.
+### 5. Infrastructure load is underpriced
 
-Their warning was that systems of record, messaging, durability, correctness, elastic scale, and surge handling become pressure points. The line underneath it: intelligence may become cheap, but infrastructure will not be free. 
+Evidence:
 
-Your reaction was also the right one: leadership is likely underestimating this. Most AI strategy discussions are still model/application centric. They are not yet modeling agent-shaped load against databases, queues, auth systems, observability systems, CI systems, and enterprise APIs.
+- D2-C011
+- SL-C018
+- V-C003
 
-Crimson implication: agent adoption needs capacity planning. Not just GPU planning. Systems-of-record planning.
+CockroachDB's strongest contribution was the human-vs-agent load distinction. Human traffic breathes. Agent traffic does not.
 
-## 7. MCP is useful, but the auth/security surface is ugly
+Analysis:
 
-The MCP panel was valuable because it exposed the mess.
+A thousand humans and a thousand agents are not capacity-equivalent. Agents can call tools continuously, retry aggressively, inspect everything, run 24/7, and compound as populations grow. That changes load on databases, queues, APIs, auth systems, CI systems, observability systems, and systems of record.
 
-The obvious problem: tool explosion. HubSpot reportedly has thousands of tools exposed behind MCP-style surfaces; Groupon and PagerDuty are dealing with many agents, many MCPs, and infrastructure-critical use cases. 
+This is not just a GPU planning problem. It is enterprise infrastructure planning.
 
-The harder problem: authorization.
+Implication:
 
-Patterns discussed included:
+HMC should model agent-shaped traffic separately from human traffic. Any agent rollout should ask how it affects:
 
-acting “as the user”
-service accounts
-separate MCP servers
-criticality-based separation
-customer-facing versus internal agents
-union of user and agent permissions
-audit instead of hard delete
-data leakage into traces
-private conversations entering tool logs
-DLP becoming more important
+- systems of record;
+- auth and permission checks;
+- API rate limits;
+- queues and workflows;
+- logging and tracing volume;
+- CI/test capacity;
+- data stores and search indexes.
 
-The critical distinction: internal agents and external/customer-facing agents are very different games. Internal agents may operate in a trusted environment with more audit and recovery options. External-facing agents introduce user intent, delegated authority, hallucinated actions, and unclear liability.
+### 6. MCP is a connection pattern, not a security model
 
-Crimson implication: do not treat MCP as a security model. MCP is a connection/runtime pattern. The security model has to live around it: identity, scope, policy, audit, trace hygiene, service-account strategy, and action-specific controls.
+Evidence:
 
-## 8. The deterministic/agentic boundary is architectural law
+- D2-C014
+- SL-C022
 
-RingCentral’s final talk may have been the cleanest closing synthesis. The core line: not everything needs to be an agent.
+The MCP panel's value was not that MCP is bad. It was that MCP makes the connection problem easier while making the governance surface more visible and more dangerous.
 
-This matters because agentic systems are seductive. Teams will over-agent workflows that should remain deterministic. That is how systems become expensive, flaky, untestable, and impossible to reason about.
+Analysis:
 
-Their trading-agent example was useful because it separated:
+Tool sprawl, trace leakage, service-account ambiguity, user-vs-agent authorization, customer-facing vs internal agents, and destructive actions are all security model problems. MCP does not solve them by existing.
 
-Agentic layer:
-hypothesis
-research
-open-ended reasoning
-strategy generation
-signal discovery
-explanation
+The practical rule "do not hard delete" is a useful first safety primitive. Criticality should influence what agents can do automatically, what requires review, and what must remain deterministic.
 
-Deterministic layer:
-execution
-backtesting mechanics
-known procedures
-constraints
-deployment controls
-performance measurement
+Implication:
 
-The boundary is the architecture. Agents produce candidates. Deterministic systems execute, test, gate, and enforce constraints.
+HMC should treat MCP-like surfaces as transport/runtime plumbing. Security belongs around them:
 
-The failure modes were also strong:
+- actor identity;
+- user delegation;
+- scoped tool exposure;
+- action criticality;
+- audit;
+- trace hygiene;
+- DLP;
+- separate policies for internal and customer-facing agents.
 
-overfitting
-correlated convergence
-strategy drift
-runaway research compute
-poor explainability
-generalist agents producing shallow work
+### 7. Deterministic boundaries are architectural law
 
-Your reaction was correct: this maps directly to enterprise AI. Specialize deeply. Keep known procedures deterministic. Use agents where judgment, exploration, and hypothesis generation are actually needed. Govern the boundary between research and production. 
+Evidence:
 
-The strongest line: architecture is the management structure.
+- D2-C009
+- D2-C015
+- SL-C023
+- SL-C024
+- SL-C025
+- SL-C026
 
-Crimson implication: micro-apps and agents should not collapse reasoning, execution, policy, and persistence into one blob. The system should make the boundary visible.
+The RingCentral slides and notes crystallized the conference: not everything needs to be an agent.
 
-## 9. Customer experience talks were useful, but contradictory
+Analysis:
 
-The T-Mobile / Distyl thread was valuable because it showed real enterprise ambition, but it also exposed the contradiction in customer-service AI.
+Agents earn their complexity where ambiguity, judgment, hypothesis generation, exploration, and adaptation matter. Known procedures with predictable outputs need deterministic pipelines.
 
-The positive case:
-T-Mobile has clear pain points.
-They look at NPS continuously.
-Leadership is strongly committed.
-They are trying to scale high-quality human support patterns.
-Forward-deployed AI teams appear to work better than traditional consulting.
-They have concrete products like Intent-CX / T-Life / Journey Bot.
-The 80-year-old upgrade story made the agency-enhancing version plausible.
+The best architecture keeps these roles separate:
 
-The contradiction:
-They say “customer-centric” and “personal,” while also aiming for customers not to call.
-That can mean better self-service.
-It can also mean automated containment.
+- agents research, hypothesize, compare, explain, and propose;
+- deterministic systems execute, test, enforce, deploy, and measure;
+- validated outputs cross a visible boundary.
 
-The difference is customer agency.
+This is also management structure encoded as architecture. Specialized agents with bounded mandates are more credible than broad generalist agents with vague authority.
 
-If the bot helps a customer accomplish something they otherwise could not, it is customer-centric. If the bot prevents escape to a human while optimizing deflection, it is cost containment with softer language.
+Implication:
 
-Crimson implication: AI experiences should be measured on successful resolution, user agency, escalation quality, and after-the-fact trust — not just avoided calls or reduced handling cost.
+Crimson should avoid collapsing reasoning, execution, policy, persistence, and audit into one agent blob. Make the boundary visible in code and operations.
 
-## 10. Banking talk: useful but mixed
+### 8. Customer and banking use cases reveal the moral edge
 
-The Axos / OutSystems banking talk had useful elements but also some uncomfortable ones.
+Evidence:
 
-Useful:
-They framed legacy systems as the real substrate.
-They discussed wrapping the core for agility without risking stability.
-They started internally with logs and SDLC personas.
-They focused on narrow use cases through an agent workbench.
-Fine-grained agents seemed directionally right.
+- D2-C002
+- D2-C003
+- D2-C004
+- SL-C002
 
-Mixed / concerning:
-Code review ROI claims need scrutiny.
-Management/timecard-monitoring agents sounded culturally ugly.
-The “monitor what applications people are running” pattern feels like a surveillance sink unless tightly governed.
+The T-Mobile / Distyl and Axos / OutSystems material was useful because it showed real enterprise ambition and real enterprise risk.
 
-Your reaction should be preserved: some pieces were real; some were gross. That matters. Agent adoption can produce leverage, but it can also produce managerial instrumentation that feels like a category error.
+Analysis:
 
-Internal takeaway: choose use cases that increase system intelligence and reduce toil, not use cases that turn workers into telemetry sources.
+Customer-service agents can increase agency if they help people accomplish tasks, explain options, and escalate cleanly. They become containment systems if success is measured mainly by avoided calls.
 
-## Key internal implications
+Banking agents can help wrap legacy cores, analyze logs, and reduce SDLC friction. They become surveillance sinks when management instrumentation and timecard monitoring become the use case.
 
-First, `env.API` is strategically important. It should be framed as a governed capability layer for non-human actors, not just application integration.
+The same substrate can reduce toil or intensify control. Use-case choice is moral architecture.
 
-Second, Crimson’s `env.*` model maps well to where the market is going: synthetic capabilities, constrained access, identity-aware execution, auditability, and deterministic boundaries.
+Implication:
 
-Third, agent readiness is not mostly about model selection. It is about whether the enterprise has schemas, data quality, context discipline, observability, test harnesses, evals, lineage, and policy.
+HMC should prefer use cases that improve user agency, reduce toil, or increase system reliability. Be cautious with use cases whose primary value is worker surveillance, deflection, or opaque automation of authority.
 
-Fourth, validation will become the main bottleneck. We should invest in gates, sweeps, replay, trace inspection, and agent-generated artifacts that are easy for humans to verify.
+## Cross-Day Architecture
 
-Fifth, internal AI systems should distinguish clearly between:
-reasoning
-planning
-research
-execution
-persistence
-policy
-audit
+Day 2 confirmed the cross-day stack:
 
-Sixth, small models become more plausible when the operating surface is well-designed. Big models compensate for ambiguity. Better systems reduce ambiguity.
+1. Capability mediation
+   Schema-normalized actions, not raw endpoints.
 
-Seventh, agent load should be treated as a new infrastructure class. We should assume agent traffic patterns will differ materially from human traffic patterns.
+2. Identity and authorization
+   Subject/actor separation, delegated authority, scoped capabilities, audit lineage.
 
-## Proposed internal thesis
+3. Context engineering
+   Governed state with provenance, freshness, permissions, retrieval quality, and lineage.
 
-The enterprise agent stack is not a chatbot stack.
+4. Deterministic execution
+   Known procedures stay in testable pipelines.
 
-It is a mediated execution architecture for non-human actors. The critical layers are schema, identity, context, deterministic execution, evals, observability, data lineage, and governance. Models matter, but they are only one part of the stack. The durable advantage will come from shaping the operating surface so agents can act safely, cheaply, and verifiably.
+5. Agentic reasoning
+   Agents handle ambiguity, hypothesis, research, synthesis, and proposal generation.
 
-## Sharp version
+6. Validation machinery
+   Gates, sweeps, evals, replay, trace inspection, and human verification.
 
-The industry is converging on a simple truth: agents should not be trusted; systems should be designed so they do not need to be trusted.
+7. Infrastructure control
+   Capacity planning for databases, queues, APIs, auth, CI, observability, and token economics.
 
-Give agents narrow capabilities.
-Give them context with provenance.
-Give them deterministic execution paths.
-Give them evals and replay.
-Give humans verification leverage.
-Give infrastructure a fighting chance.
+8. Governance
+   Criticality, DLP, trace hygiene, escalation, rollback, and action policy.
 
-That was Day 2.
+## HMC Strategic Read
+
+The internal thesis should be sharper now:
+
+`env.API` and Crimson-style `env.*` surfaces are not convenience abstractions. They are the mediated execution layer for non-human actors.
+
+That layer should be designed to:
+
+- narrow what agents can see;
+- narrow what agents can do;
+- preserve source lineage;
+- distinguish actor from subject;
+- route actions through deterministic paths where possible;
+- make writes reviewable;
+- capture traces;
+- expose cost;
+- support replay and audit;
+- let humans verify high-risk work.
+
+This makes agent adoption less about trusting agents and more about shaping the world they are allowed to inhabit.
+
+## Open Risks
+
+- The Day 2 morning stream conflict remains unresolved; the booth and scheduled-session notes overlap.
+- Some audio transcript timestamps still conflict with schedule time, though content mapping is strong.
+- Vendor claims are useful as directional architecture signal, not proof of product maturity.
+- OCR-backed slide claims remain bounded by OCR quality and noted caveats.
+
+## Sharp Synthesis
+
+The enterprise agent stack is a mediated execution architecture for non-human actors.
+
+The winning architecture is not agents everywhere. It is agents where ambiguity earns their complexity cost, deterministic systems where repeatability matters, and a governed control plane between them.
