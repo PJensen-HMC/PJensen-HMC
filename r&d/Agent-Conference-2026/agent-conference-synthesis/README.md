@@ -7,8 +7,8 @@ This workspace is organized as a processing pipeline:
 3. `03_extracted-claims`: what sources actually say.
 4. `04_analysis`: what those claims likely mean.
 5. `05_outputs`: memos, deck notes, and final written artifacts.
+6. `06_distillation`: executive-facing derivatives from the final output, preserving claim traceability.
 
 The working rule is processing state first, source identity second, theme last.
 
 Raw evidence should stay raw. If a source needs interpretation, transcription cleanup, or thematic extraction, that work should happen in a later stage and point back to the original source through `02_normalized/source-ledger.md`.
-

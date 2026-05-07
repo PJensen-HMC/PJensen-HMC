@@ -43,3 +43,10 @@ Primary output files:
 | File | Purpose |
 | --- | --- |
 | `05_outputs/agent-conference-2026.md` | Claim-backed internal memo synthesizing the conference into HMC architecture implications. |
+
+Primary distillation files:
+
+| File | Purpose |
+| --- | --- |
+| `06_distillation/agent-conference-2026-gemstone.md` | Executive-facing leadership distillation derived from the output memo and claim set. |
+| `06_distillation/README.md` | Stage guide for the executive distillation layer. |
