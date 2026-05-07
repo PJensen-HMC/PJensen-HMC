@@ -89,6 +89,74 @@ The clearest cross-day synthesis:
 
 > Agents are not the product. The product is the governed runtime that lets agents act safely, measurably, and economically.
 
+## Field Signals Worth Preserving
+
+These are not vendor proof points. They are field signals: compact anecdotes that make the architecture concrete.
+
+### Apollo: Endpoint Sprawl Is Not Agent Readiness
+
+Evidence: `D2-C005`, `V-C001`
+
+The Apollo booth signal was not simply "GraphQL for agents." The useful observation was that API descriptions can be ingested, normalized, mediated, and exposed as governed capabilities instead of raw endpoint catalogs.
+
+Architecture lesson: `env.API` should not be an endpoint dump. It should be the surface where schema, identity, policy, runtime isolation, audit, and replay meet.
+
+### DataRobot: The Product Is Below The Waterline
+
+Evidence: `D1-C010`, `SL-C006`, `SL-C007`, `SL-C014`
+
+The DataRobot slides gave the best image for production reality: the visible agent demo is the small part above the waterline. The production product is underneath: identity, auth, audit, evals, governance, observability, CI/CD, connectors, cost controls, and token economics.
+
+Architecture lesson: the durable platform investment is the substrate, not the demo.
+
+### Bauplan: Data Needs A Safe Failure Surface
+
+Evidence: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
+
+The Bauplan signal was the contrast between code and data. Code agents can be wrong inside branches, diffs, tests, pull requests, and rollback paths. Data agents need an equivalent safety surface before they touch authoritative state.
+
+Architecture lesson: data agents should propose through sandboxed state, diffs, checks, review, lineage, and controlled promotion.
+
+### CircleCI/METR: Felt Speed Is Not Measured Throughput
+
+Evidence: `D2-C012`, `SL-C019`, `SL-C020`
+
+The CircleCI/METR signal was a useful warning for leadership: AI can make teams feel faster while the real system bottleneck moves to validation, review, reliability, recovery, and operational confidence.
+
+Architecture lesson: do not measure agent value by generation velocity alone. Measure successful, reviewed, recoverable outcomes.
+
+### RingCentral: Not Everything Should Be An Agent
+
+Evidence: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
+
+The RingCentral material preserved the cleanest boundary rule: agents belong where ambiguity, research, synthesis, and hypothesis generation matter. Known procedures should remain deterministic.
+
+Architecture lesson: agents should prepare, propose, and explain; deterministic systems should execute, enforce, persist, and audit.
+
+### MCP Panel: Do Not Hard Delete
+
+Evidence: `D2-C014`, `SL-C022`
+
+The MCP panel produced the smallest useful safety rule: do not hard delete. That line matters because it turns abstract tool-governance concern into an operational default.
+
+Architecture lesson: connection standards are not security models. Destructive actions need criticality policy, review gates, audit, and recoverable execution.
+
+### CockroachDB: Agent Traffic Does Not Breathe
+
+Evidence: `D2-C011`, `SL-C018`, `V-C003`
+
+The CockroachDB signal was that a thousand agents are not capacity-equivalent to a thousand humans. Agents can retry, fan out, run continuously, inspect everything, and generate load without the natural pauses of human traffic.
+
+Architecture lesson: agent-shaped load needs separate capacity planning across databases, APIs, auth, queues, CI, search, observability, and inference.
+
+### Coding Agents: You Cannot Outsource The Care
+
+Evidence: `D1-C011`, `D1-C015`, `SL-C011`
+
+The coding-agent thread sharpened the human part of the architecture. AI can generate more candidate work, but the organization still owns taste, boundary judgment, review discipline, and integration quality.
+
+Architecture lesson: generation scales only if review, provenance, tests, harnesses, and ownership scale with it.
+
 ## 1. The Agent Layer Is A Mediated Capability Layer
 
 Evidence: `D2-C005`, `V-C001`, `D1-C010`, `SL-C006`, `SL-C007`
