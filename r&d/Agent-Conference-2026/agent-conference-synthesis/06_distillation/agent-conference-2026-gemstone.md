@@ -196,8 +196,10 @@ Convenience links for external companies and named external references in this d
 
 | Name | Why it appears | Link |
 | --- | --- | --- |
+| Monte Carlo | Data and AI observability field signal | https://www.montecarlodata.com/ |
 | Apollo GraphQL | API orchestration / capability-surface field signal | https://www.apollographql.com/ |
 | Bauplan | Data-agent safety surface / Git-for-data signal | https://www.bauplanlabs.com/ |
+| NVIDIA | Agentic-coding CLI adoption and Research/Gates/Sweeps signal | https://www.nvidia.com/ |
 | CircleCI | Validation bottleneck / speed-confidence signal | https://circleci.com/ |
 | Cockroach Labs / CockroachDB | Agent-shaped infrastructure load signal | https://www.cockroachlabs.com/ |
 | DataRobot | Below-waterline production substrate signal | https://www.datarobot.com/ |
@@ -208,8 +210,6 @@ Convenience links for external companies and named external references in this d
 | LangChain / LangSmith | Developer-facing agent observability and eval tooling signal | https://www.langchain.com/langsmith/ |
 | METR | Measurement / validation signal paired with CircleCI material | https://metr.org/ |
 | Model Context Protocol | Open standard referenced in MCP governance signal | https://modelcontextprotocol.io/ |
-| Monte Carlo | Data and AI observability field signal | https://www.montecarlodata.com/ |
-| NVIDIA | Agentic-coding CLI adoption and Research/Gates/Sweeps signal | https://www.nvidia.com/ |
 | T-Mobile | Customer-service agency-vs-containment field signal | https://www.t-mobile.com/about-us |
 | You.com | Budget-aware search / context economics signal | https://you.com/ |
 
