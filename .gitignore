@@ -1,90 +1,121 @@
-# ignore everything in ~/
-*
+# ------------------------------------------------------------
+# OS / editor noise
+# ------------------------------------------------------------
 
-# --- root files ---
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+.vscode/
+.idea/
+
+
+# ------------------------------------------------------------
+# Logs / temp / cache
+# ------------------------------------------------------------
+
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+
+.cache/
+tmp/
+temp/
+
+
+# ------------------------------------------------------------
+# SSH / terminal-agent local state
+# ------------------------------------------------------------
+
+.ssh/
+.gnupg/
+.local/
+.config/
+.history
+.bash_history
+.zsh_history
+.lesshst
+.python_history
+
+# Keep shell config trackable if present.
 !.bashrc
-!.gitignore
-!CLAUDE.md
-!init.sh
-!pr.sh
+!.profile
+!.bash_profile
+!.zshrc
 
-# --- .claude directory ---
-!.claude/
-.claude/*
-!.claude/.gitignore
+
+# ------------------------------------------------------------
+# Secrets / credentials
+# ------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+.secrets
+.secrets.*
+!.secrets.example
+
+.claude/.secrets
+.claude/.secrets.*
 !.claude/.secrets.example
-!.claude/settings.json
-!.claude/settings.local.json
-!.claude/statusline.sh
-!.claude/statusline.py
-!.claude/send_statusline.sh
-!.claude/send_test.sh
 
-# --- README ---
-!README.md
 
-# --- tools ---
-!tools/
-tools/*
-!tools/*.ps1
-!tools/*.js
-!tools/*.ts
-!tools/*.sh
+# ------------------------------------------------------------
+# Claude / agent local state
+# ------------------------------------------------------------
 
-# keep only these tracked
+.claude/settings.local.json
+
+# Local/private Claude project memory.
+.claude/projects/**/memory/*
+!.claude/projects/**/memory/README.md
+!.claude/projects/**/memory/*.example.md
+
+
+# ------------------------------------------------------------
+# Repos directory
+# ------------------------------------------------------------
+# Track the repo registry and bootstrap script.
+# Ignore all cloned/materialized repos underneath.
+
+repos/*
 !repos/
 !repos/init.sh
 !repos/repos.list
-!repos/crimson-sandbox/
-!repos/crimson-sandbox/**
 
-# --- hiring ---
-!hiring/
-hiring/*
-!hiring/*.md
 
-# --- patches ---
-!patches/
-patches/*
-!patches/*/
-patches/*/*
-!patches/*/*.patch
+# ------------------------------------------------------------
+# Dependencies / build output
+# ------------------------------------------------------------
 
-# --- r&d spikes ---
-!r&d/
-r&d/*
-!r&d/*.md
-!r&d/*/
-r&d/*/*
-!r&d/*/*.md
+node_modules/
+dist/
+build/
+out/
+coverage/
 
-# --- local plugins ---
-!.claude/plugins/
-.claude/plugins/*
-!.claude/plugins/local/
-.claude/plugins/local/*
-!.claude/plugins/local/hmc-tools/
-.claude/plugins/local/hmc-tools/*
-!.claude/plugins/local/hmc-tools/.claude-plugin/
-.claude/plugins/local/hmc-tools/.claude-plugin/*
-!.claude/plugins/local/hmc-tools/.claude-plugin/plugin.json
-!.claude/plugins/local/hmc-tools/skills/
-.claude/plugins/local/hmc-tools/skills/*
-!.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/
-.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/*
-!.claude/plugins/local/hmc-tools/skills/upgrade-hmc-pkgs/SKILL.md
-!.claude/plugins/local/hmc-tools/skills/hmc_dot_net_list_pkgs/
-.claude/plugins/local/hmc-tools/skills/hmc_dot_net_list_pkgs/*
-!.claude/plugins/local/hmc-tools/skills/hmc_dot_net_list_pkgs/SKILL.md
-!.claude/plugins/local/hmc-tools/skills/safe-push/
-.claude/plugins/local/hmc-tools/skills/safe-push/*
-!.claude/plugins/local/hmc-tools/skills/safe-push/SKILL.md
+__pycache__/
+*.pyc
+.venv/
+venv/
 
-# --- memory ---
-!.claude/projects/
-.claude/projects/*
-!.claude/projects/-home-devadmin/
-.claude/projects/-home-devadmin/*
-!.claude/projects/-home-devadmin/memory/
-.claude/projects/-home-devadmin/memory/*
-!.claude/projects/-home-devadmin/memory/*.md
+
+# ------------------------------------------------------------
+# Generated artifacts
+# ------------------------------------------------------------
+
+*.tar
+*.tar.gz
+*.zip
+*.7z
