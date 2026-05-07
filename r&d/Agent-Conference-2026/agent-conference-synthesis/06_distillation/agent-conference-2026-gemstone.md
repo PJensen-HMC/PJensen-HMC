@@ -202,6 +202,7 @@ Convenience links for external companies and named external references in this d
 | NVIDIA | Agentic-coding CLI adoption and Research/Gates/Sweeps signal | https://www.nvidia.com/ |
 | CircleCI | Validation bottleneck / speed-confidence signal | https://circleci.com/ |
 | Cockroach Labs / CockroachDB | Agent-shaped infrastructure load signal | https://www.cockroachlabs.com/ |
+| Datadog | World-model observability and SRE/code-repair agent signal | https://www.datadoghq.com/ |
 | DataRobot | Below-waterline production substrate signal | https://www.datarobot.com/ |
 | Distyl AI | T-Mobile agency-vs-containment field signal | https://distyl.ai/ |
 | Dust | Vendor watchlist; Agent OS positioning captured in booth note | https://dust.tt/ |
@@ -210,8 +211,29 @@ Convenience links for external companies and named external references in this d
 | LangChain / LangSmith | Developer-facing agent observability and eval tooling signal | https://www.langchain.com/langsmith/ |
 | METR | Measurement / validation signal paired with CircleCI material | https://metr.org/ |
 | Model Context Protocol | Open standard referenced in MCP governance signal | https://modelcontextprotocol.io/ |
+| PagerDuty | SRE agents and MCP production-operations signal | https://www.pagerduty.com/ |
 | T-Mobile | Customer-service agency-vs-containment field signal | https://www.t-mobile.com/about-us |
 | You.com | Budget-aware search / context economics signal | https://you.com/ |
+
+## People Worth Looking Up
+
+This is a curated people index, not a complete speaker roster. It preserves the speakers and operators who most directly shaped the executive signal, especially where the raw notes show personal emphasis. Profile links are convenience links for follow-up; the conference evidence remains the source spine in Appendix A. [14], [15], [16], [17], [18]
+
+| Person | Conference role | Why they matter here | Public link |
+| --- | --- | --- | --- |
+| Julie Yaunches | Senior AI Engineer, NVIDIA | Strongest personally emphasized talk in the corpus. The CLI harness, Research/Gates/Sweeps, and accelerated-development material should stay visible even though it is note-backed rather than audio-backed. | [LinkedIn](https://www.linkedin.com/in/jyaunches) |
+| Ciro Greco | CEO and Co-founder, Bauplan | Made the data-agent safety problem concrete: agents can fail usefully only when the substrate gives them branches, reviewable deltas, checks, and controlled promotion. | [LinkedIn](https://www.linkedin.com/in/cirogreco/en) |
+| Ralph Bird | Principal Machine Learning Engineer, PagerDuty | The SRE-agent and MCP operations thread was one of the most HMC-relevant practical signals: agent tools, incident response, evals, and production safety. | [Speaker bio](https://www.agentconference.com/speaker/Ralph-Bird) |
+| Barr Moses | CEO and Co-founder, Monte Carlo | Clarified why "bad agent answer" is often a data-quality or data-observability failure in disguise. | [Profile](https://theorg.com/org/monte-carlo/org-chart/barr-moses) |
+| Spencer Kimball | Cofounder and CEO, Cockroach Labs | Put infrastructure load at the center: non-human actors change database, API, queue, auth, CI, and observability economics. | [Profile](https://theorg.com/org/cockroach-labs/org-chart/spencer-kimball) |
+| Heiko Hotz | Generative AI Blackbelt, Google | Useful source for systems design for non-human actors: structured data, deterministic executors, and post-launch measurement. | [LinkedIn](https://uk.linkedin.com/in/heikohotz) |
+| Ameet Talwalkar | Chief Scientist, Datadog | Day 1 signal for observability world models, SRE agents, and code-repair agents grounded in real telemetry. | [LinkedIn](https://www.linkedin.com/in/atalwalkar) |
+| Venky Veeraraghavan | Chief Product Officer, DataRobot | Reinforced that the production product is below the waterline: identity, governance, evals, observability, CI/CD, connectors, and economics. | [Profile](https://theorg.com/org/datarobot/org-chart/venky-veeraraghavan) |
+| Chang She | CEO, LanceDB | Useful follow-up for context as a workload: branching retrieval, metadata scale, provenance, and retrieval economics. | [LinkedIn](https://www.linkedin.com/in/changshe) |
+| Saahil Jain | CTO, You.com | Useful follow-up for search infrastructure, budget-aware context, and the economics of agent retrieval. | [LinkedIn](https://www.linkedin.com/in/saahiljain) |
+| Julianne Roberson | Director, AI Engineering, T-Mobile | Important customer-agent scale signal and the clearest agency-vs-containment caution in the field notes. | [LinkedIn](https://www.linkedin.com/in/julianne-roberson-07206557) |
+| Arjun Prakash | Co-founder and CEO, Distyl AI | Important enterprise-deployment context paired with the T-Mobile signal. Useful for understanding how agent systems get packaged for real organizations. | [LinkedIn](https://www.linkedin.com/in/arjunsprakash) |
+| Matt DeBergalis | CEO and Cofounder, Apollo GraphQL | Useful follow-up for the "cockpit, not keys" mediation pattern: APIs as governed capability surfaces rather than raw chatbot access. | [LinkedIn](https://www.linkedin.com/in/debergalis) |
 
 ## Leadership Caveats
 
