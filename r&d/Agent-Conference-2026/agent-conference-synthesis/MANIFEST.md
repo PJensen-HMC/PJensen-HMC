@@ -20,3 +20,12 @@ Primary normalized indexes:
 | `02_normalized/booth-index.md` | Booth/vendor note inventory. |
 | `02_normalized/day1-timeline.md` | Day 1 source chronology. |
 | `02_normalized/day2-timeline.md` | Day 2 source chronology. |
+
+Primary extracted claim files:
+
+| File | Purpose |
+| --- | --- |
+| `03_extracted-claims/day1-claims.md` | Day 1 source-level claims and field observations. |
+| `03_extracted-claims/day2-claims.md` | Day 2 source-level claims and field observations. |
+| `03_extracted-claims/vendor-claims.md` | Booth and vendor/hallway claims. |
+| `03_extracted-claims/slide-claims.md` | Image-derived claim placeholder; no claims promoted until image review/OCR. |
