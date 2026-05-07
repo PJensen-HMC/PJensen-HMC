@@ -48,5 +48,5 @@ Primary distillation files:
 
 | File | Purpose |
 | --- | --- |
-| `06_distillation/agent-conference-2026-gemstone.md` | Executive-facing leadership distillation derived from the output memo and claim set. |
-| `06_distillation/README.md` | Stage guide for the executive distillation layer. |
+| `06_everything/agent-conference-2026-everything.md` | Everything together, companies, people, takeaways. |
+| `06_everything/README.md` | Stage guide for the executive distillation layer. |
