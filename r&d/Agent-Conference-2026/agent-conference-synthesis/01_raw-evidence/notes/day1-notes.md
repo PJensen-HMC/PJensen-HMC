@@ -48,7 +48,7 @@ Mission:
 
 ## [Approx 8:00–9:00 AM] — Pre-Conference Mental Model
 
-"I feel like I'm in the perfect bad mood. feeling skeptical"
+"I feel like I'm in the perfect bad mood, feeling skeptical."
 
 Observations:
 
@@ -96,7 +96,7 @@ Modeling:
 
 Benchmarks:
 
-* "Toto" on HuggingFace (timeseries focused model, sounds super useful)
+* "Toto" on HuggingFace
 * timeseries + text
 * timeseries question answering
 
@@ -198,24 +198,30 @@ Two kinds of systems:
 1. ad hoc workflows
 2. embedded workflows
 
-Reaction:
+RAW TAKE:
 "This is where I want to be."
 
-Interesting:
-
-* agents should have their own repository
-* repository for skills
-* encode decision making
+RAW TAKE:
+a) anything you do other product can do
+b) you MUST have a flywheel
+c) building blocks -- internal applications
+d) agents should have their own repository
+e) a repository for skills
+f) encode how you make decisions
 
 Reaction:
 
 * workflow distinction meaningful
 * embedded workflows seem durable
+* infra + reusable capability surfaces matter more than single apps
 
 ---
 
 ## [UiPath]
 
+G2 Chief Innovation Officer.
+
+RAW TAKE:
 "Paradox: agents needed more oversight as autonomy increases."
 
 Understanding goals.
@@ -229,13 +235,22 @@ Resiliency.
 
 Throwing around determinism.
 
+Mixed fleet of software.
+
 "Pile of MCP is not enough."
+
+RAW REACTION:
+"I could not agree more -- its about process orchestration -- not a swarm."
+
+RAW REACTION:
+"They're throwing around determinism a lot -- but they have not explained how."
 
 Reaction:
 
 * orchestration layer matters
 * determinism being used vaguely
 * not enough mechanism
+* orchestration > swarm rhetoric
 
 ---
 
@@ -306,7 +321,7 @@ HNSW.
 Versioned context.
 
 Reaction:
-"Bitemporal data framing may come into play!"
+"Bitemporal data may come into play!"
 
 Key realization:
 
@@ -322,7 +337,6 @@ Agent core.
 Bedrock.
 
 Reaction:
-
 "This is Crimson SDK."
 
 Three agents in prod in November.
@@ -419,7 +433,7 @@ Reaction:
 SFT / LoRA section:
 
 * SLMs
-* fine tune for extraction/classification (me loving LORA)
+* fine tune for extraction/classification
 * data residency
 
 Reaction:
@@ -561,7 +575,7 @@ Agents manage budgets.
 Reaction:
 "Make the agent aware of the budget."
 
-YOU.com is now defaulted as the search surface in GPT OSS. (they tried Bing and Google)
+YOU.com defaulted in GPT OSS.
 
 Critique of benchmarks.
 Variance.
@@ -688,6 +702,54 @@ COST.
 
 Biggest mistake:
 not aligned to business outcome.
+
+---
+
+## [High-Value Raw Takes Preservation]
+
+These takes are intentionally preserved in raw/fragmented form because they represent instinctive synthesis, skepticism, and emotional signal during the conference.
+
+"How is it handled. There are a lot of naysayers -- if we're not showing up on reddit we're not taking enough risks."
+
+"The hard stuff is all below the waterline."
+
+"WE GOTTA HAVE A GATEWAY."
+
+"YOU WILL NOT MITIGATE PROMPT INJECTION. IT WILL HAPPEN."
+
+"The shape is slowly starting to form."
+
+"A funded startup does not mean you cannot catch them."
+
+"This is BIG -- this is my lane."
+
+"Code review is where the shit gets generated."
+
+"Agents create pathological DB workloads."
+
+"Make the agent aware of the budget."
+
+"The scarce resource isn't tokens -- it's domain rules."
+
+"Humans stop reading diffs and start consuming distilled signals."
+
+"Agent systems are distributed systems with identity, budgets, traces, and failure modes."
+
+## [Missing Raw Takes / Recovery Buffer]
+
+The following raw fragments were explicitly called out as missing and should be preserved verbatim or near-verbatim. These are not polished synthesis; they are source material.
+
+"How is it handled. There are a lot of naysayers -- if we're not showing up on reddit we're not taking enough risks. The"
+
+Raw take / likely thread:
+
+* risk tolerance
+* public visibility as signal
+* if nobody is reacting negatively, the work may be too safe
+* Reddit as cultural/error-signal surface
+* willingness to absorb noise as evidence of pushing into real territory
+
+Preserve as unresolved fragment. Do not over-clean.
 
 ---
 
