@@ -1,6 +1,6 @@
 # PJensen-HMC dotfiles
 
-Pete Jensen's machine bootstrap — HMC dev environment. Clone into `~/` and run `init.sh`.
+Pete Jensen's work agent bootstrap — HMC dev environment. Clone into `~/` and run `init.sh`.
 
 ## Fresh machine setup
 
