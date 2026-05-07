@@ -31,12 +31,13 @@ The HMC move is:
 
 > Build the control plane that lets non-human actors act safely, measurably, and economically.
 
-## Executive Visuals
+## The Control Plane Pattern
 
 ```mermaid
 flowchart LR
-    intent["Human or system intent"] --> actor["Agent or automation actor"]
-    actor --> identity["Subject, actor, and delegation"]
+    intent["Human or system intent"] --> actor["Agent, automation, or swarm"]
+    actor --> reflection["Coordination and swarm reflection"]
+    reflection --> identity["Subject, actor, and delegation"]
     identity --> capability["Governed capability surface"]
     capability --> criticality{"Action criticality"}
     criticality -->|Read or low risk| execute["Deterministic execution"]
@@ -45,35 +46,10 @@ flowchart LR
     execute --> system["System of record"]
     capability --> audit["Audit, replay, and evals"]
     audit --> sweeps["Gates and sweeps"]
+    sweeps --> reflection
 ```
 
-```mermaid
-flowchart LR
-    capability["Named capability"] --> io["Typed input and output"]
-    io --> policy["Policy and permissions"]
-    policy --> effects["Known side effects"]
-    effects --> criticality["Criticality level"]
-    criticality --> audit["Audit event"]
-    audit --> recovery["Rollback or compensation"]
-    criticality --> review{"Review needed?"}
-    review -->|Yes| human["Human approval"]
-    review -->|No| execute["Execute"]
-    human --> execute
-```
-
-Gates and sweeps showed up most concretely in the agentic-coding material, where accelerated generation creates review, validation, and drift pressure. The broader architectural lesson is portable: once agents increase the volume of proposed work, organizations need explicit gates for known failure modes and scheduled sweeps for recurring or cross-cutting issues. [3], [5], [7], [15], [16], [18]
-
-```mermaid
-flowchart LR
-    research["Research"] --> proposal["Proposal"]
-    proposal --> gates["Gates for known failures"]
-    gates --> review["Human review"]
-    review --> execute["Execute"]
-    execute --> trace["Trace and eval"]
-    trace --> sweeps["Sweeps for recurring issues"]
-    sweeps --> guardrails["Updated guardrails"]
-    guardrails --> gates
-```
+Swarm reflection is not just orchestration. It is the management loop above execution: specialized agents propose, critique, and improve work as a portfolio; gates, sweeps, evals, and human review push constraints back down before deterministic systems execute. The RingCentral material made this boundary explicit, while the NVIDIA coding material made gates and sweeps concrete in an engineering workflow. [3], [5], [7], [10], [15], [16], [18]
 
 ## What The Evidence Suggests
 
@@ -178,6 +154,7 @@ These are field signals, not vendor endorsements.
 - Bauplan: data agents need a safe failure surface. Code agents can be wrong inside branches, diffs, tests, and pull requests; data agents need sandboxed state, lineage, reviewable deltas, checks, and controlled promotion before touching authoritative data. [5], [7], [10], [18]
 - LanceDB / You.com: context is a workload with scale, latency, provenance, and budget, not a vector search checkbox. [4], [7], [9], [14], [18]
 - Google commerce: customer-facing agents need structured data and deterministic executors, not one model wandering around the market with tools. [5], [10], [15], [16]
+- RingCentral: swarm reflection is management, not chatter. Specialized agents can reason, research, hypothesize, and propose; deterministic systems should execute, test, enforce, and measure below a governance boundary. [5], [7], [10], [18]
 - T-Mobile / Distyl: agency can become containment. Use-case choice determines whether the substrate liberates work or tightens control. [5], [10], [15], [16]
 
 ## Vendor Watchlist
@@ -212,6 +189,7 @@ Convenience links for external companies and named external references in this d
 | METR | Measurement / validation signal paired with CircleCI material | https://metr.org/ |
 | Model Context Protocol | Open standard referenced in MCP governance signal | https://modelcontextprotocol.io/ |
 | PagerDuty | SRE agents and MCP production-operations signal | https://www.pagerduty.com/ |
+| RingCentral | Multi-agent orchestration and swarm-reflection signal | https://www.ringcentral.com/ |
 | T-Mobile | Customer-service agency-vs-containment field signal | https://www.t-mobile.com/about-us |
 | You.com | Budget-aware search / context economics signal | https://you.com/ |
 
@@ -224,6 +202,7 @@ This is a curated people index, not a complete speaker roster. It preserves the 
 | Julie Yaunches | Senior AI Engineer, NVIDIA | Strongest personally emphasized talk in the corpus. The CLI harness, Research/Gates/Sweeps, and accelerated-development material should stay visible even though it is note-backed rather than audio-backed. | [LinkedIn](https://www.linkedin.com/in/jyaunches) |
 | Ciro Greco | CEO and Co-founder, Bauplan | Made the data-agent safety problem concrete: agents can fail usefully only when the substrate gives them branches, reviewable deltas, checks, and controlled promotion. | [LinkedIn](https://www.linkedin.com/in/cirogreco/en) |
 | Ralph Bird | Principal Machine Learning Engineer, PagerDuty | The SRE-agent and MCP operations thread was one of the most HMC-relevant practical signals: agent tools, incident response, evals, and production safety. | [Speaker bio](https://www.agentconference.com/speaker/Ralph-Bird) |
+| Mayank Agarwal | Director of Product Management, AI Products, RingCentral | Preserved the swarm-reflection signal: specialized mandates, quality gates, portfolio-level reflection, and a deterministic execution boundary. | [LinkedIn](https://www.linkedin.com/in/mayank-agarwal-6223b04a) |
 | Barr Moses | CEO and Co-founder, Monte Carlo | Clarified why "bad agent answer" is often a data-quality or data-observability failure in disguise. | [Profile](https://theorg.com/org/monte-carlo/org-chart/barr-moses) |
 | Spencer Kimball | Cofounder and CEO, Cockroach Labs | Put infrastructure load at the center: non-human actors change database, API, queue, auth, CI, and observability economics. | [Profile](https://theorg.com/org/cockroach-labs/org-chart/spencer-kimball) |
 | Heiko Hotz | Generative AI Blackbelt, Google | Useful source for systems design for non-human actors: structured data, deterministic executors, and post-launch measurement. | [LinkedIn](https://uk.linkedin.com/in/heikohotz) |
@@ -328,6 +307,7 @@ Claim IDs in this section resolve through the extracted-claims layer [4], [5], [
 - Toil-first pilot heuristic and durable domain-rule capture: `D1-C003`, `D1-C004`, `D1-C008`, `D1-C015`
 - Data-agent safety surfaces: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
 - Validation bottleneck and Research/Gates/Sweeps: `D1-C011`, `D2-C010`, `D2-C012`, `SL-C019`, `SL-C020`
+- Multi-agent orchestration and swarm reflection: `D2-C015`, `SL-C024`, `SL-C025`
 - MCP and gateway governance: `D2-C014`, `SL-C022`
 - Infrastructure load: `D2-C011`, `SL-C018`, `V-C003`
 - Deterministic execution boundaries: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
