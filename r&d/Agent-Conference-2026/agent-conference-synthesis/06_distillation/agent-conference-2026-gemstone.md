@@ -48,11 +48,31 @@ flowchart LR
 ```
 
 ```mermaid
-flowchart TD
-    finding["Conference finding<br/>Agents need mediated capabilities"] --> implication["HMC implication<br/>System-access surfaces may become capability surfaces"]
-    implication --> move["Proposed move<br/>Define a capability registry standard"]
-    move --> pilot["Test against one bounded toil pilot"]
-    pilot --> assets["Promote reusable rules, evals, events, and gateway policies"]
+flowchart LR
+    capability["Named capability"] --> io["Typed input and output"]
+    io --> policy["Policy and permissions"]
+    policy --> effects["Known side effects"]
+    effects --> criticality["Criticality level"]
+    criticality --> audit["Audit event"]
+    audit --> recovery["Rollback or compensation"]
+    criticality --> review{"Review needed?"}
+    review -->|Yes| human["Human approval"]
+    review -->|No| execute["Execute"]
+    human --> execute
+```
+
+Gates and sweeps showed up most concretely in the agentic-coding material, where accelerated generation creates review, validation, and drift pressure. The broader architectural lesson is portable: once agents increase the volume of proposed work, organizations need explicit gates for known failure modes and scheduled sweeps for recurring or cross-cutting issues. [3], [5], [7], [15], [16], [18]
+
+```mermaid
+flowchart LR
+    research["Research"] --> proposal["Proposal"]
+    proposal --> gates["Gates for known failures"]
+    gates --> review["Human review"]
+    review --> execute["Execute"]
+    execute --> trace["Trace and eval"]
+    trace --> sweeps["Sweeps for recurring issues"]
+    sweeps --> guardrails["Updated guardrails"]
+    guardrails --> gates
 ```
 
 ## What Leadership Should Believe Now
@@ -142,7 +162,7 @@ The durable platform work is not a single impressive agent. It is the substrate 
 - Turn the pilot registry, events, evals, and gateway rules into reusable platform assets.
 - Prepare leadership readout around control plane maturity, not agent novelty.
 
-This sequence is grounded in the conference's repeated pattern: start with toil, make agent work reviewable, promote evals into guardrails, and keep gateway policy ahead of rollout. [2], [3], [4], [5], [7]
+This sequence is grounded in the conference's repeated pattern: start with toil, make agent work reviewable, promote evals into guardrails, and keep gateway policy ahead of rollout. The gates-and-sweeps language is generalized from the agentic-coding material rather than presented as a direct claim about every domain. [2], [3], [4], [5], [7]
 
 ## Field Signals Executives Can Remember
 
