@@ -22,6 +22,16 @@ Evidence base:
 
 This memo is an output artifact. It is not raw evidence. Any externally quoted claim should be traced back through the claim IDs and then to the raw source ledger.
 
+## Method Note: Human-Agent Capture
+
+This conference was captured as a human-agent pair.
+
+The human role was presence: choosing rooms, sensing energy, noticing which claims felt real or hollow, taking rough notes, recording audio, photographing slides, and making judgment calls in motion. The agent role was compression: reconciling raw notes with schedules and ledgers, normalizing sources, extracting claims, comparing claims across days, preserving OCR evidence, and turning the firehose into an inspectable memo.
+
+That pairing matters. A solo attendee could have gathered impressions. A solo agent could have summarized artifacts after the fact. The useful result came from the loop: human sensing in the room, agent-assisted synthesis immediately around the capture, then structured traceability after the conference.
+
+This is part of the finding. The work product is not only a memo about agents. It is evidence that a human-agent research workflow can convert dense, high-noise conference attendance into actionable intelligence without losing source provenance.
+
 ## Executive Summary
 
 The strongest conclusion from Agent Conference 2026 is that production agents are not primarily a model-selection problem. They are an enterprise control-plane problem.
@@ -916,6 +926,7 @@ The architecture conclusions do not depend on those numbers being exact. The cla
 
 Primary Day 1 support:
 
+- Capture method / human notes as evidence anchors: `D1-C001`
 - Observability as world-model substrate: `D1-C002`
 - Enterprise starting heuristic / go for toil: `D1-C003`
 - Embedded workflows, skills, and encoded procedures: `D1-C004`, `D1-C008`
@@ -929,6 +940,7 @@ Primary Day 1 support:
 
 Primary Day 2 support:
 
+- Day 2 booth/session capture strategy: `D2-C001`
 - API/capability mediation: `D2-C005`, `V-C001`
 - Data-agent safety: `D2-C007`, `SL-C015`, `SL-C016`, `SL-C017`
 - NVIDIA research/gates/sweeps: `D2-C010`
@@ -939,7 +951,7 @@ Primary Day 2 support:
 - Deterministic boundaries: `D2-C009`, `D2-C015`, `SL-C023`, `SL-C024`, `SL-C025`, `SL-C026`
 - Google commerce structured-data / deterministic executor boundary: `D2-C009`
 - Customer/banking use-case risk: `D2-C002`, `D2-C003`, `D2-C004`, `SL-C002`
-- Cross-day cockpit / validation / context / infrastructure synthesis: `D2-C016`
+- Cross-day cockpit / validation / context / infrastructure / distributed-cognition synthesis: `D2-C016`
 
 Primary vendor/watchlist support:
 
