@@ -10,7 +10,11 @@ Agent Conference 2026 did not validate a simple "agents everywhere" roadmap.
 
 It surfaced a production architecture: agents are non-human actors that need to operate inside explicit identity, capability, context, validation, observability, infrastructure, and human-review boundaries. The strategic work is not choosing the cleverest agent. The strategic work is building the control plane that lets agents, automations, scheduled jobs, and tool-using LLM systems act safely under delegated authority. [1], [2], [3], [4], [5], [6], [8]
 
-The HMC opportunity is to evolve selected system-access surfaces into governed capability surfaces. The design unit should not be the endpoint. It should be the capability: a named action with typed input, typed output, known side effect, owner, policy, audit event, criticality level, and rollback or compensation path. [1], [2], [4], [6], [7], [8]
+HMC should not assume that existing APIs, wrappers, or integration layers are agent-ready. Today, these surfaces are mostly understood as application plumbing: ways for software systems, services, or users to reach data and perform work. That is not sufficient for non-human actors. [1], [2], [4], [6], [7], [8]
+
+The strategic move is to define a new design standard: governed capability surfaces. A capability is not just an endpoint. It is a named action with typed input, typed output, known side effect, ownership, policy, actor constraints, audit events, criticality classification, and rollback or compensation behavior.
+
+This model is not yet socialized. That is the point. The near-term work is to introduce the concept, test it in one bounded pilot, and decide which existing system-access surfaces could be refactored or wrapped into this model over time.
 
 ## Human-Agent Capture
 
