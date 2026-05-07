@@ -90,6 +90,7 @@ Extracted from `NOTES-DAY2`, `NOTES-DAY2-EXTENDED`, `NOTES-SCHEDULE`, Day 2 audi
 - Source IDs: NOTES-DAY2; NOTES-DAY2-EXTENDED; NOTES-SCHEDULE
 - Status: captured
 - Claim: The NVIDIA notes describe an internal CLI explosion, with 25 CLIs built in 10 weeks and broad adoption after Claude Code became available internally.
+- Claim: The notes preserve email / Outlook / DL CLI examples, "automate everything" Slack-channel adoption, executive usage, a four-engineer CLI team, and a 30-40 PR/day operating load.
 - Claim: The notes identify the velocity gap between code generation and validation/verification.
 - Claim: The notes define research, gates, and sweeps as the operating model for accelerated development.
 - Claim: The notes list gates/sweeps such as E2E verification, security review, architecture alignment, coverage ratchets, PR limits, dependency pinning, migration guards, CODEOWNERS, and commit linting.

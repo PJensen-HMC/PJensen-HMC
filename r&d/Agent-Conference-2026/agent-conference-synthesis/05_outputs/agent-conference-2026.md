@@ -140,6 +140,8 @@ Evidence: `D1-C007`, `D1-C012`, `SL-C003`, `SL-C004`, `SL-C005`, `SL-C008`
 
 The LanceDB and You.com signals both pushed past naive RAG. A vector database is not enough for agents. Production context involves branching retrieval paths, structured filters, raw artifacts, provenance, write-path rules, metadata scale, p99 latency, and budget-aware search.
 
+The scale anecdote worth preserving is specifically tables: the Day 1 raw notes preserve "one customer has 1B tables" inside the LanceDB block. Treat the exact vendor attribution as unverified; the point to preserve is the infrastructure shape, not the speaker credit.
+
 The You.com budget/API angle matters because retrieval is not free ambient intelligence. Search APIs, contents APIs, model calls, long traces, and runtime budgets all become part of the same context-economics problem.
 
 Architecture lesson: HMC search/indexing should be treated as capacity-bearing context infrastructure with provenance, latency targets, metadata scale, and cost controls.
@@ -157,6 +159,10 @@ Architecture lesson: data agents should propose through sandboxed state, diffs, 
 Evidence: `D2-C010`
 
 The NVIDIA story was not just "AI coding tools got adopted." The stronger operational story was that internal CLI-style tools spread quickly, generation accelerated, and the control system had to become research, gates, and sweeps.
+
+The concrete story should stay intact: after Claude Code became available internally, an email CLI was discovered, Outlook and DL CLIs followed, and the pattern became a pile of executable interfaces. The notes preserve 25 CLIs built in 10 weeks, "automate everything" Slack-channel energy, executive usage, a four-engineer CLI team, and 30-40 PRs/day.
+
+This should be treated as note-backed, not audio-backed. No dedicated NVIDIA transcript is cataloged in this workspace, but the raw and extended notes are strong enough to preserve the CLI point as a field signal.
 
 Research helps agents map the system before acting. Gates stop known failure modes before promotion. Sweeps find repeated or cross-cutting rot that one PR cannot see.
 
@@ -882,11 +888,13 @@ Do not present the following as final external facts without checking raw source
 
 - Any vendor-specific performance number or adoption percentage.
 - Bauplan's 90% agent-driven development framing.
+- NVIDIA CLI adoption details before external or leadership quotation; this is note-backed but not audio-backed in the current evidence set.
 - CircleCI/METR speed measurements.
 - Any OCR-caveated slide wording.
 - Apollo product packaging details beyond the booth capture.
 - Dust / Agent OS replacement positioning and deployment model.
 - LangSmith product direction beyond the booth note.
+- Exact attribution and wording of the 1B tables scale anecdote.
 - RingCentral slide claims where image OCR preserved only partial text.
 - CockroachDB load claims where the claim is directional but not quantified.
 
