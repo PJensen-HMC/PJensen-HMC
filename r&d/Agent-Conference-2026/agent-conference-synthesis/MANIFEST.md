@@ -8,6 +8,7 @@ Current raw evidence inventory:
 | Notes | 4 | `01_raw-evidence/notes/` | Day-level raw notes, extended Day 2 GPT capture, and canonical schedule export. |
 | Audio transcripts | 8 | `01_raw-evidence/audio-transcripts/` | Raw transcript captures, not cleaned. |
 | Images | 45 | `01_raw-evidence/images/` | Timestamped images and one ChatGPT screenshot. |
+| Image OCR ledgers | 1 | `01_raw-evidence/images/images-ocr.md` | OCR extraction ledger keyed by image filename; uncertainty and signal notes preserved. |
 | Booth notes | 6 | `01_raw-evidence/booth-notes/` | Vendor and exhibit-hall notes. |
 
 Primary normalized indexes:
@@ -28,4 +29,4 @@ Primary extracted claim files:
 | `03_extracted-claims/day1-claims.md` | Day 1 source-level claims and field observations. |
 | `03_extracted-claims/day2-claims.md` | Day 2 source-level claims and field observations. |
 | `03_extracted-claims/vendor-claims.md` | Booth and vendor/hallway claims. |
-| `03_extracted-claims/slide-claims.md` | Image-derived claim placeholder; no claims promoted until image review/OCR. |
+| `03_extracted-claims/slide-claims.md` | Image-derived claims promoted from `01_raw-evidence/images/images-ocr.md`. |

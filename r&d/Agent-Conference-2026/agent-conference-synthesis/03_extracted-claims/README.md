@@ -9,4 +9,4 @@ Claim records should keep:
 - source status, especially when audio timestamps conflict with schedule time;
 - the smallest claim that can survive later analysis.
 
-Do not promote image-derived claims until the relevant images have been reviewed or OCRed.
+Promote image-derived claims only when the relevant image has OCR/review evidence, and keep OCR uncertainty visible.
