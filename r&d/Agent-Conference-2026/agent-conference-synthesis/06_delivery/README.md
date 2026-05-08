@@ -16,9 +16,9 @@ Use this as the fuller source-backed packet. It includes field signals, vendor w
 
 ## Present As Microsite
 
-`06_delivery/agentic-engineering-microsite.html`
+`06_delivery/agent-conference-2026-microsite.html`
 
-Use this as the short presentation artifact for the NVIDIA-inspired agentic-engineering lesson: CLI-native work surfaces, velocity gaps, review pressure, and the operating controls needed to absorb AI-generated work. Research/Gates/Sweeps appears inside the deck as one loop, not the whole thesis. It is a standalone HTML microsite/slide deck and should be presented as a note-backed field signal, not as a verbatim transcript.
+Use this as the conference-wide executive microsite. It presents the HMC thesis, human-agent capture method, control-plane pattern, governed capability-surface idea, field signals, low-regret moves, caveats, and source spine. NVIDIA appears only as one field signal inside the broader validation and operating-controls story.
 
 ## Keep Internal Unless Asked
 
