@@ -2,6 +2,12 @@
 
 This folder defines the recommended delivery order. The canonical artifacts remain in `05_outputs` so the final documents do not drift into duplicate copies.
 
+## Field Story
+
+`06_delivery/STORY.md`
+
+Use this as the chronological field narrative behind the microsite and executive packet. It preserves the live reactions, time sequence, favorite talks, discomforts, and the human-agent capture method that made the final artifact possible.
+
 ## Send First
 
 `05_outputs/agent-conference-2026-everything-distilled.md`
