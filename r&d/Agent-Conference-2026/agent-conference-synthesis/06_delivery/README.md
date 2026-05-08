@@ -18,7 +18,7 @@ Use this as the fuller source-backed packet. It includes field signals, vendor w
 
 `06_delivery/agent-conference-2026-microsite.html`
 
-Use this as the conference-wide executive microsite. It presents the HMC thesis, human-agent capture method, control-plane pattern, governed capability-surface idea, field signals, low-regret moves, caveats, and source spine. NVIDIA appears only as one field signal inside the broader validation and operating-controls story.
+Use this as the conference-wide executive microsite. It presents the HMC thesis, human-agent capture method, control-plane pattern, governed capability-surface idea, field signals, low-regret moves, caveats, and source spine. It is interactive: control-plane explorer, capability-surface readiness builder, field-signal filters, pilot selector, evidence drawer, focus mode, and keyboard shortcuts. NVIDIA appears only as one field signal inside the broader validation and operating-controls story.
 
 ## Keep Internal Unless Asked
 

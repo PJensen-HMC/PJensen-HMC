@@ -3,21 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agent Conference 2026 | HMC Executive Microsite</title>
+  <title>Agent Conference 2026 | HMC Interactive Brief</title>
   <style>
     :root {
-      --bg: #0f1417;
+      --bg: #111417;
+      --bg-2: #171c20;
       --ink: #f7f4ea;
-      --muted: #b8c0c2;
+      --muted: #b9c0c4;
+      --soft: #8d989f;
       --line: rgba(247, 244, 234, 0.16);
-      --panel: rgba(247, 244, 234, 0.07);
-      --panel-strong: rgba(247, 244, 234, 0.12);
-      --green: #7cf29c;
-      --cyan: #5bd7ff;
+      --panel: rgba(247, 244, 234, 0.065);
+      --panel-2: rgba(247, 244, 234, 0.105);
+      --green: #76f29a;
+      --cyan: #5ed9ff;
       --yellow: #ffd166;
       --red: #ff715b;
-      --shadow: rgba(0, 0, 0, 0.4);
+      --blue: #91b7ff;
+      --shadow: rgba(0, 0, 0, 0.38);
       --radius: 8px;
+      --max: 1180px;
     }
 
     * {
@@ -29,16 +33,16 @@
       color: var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       letter-spacing: 0;
+      scroll-behavior: smooth;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      overflow: hidden;
       background:
-        radial-gradient(circle at 15% 18%, rgba(91, 215, 255, 0.14), transparent 30%),
-        radial-gradient(circle at 82% 14%, rgba(124, 242, 156, 0.12), transparent 32%),
-        linear-gradient(140deg, #0b0f12 0%, #11191b 48%, #17130f 100%);
+        radial-gradient(circle at 12% 6%, rgba(94, 217, 255, 0.14), transparent 30%),
+        radial-gradient(circle at 88% 5%, rgba(118, 242, 154, 0.12), transparent 28%),
+        linear-gradient(145deg, #0c1012 0%, #121a1d 46%, #18130f 100%);
     }
 
     body::before {
@@ -47,10 +51,16 @@
       inset: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(247, 244, 234, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(247, 244, 234, 0.035) 1px, transparent 1px);
-      background-size: 46px 46px;
-      mask-image: linear-gradient(to bottom, black, transparent 78%);
+        linear-gradient(rgba(247, 244, 234, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(247, 244, 234, 0.032) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 76%);
+    }
+
+    body.focus-mode .supporting,
+    body.focus-mode .fine-print,
+    body.focus-mode .site-footer {
+      display: none;
     }
 
     a {
@@ -62,37 +72,125 @@
       text-decoration: underline;
     }
 
-    .deck {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
+    button,
+    input {
+      font: inherit;
     }
 
-    .slide {
-      position: absolute;
-      inset: 0;
-      display: none;
-      width: 100vw;
-      height: 100vh;
-      padding: clamp(28px, 5vw, 70px);
-      align-items: center;
-      justify-content: center;
+    button {
+      cursor: pointer;
     }
 
-    .slide.active {
-      display: flex;
+    .skip {
+      position: fixed;
+      left: 16px;
+      top: -80px;
+      z-index: 40;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #050708;
+      color: var(--ink);
     }
 
-    .inner {
-      width: min(1180px, 100%);
-      max-height: 100%;
+    .skip:focus {
+      top: 16px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(14, 18, 20, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar-inner {
+      width: min(var(--max), calc(100vw - 32px));
+      margin: 0 auto;
+      min-height: 66px;
       display: grid;
-      gap: 28px;
+      grid-template-columns: auto 1fr auto;
+      gap: 18px;
+      align-items: center;
     }
 
-    .two {
-      grid-template-columns: minmax(0, 1fr) minmax(330px, 0.88fr);
+    .brand {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand strong {
+      font-size: 0.98rem;
+    }
+
+    .brand span {
+      color: var(--soft);
+      font-size: 0.78rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav a,
+    .small-button,
+    .chip-button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(247, 244, 234, 0.06);
+      color: var(--ink);
+      padding: 8px 10px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .nav a:hover,
+    .small-button:hover,
+    .chip-button:hover,
+    .nav a.active,
+    .chip-button.active {
+      border-color: rgba(118, 242, 154, 0.65);
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      justify-content: end;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      width: min(var(--max), calc(100vw - 32px));
+      margin: 0 auto;
+      padding: clamp(54px, 8vw, 96px) 0;
+      scroll-margin-top: 86px;
+    }
+
+    .hero {
+      min-height: calc(100vh - 66px);
+      display: grid;
+      align-items: center;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr);
+      gap: 34px;
       align-items: center;
     }
 
@@ -113,620 +211,1314 @@
     }
 
     h1 {
-      max-width: 1000px;
-      font-size: clamp(3.2rem, 8.4vw, 7.6rem);
+      max-width: 980px;
+      font-size: clamp(3.2rem, 8vw, 7rem);
       line-height: 0.9;
     }
 
     h2 {
-      max-width: 1000px;
-      font-size: clamp(2.25rem, 5.6vw, 5.1rem);
-      line-height: 0.96;
+      max-width: 960px;
+      font-size: clamp(2.1rem, 5vw, 4.8rem);
+      line-height: 0.97;
     }
 
     h3 {
-      font-size: clamp(1.15rem, 1.9vw, 1.55rem);
-      line-height: 1.12;
+      font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+      line-height: 1.15;
     }
 
     .lead {
-      max-width: 930px;
+      max-width: 900px;
       color: var(--muted);
-      font-size: clamp(1.08rem, 2.1vw, 1.55rem);
-      line-height: 1.43;
+      font-size: clamp(1.08rem, 2vw, 1.48rem);
+      line-height: 1.45;
     }
 
-    .big-line {
-      max-width: 1030px;
-      font-size: clamp(1.65rem, 3.5vw, 3.15rem);
-      line-height: 1.06;
-      font-weight: 850;
+    .section-head {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .panel,
+    .card,
+    .metric,
+    .source-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      box-shadow: 0 22px 70px var(--shadow);
     }
 
     .panel {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-      box-shadow: 0 24px 80px var(--shadow);
-      padding: clamp(18px, 2.8vw, 32px);
+      padding: clamp(18px, 2.5vw, 30px);
     }
 
-    .tags,
-    .chips {
+    .hero-visual {
+      min-height: 500px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+    }
+
+    .constellation {
+      position: relative;
+      min-height: 330px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(247, 244, 234, 0.045) 1px, transparent 1px),
+        linear-gradient(rgba(247, 244, 234, 0.045) 1px, transparent 1px),
+        rgba(0, 0, 0, 0.18);
+      background-size: 34px 34px;
+      overflow: hidden;
+    }
+
+    .orbit {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 78%;
+      aspect-ratio: 1;
+      border: 1px solid rgba(118, 242, 154, 0.22);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .orbit.two {
+      width: 52%;
+      border-color: rgba(94, 217, 255, 0.22);
+      animation: spin 24s linear infinite;
+    }
+
+    .orbit.three {
+      width: 28%;
+      border-color: rgba(255, 209, 102, 0.2);
+      animation: spin 16s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .center-node {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 170px;
+      height: 86px;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 1px solid rgba(118, 242, 154, 0.5);
+      border-radius: var(--radius);
+      background: rgba(10, 18, 14, 0.92);
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .satellite {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 112px;
+      min-height: 54px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17, 20, 23, 0.92);
+      color: var(--ink);
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 850;
+    }
+
+    .satellite:nth-of-type(5) { left: 7%; top: 14%; }
+    .satellite:nth-of-type(6) { right: 8%; top: 18%; }
+    .satellite:nth-of-type(7) { left: 9%; bottom: 15%; }
+    .satellite:nth-of-type(8) { right: 11%; bottom: 14%; }
+    .satellite:nth-of-type(9) { left: 50%; top: 5%; transform: translateX(-50%); }
+
+    .hero-actions,
+    .chip-row,
+    .filter-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
 
-    .tag,
-    .chip {
+    .primary-action {
+      min-height: 44px;
+      border: 1px solid rgba(118, 242, 154, 0.68);
+      border-radius: var(--radius);
+      background: rgba(118, 242, 154, 0.13);
+      color: var(--green);
+      padding: 11px 14px;
+      font-weight: 900;
+    }
+
+    .secondary-action {
+      min-height: 44px;
       border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.2);
+      border-radius: var(--radius);
+      background: rgba(247, 244, 234, 0.06);
       color: var(--ink);
-      padding: 9px 12px;
-      font-weight: 800;
-      font-size: 0.9rem;
-      white-space: nowrap;
+      padding: 11px 14px;
+      font-weight: 850;
     }
 
-    .chip {
-      border-color: rgba(91, 215, 255, 0.3);
-      background: rgba(91, 215, 255, 0.08);
-      font-size: 0.82rem;
-    }
-
-    .capture {
+    .stats {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px;
+      min-height: 114px;
+      display: grid;
+      align-content: space-between;
+      box-shadow: none;
+    }
+
+    .metric strong {
+      color: var(--green);
+      font-size: clamp(1.8rem, 3.6vw, 3rem);
+      line-height: 0.9;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.25;
+    }
+
+    .method-grid,
+    .moves-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
 
-    .capture-card,
-    .move,
-    .signal,
-    .source,
-    .pillar {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: rgba(0, 0, 0, 0.22);
+    .card {
       padding: 18px;
+      box-shadow: none;
       display: grid;
-      gap: 10px;
+      gap: 12px;
       align-content: start;
+      min-height: 142px;
     }
 
-    .capture-card strong,
-    .move strong,
-    .signal strong,
-    .source strong,
-    .pillar strong {
+    .card strong,
+    .source-card strong {
       color: var(--green);
       font-size: 1rem;
     }
 
-    .capture-card p,
-    .move p,
-    .signal p,
-    .source p,
-    .pillar p,
-    .note {
+    .card p,
+    .source-card p,
+    .detail-text,
+    .help-text {
       color: var(--muted);
       line-height: 1.42;
       font-size: 0.96rem;
     }
 
-    .diagram {
+    .explorer {
       display: grid;
-      gap: 14px;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 18px;
+      align-items: stretch;
     }
 
-    .diagram-row {
+    .plane-map {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
     }
 
-    .node {
-      min-height: 112px;
+    .plane-node {
+      min-height: 118px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: rgba(247, 244, 234, 0.06);
-      padding: 14px;
-      display: grid;
-      align-content: center;
-      gap: 8px;
-      text-align: center;
-      position: relative;
-    }
-
-    .node strong {
       color: var(--ink);
-      font-size: 0.96rem;
+      text-align: left;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
     }
 
-    .node span {
+    .plane-node span {
+      color: var(--soft);
+      font-size: 0.78rem;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .plane-node strong {
+      font-size: 1rem;
+    }
+
+    .plane-node.active {
+      border-color: rgba(118, 242, 154, 0.78);
+      background: rgba(118, 242, 154, 0.11);
+    }
+
+    .detail-panel {
+      min-height: 100%;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .detail-panel h3 {
+      color: var(--green);
+      font-size: 1.55rem;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .detail-list li {
+      border-left: 3px solid rgba(94, 217, 255, 0.55);
+      padding-left: 12px;
       color: var(--muted);
-      font-size: 0.8rem;
-      line-height: 1.22;
+      line-height: 1.38;
     }
 
-    .node.accent {
-      border-color: rgba(124, 242, 156, 0.45);
-      background: rgba(124, 242, 156, 0.08);
-    }
-
-    .capability {
+    .surface-builder {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.62fr);
+      gap: 18px;
     }
 
-    .capability .node {
-      min-height: 130px;
-    }
-
-    .pillars {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .signals {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .signal {
-      min-height: 132px;
-    }
-
-    .moves {
+    .check-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .check-card {
+      position: relative;
+      min-height: 112px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 14px 14px 14px 42px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .check-card input {
+      position: absolute;
+      left: 14px;
+      top: 17px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--green);
+    }
+
+    .check-card strong {
+      color: var(--ink);
+    }
+
+    .check-card span {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.32;
+    }
+
+    .scorebox {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .score-number {
+      font-size: clamp(3rem, 7vw, 5.6rem);
+      line-height: 0.9;
+      color: var(--green);
+      font-weight: 950;
+    }
+
+    .meter {
+      height: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.24);
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--red), var(--yellow), var(--green));
+      transition: width 180ms ease;
+    }
+
+    .signal-toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .search {
+      min-height: 42px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.24);
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .signal-card {
+      min-height: 158px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(247, 244, 234, 0.055);
+      color: var(--ink);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      text-align: left;
+      align-content: start;
+    }
+
+    .signal-card:hover,
+    .signal-card.active {
+      border-color: rgba(118, 242, 154, 0.65);
+      background: rgba(118, 242, 154, 0.09);
+    }
+
+    .signal-card small {
+      color: var(--yellow);
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .signal-card p {
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 0.92rem;
+    }
+
+    .drawer {
+      position: fixed;
+      right: 18px;
+      top: 82px;
+      bottom: 18px;
+      z-index: 30;
+      width: min(430px, calc(100vw - 36px));
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(13, 17, 19, 0.96);
+      box-shadow: 0 30px 90px var(--shadow);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .drawer.open {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .drawer-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .drawer h3 {
+      color: var(--green);
+      font-size: 1.35rem;
+    }
+
+    .drawer-close {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(247, 244, 234, 0.06);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .pilot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.64fr);
+      gap: 18px;
+    }
+
+    .slider-grid {
+      display: grid;
       gap: 14px;
     }
 
-    .split-list {
+    .slider-row {
+      display: grid;
+      grid-template-columns: 170px 1fr 42px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .slider-row label {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .slider-row input {
+      accent-color: var(--green);
+    }
+
+    .slider-row output {
+      color: var(--yellow);
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .recommendation {
       display: grid;
       gap: 14px;
+      align-content: start;
+    }
+
+    .recommendation strong {
+      color: var(--green);
+      font-size: 1.35rem;
+    }
+
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .source-card {
+      min-height: 136px;
+      padding: 16px;
+      box-shadow: none;
+      display: grid;
+      gap: 10px;
+      align-content: start;
     }
 
     .callout {
       border-left: 4px solid var(--green);
       border-radius: 0 var(--radius) var(--radius) 0;
-      background: rgba(124, 242, 156, 0.08);
+      background: rgba(118, 242, 154, 0.08);
       padding: 16px 18px;
     }
 
     .callout p {
-      color: var(--ink);
       line-height: 1.44;
     }
 
-    .source-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+    .site-footer {
+      width: min(var(--max), calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 50px;
+      color: var(--soft);
+      font-size: 0.88rem;
     }
 
-    .citation {
-      color: var(--yellow);
-      font-weight: 850;
-    }
-
-    .nav {
+    .floating-help {
       position: fixed;
-      right: 22px;
-      bottom: 22px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav button {
-      width: 44px;
-      height: 44px;
-      border: 1px solid var(--line);
-      border-radius: 50%;
-      background: rgba(15, 20, 23, 0.88);
-      color: var(--ink);
-      font-size: 1.25rem;
-      cursor: pointer;
-      box-shadow: 0 12px 30px var(--shadow);
-    }
-
-    .nav button:hover {
-      color: var(--green);
-      border-color: rgba(124, 242, 156, 0.8);
-    }
-
-    .counter {
-      min-width: 54px;
-      color: var(--muted);
-      font-size: 0.86rem;
-      font-weight: 800;
-      text-align: center;
-    }
-
-    .progress {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 11;
-      height: 5px;
-      background: rgba(247, 244, 234, 0.1);
-    }
-
-    .progress span {
-      display: block;
-      width: 0;
-      height: 100%;
-      background: linear-gradient(90deg, var(--green), var(--cyan), var(--yellow));
-      transition: width 180ms ease;
-    }
-
-    .foot {
-      position: fixed;
-      left: 22px;
+      right: 18px;
       bottom: 18px;
-      z-index: 10;
-      color: rgba(247, 244, 234, 0.6);
-      font-size: 0.78rem;
-      font-weight: 750;
+      z-index: 21;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 50;
+      display: none;
+      transform: translateX(-50%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(13, 17, 19, 0.96);
+      color: var(--ink);
+      padding: 10px 12px;
+      box-shadow: 0 18px 48px var(--shadow);
+      font-weight: 800;
+    }
+
+    .toast.show {
+      display: block;
     }
 
     @media (max-width: 980px) {
-      body {
-        overflow: auto;
-      }
-
-      .deck {
-        height: auto;
-        overflow: visible;
-      }
-
-      .slide {
-        position: relative;
-        height: auto;
-        min-height: 100vh;
-      }
-
-      .slide:not(.active) {
-        display: none;
-      }
-
-      .two,
-      .capture,
-      .capability,
-      .moves,
-      .source-grid,
-      .diagram-row,
-      .pillars,
-      .signals {
+      .topbar-inner,
+      .grid-two,
+      .explorer,
+      .surface-builder,
+      .pilot,
+      .signal-toolbar {
         grid-template-columns: 1fr;
       }
 
-      .foot {
+      .nav {
+        justify-content: start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+
+      .toolbar {
+        justify-content: start;
+      }
+
+      .stats,
+      .method-grid,
+      .moves-grid,
+      .check-grid,
+      .plane-map,
+      .signals-grid,
+      .source-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        min-height: auto;
+      }
+
+      .constellation {
+        min-height: 260px;
+      }
+
+      .satellite {
+        width: 96px;
+        font-size: 0.72rem;
+      }
+
+      .slider-row {
+        grid-template-columns: 1fr;
+      }
+
+      .floating-help {
         display: none;
       }
     }
 
     @media print {
       body {
-        overflow: visible;
         background: #ffffff;
         color: #111111;
       }
 
       body::before,
-      .nav,
-      .progress,
-      .foot {
+      .topbar,
+      .floating-help,
+      .drawer,
+      .toast,
+      .hero-actions,
+      .signal-toolbar {
         display: none;
       }
 
-      .deck {
-        height: auto;
-        overflow: visible;
-      }
-
-      .slide,
-      .slide.active {
-        position: relative;
-        display: flex;
-        height: auto;
-        min-height: 7.5in;
-        page-break-after: always;
-        color: #111111;
+      section {
+        width: 100%;
+        padding: 34px 0;
+        page-break-inside: avoid;
       }
 
       .panel,
-      .capture-card,
-      .move,
-      .signal,
-      .source,
-      .pillar,
-      .node {
+      .card,
+      .metric,
+      .source-card,
+      .plane-node,
+      .check-card,
+      .signal-card {
         box-shadow: none;
         border-color: #bbbbbb;
         background: #ffffff;
       }
 
       .lead,
-      .note,
-      .capture-card p,
-      .move p,
-      .signal p,
-      .source p,
-      .pillar p,
-      .node span {
+      .card p,
+      .source-card p,
+      .detail-text,
+      .help-text,
+      .metric span,
+      .signal-card p {
         color: #333333;
       }
     }
   </style>
 </head>
 <body>
-  <main class="deck" aria-live="polite">
-    <section class="slide active" data-title="Opening">
-      <div class="inner">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <strong>Agent Conference 2026</strong>
+        <span>HMC interactive brief</span>
+      </div>
+      <nav class="nav" aria-label="Microsite sections">
+        <a href="#read">Read</a>
+        <a href="#pattern">Pattern</a>
+        <a href="#capability">Capability</a>
+        <a href="#signals">Signals</a>
+        <a href="#pilot">Pilot</a>
+        <a href="#sources">Sources</a>
+      </nav>
+      <div class="toolbar">
+        <button class="small-button" id="focusToggle" type="button">Focus</button>
+        <button class="small-button" id="copyTakeaway" type="button">Copy line</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="read">
+      <div class="grid-two">
         <div>
-          <p class="kicker">Agent Conference 2026 / HMC Executive Microsite</p>
+          <p class="kicker">Executive read</p>
           <h1>Build the control plane.</h1>
-          <p class="lead" style="margin-top: 24px;">The conference did not validate a simple "agents everywhere" roadmap. It surfaced a production architecture: non-human actors need explicit identity, governed capabilities, provenance-aware context, validation, observability, infrastructure controls, and human-review boundaries. <span class="citation">[1][2]</span></p>
-        </div>
-        <div class="tags">
-          <span class="tag">Agents as actors</span>
-          <span class="tag">Capabilities, not raw access</span>
-          <span class="tag">Context as infrastructure</span>
-          <span class="tag">Validation bottleneck</span>
-          <span class="tag">Human judgment retained</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide" data-title="Method">
-      <div class="inner two">
-        <div>
-          <p class="kicker">Method Signal</p>
-          <h2>Human-agent capture was part of the finding.</h2>
-          <p class="lead" style="margin-top: 22px;">This was not only a memo about agents. It was produced through a human-agent research loop: the human drank from the conference firehose; the agent carried normalization, extraction, comparison, caveat preservation, and synthesis. <span class="citation">[1][4][5]</span></p>
-        </div>
-        <div class="capture">
-          <div class="capture-card">
-            <strong>Human role</strong>
-            <p>Choose rooms, sense credibility, notice energy, record audio, photograph slides, and mark what felt actionable in motion.</p>
+          <p class="lead" style="margin-top: 24px;">Agent Conference 2026 did not validate a simple "agents everywhere" roadmap. It surfaced a production architecture: non-human actors need explicit identity, governed capabilities, provenance-aware context, validation, observability, infrastructure controls, and human-review boundaries.</p>
+          <div class="hero-actions" style="margin-top: 24px;">
+            <a class="primary-action" href="#pattern">Explore the pattern</a>
+            <a class="secondary-action" href="#pilot">Try the pilot selector</a>
           </div>
-          <div class="capture-card">
-            <strong>Agent role</strong>
-            <p>Reconcile notes and schedules, index sources, extract claims, preserve caveats, and turn high-noise capture into inspectable synthesis.</p>
+        </div>
+        <div class="panel hero-visual" aria-label="Interactive control plane visual">
+          <p class="kicker">Control-plane view</p>
+          <div class="constellation">
+            <div class="orbit"></div>
+            <div class="orbit two"></div>
+            <div class="orbit three"></div>
+            <div class="center-node">Governed capability surface</div>
+            <div class="satellite">Identity</div>
+            <div class="satellite">Context</div>
+            <div class="satellite">Validation</div>
+            <div class="satellite">Observability</div>
+            <div class="satellite">Human review</div>
+          </div>
+          <div class="stats">
+            <div class="metric"><strong>1</strong><span>bounded pilot before platform spread</span></div>
+            <div class="metric"><strong>7</strong><span>control-plane concerns to make explicit</span></div>
+            <div class="metric"><strong>12</strong><span>field signals preserved as evidence texture</span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="slide" data-title="Pattern">
-      <div class="inner">
-        <div>
-          <p class="kicker">The Pattern</p>
-          <h2>Production agents are a control-plane problem.</h2>
-          <p class="lead" style="margin-top: 20px;">The model was not the center of gravity. The operating substrate around the model was. <span class="citation">[1][2][3]</span></p>
+    <section id="method" class="supporting">
+      <div class="section-head">
+        <p class="kicker">Method signal</p>
+        <h2>Human-agent capture was part of the finding.</h2>
+        <p class="lead">The conference was captured as a human-agent research pair. The human sensed the room. The agent carried normalization, extraction, comparison, caveat preservation, and synthesis.</p>
+      </div>
+      <div class="method-grid">
+        <div class="card">
+          <strong>Human role</strong>
+          <p>Choose rooms, sense credibility, notice energy, record audio, photograph slides, and decide what felt actionable in motion.</p>
         </div>
-        <div class="diagram panel">
-          <div class="diagram-row">
-            <div class="node"><strong>Intent</strong><span>human or system goal</span></div>
-            <div class="node"><strong>Mandate</strong><span>specialized scope</span></div>
-            <div class="node"><strong>Actor</strong><span>agent or automation</span></div>
-            <div class="node accent"><strong>Capability</strong><span>governed action surface</span></div>
-            <div class="node"><strong>Execution</strong><span>deterministic where possible</span></div>
-          </div>
-          <div class="diagram-row">
-            <div class="node"><strong>Identity</strong><span>subject, actor, delegation</span></div>
-            <div class="node"><strong>Context</strong><span>provenance, freshness, permissions</span></div>
-            <div class="node"><strong>Review</strong><span>human gate where needed</span></div>
-            <div class="node"><strong>Trace</strong><span>audit, cost, evals</span></div>
-            <div class="node"><strong>Improve</strong><span>gates, sweeps, rules</span></div>
-          </div>
+        <div class="card">
+          <strong>Agent role</strong>
+          <p>Reconcile schedules, index sources, extract claims, compare talks, preserve caveats, and turn the firehose into inspectable intelligence.</p>
         </div>
       </div>
     </section>
 
-    <section class="slide" data-title="Capabilities">
-      <div class="inner">
-        <div>
-          <p class="kicker">HMC Thesis</p>
-          <h2>Do not assume existing access surfaces are agent-ready.</h2>
-          <p class="lead" style="margin-top: 20px;">APIs, wrappers, and integration layers are often application plumbing. That is not sufficient for non-human actors. The strategic move is a design standard for governed capability surfaces. <span class="citation">[1][2]</span></p>
-        </div>
-        <div class="capability">
-          <div class="node accent"><strong>Capability</strong><span>named action, not just endpoint</span></div>
-          <div class="node"><strong>Contract</strong><span>typed input, typed output</span></div>
-          <div class="node"><strong>Side Effects</strong><span>known impact and owner</span></div>
-          <div class="node"><strong>Policy</strong><span>permissions and actor constraints</span></div>
-          <div class="node"><strong>Audit</strong><span>event, trace, replay path</span></div>
-          <div class="node"><strong>Recovery</strong><span>rollback or compensation</span></div>
-        </div>
-        <div class="callout">
-          <p>The near-term work is to introduce the concept, test it in one bounded pilot, and decide which existing system-access surfaces could be refactored or wrapped into this model over time.</p>
+    <section id="pattern">
+      <div class="section-head">
+        <p class="kicker">Interactive pattern explorer</p>
+        <h2>Production agents are a control-plane problem.</h2>
+        <p class="lead">Click a control-plane element to see why it matters, what can go wrong, and what HMC should define before broad rollout.</p>
+      </div>
+      <div class="explorer">
+        <div class="plane-map" id="planeMap"></div>
+        <aside class="panel detail-panel" id="planeDetail" aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <section id="capability">
+      <div class="section-head">
+        <p class="kicker">Capability surface builder</p>
+        <h2>A capability is not just an endpoint.</h2>
+        <p class="lead">Toggle the elements that are defined for a candidate system action. The readiness score is intentionally simple: it forces the conversation about whether the surface is safe for non-human actors.</p>
+      </div>
+      <div class="surface-builder">
+        <div class="check-grid" id="capabilityChecks"></div>
+        <aside class="panel scorebox">
+          <p class="kicker">Readiness</p>
+          <div class="score-number" id="capScore">0%</div>
+          <div class="meter" aria-hidden="true"><span id="capMeter"></span></div>
+          <p class="detail-text" id="capGuidance">Start by naming the capability and its owner.</p>
+          <button class="secondary-action" id="resetCapability" type="button">Reset builder</button>
+        </aside>
+      </div>
+    </section>
+
+    <section id="signals">
+      <div class="section-head">
+        <p class="kicker">Field signal explorer</p>
+        <h2>Signals, not endorsements.</h2>
+        <p class="lead">Filter or search the preserved field signals. Click any signal to open evidence texture and the HMC translation.</p>
+      </div>
+      <div class="signal-toolbar">
+        <input class="search" id="signalSearch" type="search" placeholder="Search signals, companies, or concepts" aria-label="Search field signals">
+        <div class="filter-row" id="signalFilters"></div>
+      </div>
+      <div class="signals-grid" id="signalsGrid"></div>
+    </section>
+
+    <section id="controls">
+      <div class="section-head">
+        <p class="kicker">Operating controls</p>
+        <h2>Validation is the new throughput constraint.</h2>
+        <p class="lead">Across coding-agent, validation, infrastructure, data, and MCP material, the pattern is the same: AI accelerates candidate work first. The organization has to scale review, gates, sweeps, replay, evals, and incident response around that new volume.</p>
+      </div>
+      <div class="moves-grid">
+        <div class="card"><strong>Gates</strong><p>Known failure modes before promotion: criticality policy, security checks, test selection, coverage ratchets, migration guards, CODEOWNERS, and destructive-action review.</p></div>
+        <div class="card"><strong>Sweeps</strong><p>Recurring inspections for drift, repeated review patterns, cross-cutting issues, trace anomalies, prompt-injection evidence, and eval variance.</p></div>
+        <div class="card"><strong>Replay</strong><p>Run history, source references, tool calls, actor identity, policy decisions, and output lineage need to be inspectable after the fact.</p></div>
+        <div class="card"><strong>Human taste</strong><p>Humans remain responsible for standards, authority, edge-case judgment, and whether the work should exist at all.</p></div>
+      </div>
+    </section>
+
+    <section id="pilot">
+      <div class="section-head">
+        <p class="kicker">Pilot selector</p>
+        <h2>Go for toil. Keep the blast radius small.</h2>
+        <p class="lead">Adjust the sliders for a candidate pilot. The score favors measurable toil, low write risk, available domain rules, and manageable review burden.</p>
+      </div>
+      <div class="pilot">
+        <div class="panel slider-grid" id="pilotSliders"></div>
+        <aside class="panel recommendation">
+          <p class="kicker">Recommendation</p>
+          <div class="score-number" id="pilotScore">0</div>
+          <div class="meter" aria-hidden="true"><span id="pilotMeter"></span></div>
+          <strong id="pilotLabel">Not ready</strong>
+          <p class="detail-text" id="pilotText">Start in read-only or proposal-first mode until ownership, audit, and review boundaries are clear.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="moves">
+      <div class="section-head">
+        <p class="kicker">Low-regret moves</p>
+        <h2>Start bounded. Build reusable control.</h2>
+      </div>
+      <div class="moves-grid">
+        <div class="card"><strong>1. Pick one bounded toil pilot</strong><p>Named owner, measurable success criteria, small blast radius, proposal-first or read-only starting mode.</p></div>
+        <div class="card"><strong>2. Define a capability registry standard</strong><p>Owner, contract, side-effect class, permissions, actor policy, audit fields, rollback path, and criticality level.</p></div>
+        <div class="card"><strong>3. Establish identity and gateway policy</strong><p>Subject/actor separation, delegated authority, scoped permissions, prompt-injection response, and destructive-action handling.</p></div>
+        <div class="card"><strong>4. Treat context provenance as platform infrastructure</strong><p>Source ID, version, permission, freshness, index version, and output references.</p></div>
+        <div class="card"><strong>5. Turn evals into guardrails</strong><p>Variance checks, repeatability checks, replay, gates, sweeps, and incident-response loops.</p></div>
+        <div class="card"><strong>6. Capture domain rules</strong><p>Reusable skills, domain-rule libraries, encoded decision procedures, and capability policies.</p></div>
+      </div>
+    </section>
+
+    <section id="caveats" class="fine-print">
+      <div class="section-head">
+        <p class="kicker">Caveats</p>
+        <h2>Keep the evidence honest.</h2>
+      </div>
+      <div class="panel">
+        <div class="chip-row">
+          <span class="chip">Vendor signals are not endorsements</span>
+          <span class="chip">NVIDIA CLI details are note-backed</span>
+          <span class="chip">1B tables attribution remains caveated</span>
+          <span class="chip">OCR wording should be checked before quotation</span>
+          <span class="chip">HMC capability-surface thesis is an interpretation</span>
         </div>
       </div>
     </section>
 
-    <section class="slide" data-title="Carry Forward">
-      <div class="inner">
-        <div>
-          <p class="kicker">What Carries Forward</p>
-          <h2>Seven things to remember.</h2>
-        </div>
-        <div class="pillars">
-          <div class="pillar"><strong>Actors, not users</strong><p>Separate subject, actor, delegation, tool, and system of record.</p></div>
-          <div class="pillar"><strong>Capabilities</strong><p>Expose narrow, typed, policy-aware actions instead of raw system access.</p></div>
-          <div class="pillar"><strong>Context</strong><p>Treat retrieval as infrastructure with provenance, freshness, permissions, and cost.</p></div>
-          <div class="pillar"><strong>Validation</strong><p>Generation accelerates first. Review and recovery become the bottleneck.</p></div>
-          <div class="pillar"><strong>Domain rules</strong><p>The scarce resource is not tokens. It is encoded judgment.</p></div>
-          <div class="pillar"><strong>Infrastructure load</strong><p>Humans pause. Agents do not. Model agent-shaped traffic separately.</p></div>
-          <div class="pillar"><strong>Use-case ethics</strong><p>Start with toil and reliability, not opaque authority or containment.</p></div>
-          <div class="pillar"><strong>Human center</strong><p>Agents carry volume; humans retain standards, taste, and authority.</p></div>
-        </div>
+    <section id="sources">
+      <div class="section-head">
+        <p class="kicker">Source spine</p>
+        <h2>This microsite is a delivery layer.</h2>
+        <p class="lead">The durable record remains the claim-backed memo, extracted claims, normalized ledgers, and raw evidence. Use this microsite to present and explore, not to replace traceability.</p>
       </div>
-    </section>
-
-    <section class="slide" data-title="Field Signals">
-      <div class="inner">
-        <div>
-          <p class="kicker">Field Signals</p>
-          <h2>These are signals, not endorsements.</h2>
-          <p class="lead" style="margin-top: 18px;">The value is not vendor selection. The value is how each story makes part of the architecture concrete. <span class="citation">[1][2]</span></p>
-        </div>
-        <div class="signals">
-          <div class="signal"><strong>Apollo</strong><p>Agents need cockpits, not keys to the building.</p></div>
-          <div class="signal"><strong>DataRobot</strong><p>The product is below the waterline: identity, auth, audit, evals, governance, CI/CD, connectors, and economics.</p></div>
-          <div class="signal"><strong>Bauplan</strong><p>Data agents need sandboxed state, lineage, reviewable deltas, checks, and controlled promotion.</p></div>
-          <div class="signal"><strong>NVIDIA</strong><p>CLI-native work surfaces showed velocity pressure; Research/Gates/Sweeps is one useful operating loop.</p></div>
-          <div class="signal"><strong>CircleCI / METR</strong><p>The fastest is wrong if validation cannot keep up.</p></div>
-          <div class="signal"><strong>MCP panel</strong><p>Prompt injection will happen. Design the gateway.</p></div>
-          <div class="signal"><strong>CockroachDB</strong><p>Humans breathe. Agents do not. Agent-shaped traffic changes infrastructure economics.</p></div>
-          <div class="signal"><strong>RingCentral</strong><p>Specialize deeply; keep known procedures deterministic below a governed boundary.</p></div>
-          <div class="signal"><strong>T-Mobile / Distyl</strong><p>Use-case selection determines whether agency becomes help or containment.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide" data-title="Operating Controls">
-      <div class="inner two">
-        <div>
-          <p class="kicker">Operating Controls</p>
-          <h2>Validation is the new throughput constraint.</h2>
-          <p class="lead" style="margin-top: 22px;">Across the coding-agent, validation, and infrastructure material, the pattern is the same: AI accelerates candidate work first. The organization has to scale review, gates, sweeps, replay, evals, and incident response around that new volume. <span class="citation">[1][2][3]</span></p>
-        </div>
-        <div class="panel split-list">
-          <div class="chips">
-            <span class="chip">small reviewable diffs</span>
-            <span class="chip">provenance</span>
-            <span class="chip">test selection</span>
-            <span class="chip">behavioral verification</span>
-            <span class="chip">security checks</span>
-            <span class="chip">architecture checks</span>
-            <span class="chip">coverage ratchets</span>
-            <span class="chip">migration guards</span>
-            <span class="chip">CODEOWNERS</span>
-            <span class="chip">replay</span>
-            <span class="chip">drift sweeps</span>
-            <span class="chip">human taste</span>
-          </div>
-          <p class="note">This is not process theater. It is how the enterprise absorbs AI velocity without surrendering control.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide" data-title="HMC Moves">
-      <div class="inner">
-        <div>
-          <p class="kicker">Low-Regret HMC Moves</p>
-          <h2>Start bounded. Build reusable control.</h2>
-        </div>
-        <div class="moves">
-          <div class="move"><strong>Pick one toil pilot</strong><p>Named owner, measurable success criteria, small blast radius, proposal-first or read-only starting mode.</p></div>
-          <div class="move"><strong>Define a capability registry</strong><p>Owner, contract, side-effect class, actor policy, audit fields, rollback path, and criticality level.</p></div>
-          <div class="move"><strong>Set identity and gateway policy</strong><p>Subject/actor separation, delegated authority, scoped permissions, prompt-injection response, and destructive-action handling.</p></div>
-          <div class="move"><strong>Make context provenance real</strong><p>Source ID, version, permission, freshness, index version, and output references.</p></div>
-          <div class="move"><strong>Turn evals into guardrails</strong><p>Variance checks, repeatability checks, replay, gates, sweeps, and incident-response loops.</p></div>
-          <div class="move"><strong>Capture domain rules</strong><p>Reusable skills, domain-rule libraries, encoded decision procedures, and capability policies.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide" data-title="Caveats">
-      <div class="inner">
-        <div>
-          <p class="kicker">Caveats</p>
-          <h2>Keep the evidence honest.</h2>
-        </div>
-        <div class="panel split-list">
-          <p class="note">Vendor and product material is field signal, not procurement recommendation.</p>
-          <p class="note">NVIDIA CLI adoption details are note-backed, not audio-backed in the current corpus.</p>
-          <p class="note">The "1B tables" scale anecdote remains attribution-caveated.</p>
-          <p class="note">OCR-backed slide wording should be checked before quotation.</p>
-          <p class="note">The HMC capability-surface recommendation is an HMC interpretation of the conference pattern, not a direct conference claim.</p>
-        </div>
-        <p class="big-line">HMC should not rush to trust agents. HMC should shape the world agents are allowed to inhabit.</p>
-      </div>
-    </section>
-
-    <section class="slide" data-title="Sources">
-      <div class="inner">
-        <div>
-          <p class="kicker">Source Spine</p>
-          <h2>The microsite is a delivery layer, not a source layer.</h2>
-          <p class="lead" style="margin-top: 20px;">The claim-backed artifacts remain the durable record. This microsite is a presentation surface over that evidence.</p>
-        </div>
-        <div class="source-grid">
-          <div class="source"><strong>[1] Executive packet</strong><p>`05_outputs/agent-conference-2026-everything.md`</p></div>
-          <div class="source"><strong>[2] Everything distilled</strong><p>`05_outputs/agent-conference-2026-everything-distilled.md`</p></div>
-          <div class="source"><strong>[3] Deep architecture memo</strong><p>`05_outputs/agent-conference-2026-patterns.md`</p></div>
-          <div class="source"><strong>[4] Day 1 / Day 2 analysis</strong><p>`04_analysis/day1-synthesis.md` and `04_analysis/day2-synthesis.md`</p></div>
-          <div class="source"><strong>[5] Extracted claims</strong><p>`03_extracted-claims/day1-claims.md`, `day2-claims.md`, `vendor-claims.md`, `slide-claims.md`</p></div>
-          <div class="source"><strong>[6] Normalized and raw evidence</strong><p>`02_normalized/` points back to `01_raw-evidence/`.</p></div>
-        </div>
+      <div class="source-grid">
+        <div class="source-card"><strong>Executive packet</strong><p><code>05_outputs/agent-conference-2026-everything.md</code></p></div>
+        <div class="source-card"><strong>Everything distilled</strong><p><code>05_outputs/agent-conference-2026-everything-distilled.md</code></p></div>
+        <div class="source-card"><strong>Deep memo</strong><p><code>05_outputs/agent-conference-2026-patterns.md</code></p></div>
+        <div class="source-card"><strong>Analysis</strong><p><code>04_analysis/day1-synthesis.md</code><br><code>04_analysis/day2-synthesis.md</code></p></div>
+        <div class="source-card"><strong>Claims</strong><p><code>03_extracted-claims/</code></p></div>
+        <div class="source-card"><strong>Evidence</strong><p><code>02_normalized/</code> points back to <code>01_raw-evidence/</code>.</p></div>
       </div>
     </section>
   </main>
 
-  <div class="foot">Agent Conference 2026 / HMC executive microsite</div>
-  <div class="nav" aria-label="Slide navigation">
-    <button type="button" id="prev" aria-label="Previous slide">&lt;</button>
-    <span class="counter" id="counter"></span>
-    <button type="button" id="next" aria-label="Next slide">&gt;</button>
+  <aside class="drawer" id="drawer" aria-live="polite" aria-label="Signal detail drawer"></aside>
+
+  <div class="floating-help">
+    <button class="small-button" id="evidenceButton" type="button">Evidence</button>
+    <button class="small-button" id="topButton" type="button">Top</button>
   </div>
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <footer class="site-footer">
+    Agent Conference 2026 / HMC interactive brief. Static HTML. No external dependencies.
+  </footer>
 
   <script>
-    const slides = Array.from(document.querySelectorAll(".slide"));
-    const counter = document.getElementById("counter");
-    const progress = document.getElementById("progress");
-    const prev = document.getElementById("prev");
-    const next = document.getElementById("next");
-    let index = 0;
+    const planeItems = [
+      {
+        key: "identity",
+        number: "01",
+        title: "Actor Identity",
+        summary: "Agents are actors, not users.",
+        risk: "Broad service accounts erase accountability and make delegation invisible.",
+        move: "Separate subject, actor, delegated authority, tool invocation, and system of record."
+      },
+      {
+        key: "capability",
+        number: "02",
+        title: "Governed Capability",
+        summary: "Capabilities are named actions with typed contracts.",
+        risk: "Raw endpoint access lets agents discover and mutate systems without policy context.",
+        move: "Define owner, input, output, side effects, actor constraints, audit event, criticality, and recovery path."
+      },
+      {
+        key: "context",
+        number: "03",
+        title: "Context Provenance",
+        summary: "Retrieval is infrastructure, not garnish.",
+        risk: "Answers without source, freshness, permissions, or index version cannot be defended.",
+        move: "Attach source IDs, versions, permissions, freshness, index version, and downstream output references."
+      },
+      {
+        key: "validation",
+        number: "04",
+        title: "Validation Loop",
+        summary: "The fastest is wrong if validation cannot keep up.",
+        risk: "Generation volume can exceed review, test, security, and recovery capacity.",
+        move: "Use evals, gates, sweeps, replay, variance checks, and incident response before pilots multiply."
+      },
+      {
+        key: "execution",
+        number: "05",
+        title: "Deterministic Boundary",
+        summary: "Known procedures should stay deterministic.",
+        risk: "Letting agents execute everything turns routine work into probabilistic work.",
+        move: "Have agents reason, research, and propose; let deterministic systems execute known procedures."
+      },
+      {
+        key: "human",
+        number: "06",
+        title: "Human Review",
+        summary: "Human judgment stays in the authority chain.",
+        risk: "Automation can become opaque authority, surveillance, or containment.",
+        move: "Define review gates by criticality, use case, side effect, and recoverability."
+      }
+    ];
 
-    function show(nextIndex) {
-      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
-      slides.forEach((slide, i) => {
-        slide.classList.toggle("active", i === index);
+    const capabilityItems = [
+      ["name", "Named action", "The capability has a business name that humans understand."],
+      ["owner", "Owner", "A team or person owns behavior, policy, and incident response."],
+      ["input", "Typed input", "Inputs are structured and validated before execution."],
+      ["output", "Typed output", "Outputs are structured enough for traceability and review."],
+      ["effects", "Known side effects", "Write paths and downstream impacts are explicit."],
+      ["policy", "Actor policy", "Subject, actor, permissions, and delegation are checked."],
+      ["audit", "Audit event", "Runs produce immutable, searchable events."],
+      ["criticality", "Criticality level", "Read, write, destructive, and regulated actions are classified."],
+      ["review", "Review gate", "Human approval is required where risk demands it."],
+      ["recovery", "Rollback path", "Rollback or compensation behavior is known before launch."]
+    ];
+
+    const signals = [
+      {
+        company: "Apollo",
+        theme: "capability",
+        label: "Cockpits, not keys",
+        text: "API descriptions can become mediated capabilities only when schema, identity, runtime boundary, audit, and replay surround them.",
+        evidence: "D2-C005, V-C001",
+        hmc: "Do not expose raw endpoint catalogs to agents. Curate capability surfaces."
+      },
+      {
+        company: "DataRobot",
+        theme: "runtime",
+        label: "Below the waterline",
+        text: "The production product is identity, auth, audit, evals, governance, observability, CI/CD, connectors, and economics.",
+        evidence: "D1-C010, SL-C006, SL-C007, SL-C010",
+        hmc: "Budget for substrate, not only demos."
+      },
+      {
+        company: "Bauplan",
+        theme: "data",
+        label: "Safe failure for data",
+        text: "Data agents need sandboxed state, lineage, reviewable deltas, checks, and controlled promotion.",
+        evidence: "D2-C007, SL-C015, SL-C016, SL-C017",
+        hmc: "Treat data mutation as staged promotion, not direct write access."
+      },
+      {
+        company: "NVIDIA",
+        theme: "validation",
+        label: "Velocity pressure",
+        text: "CLI-native work surfaces and accelerated generation made Research/Gates/Sweeps one useful operating loop.",
+        evidence: "D2-C010",
+        hmc: "The lesson is absorption capacity: review, gates, sweeps, and harnesses."
+      },
+      {
+        company: "CircleCI / METR",
+        theme: "validation",
+        label: "Felt speed is not throughput",
+        text: "More generated code can increase review pressure and confidence gaps.",
+        evidence: "D2-C012, SL-C019, SL-C020",
+        hmc: "Measure end-to-end throughput and recovery, not developer sensation."
+      },
+      {
+        company: "MCP panel",
+        theme: "governance",
+        label: "Gateway, not magic",
+        text: "Prompt injection and tool sprawl will happen; destructive actions need criticality policy.",
+        evidence: "D2-C014, SL-C022",
+        hmc: "Design the gateway before tool catalogs spread."
+      },
+      {
+        company: "CockroachDB",
+        theme: "infra",
+        label: "Agents do not breathe",
+        text: "Agent-shaped traffic changes load on databases, APIs, queues, auth, CI, and observability.",
+        evidence: "D2-C011, SL-C018, V-C003",
+        hmc: "Model non-human traffic separately from human traffic."
+      },
+      {
+        company: "LanceDB / You.com",
+        theme: "context",
+        label: "Context is a workload",
+        text: "Retrieval has scale, latency, provenance, and budget pressure.",
+        evidence: "D1-C012, D2-C013, SL-C008, SL-C021",
+        hmc: "Treat retrieval as governed infrastructure with cost controls."
+      },
+      {
+        company: "RingCentral",
+        theme: "execution",
+        label: "Specialize deeply",
+        text: "Agents should reason, research, hypothesize, and propose within mandates; deterministic systems execute known procedures.",
+        evidence: "D2-C015, SL-C023, SL-C024, SL-C025, SL-C026",
+        hmc: "Keep mandates narrow and execution boundaries visible."
+      },
+      {
+        company: "T-Mobile / Distyl",
+        theme: "ethics",
+        label: "Agency can become containment",
+        text: "Use-case choice determines whether the substrate liberates work or tightens control.",
+        evidence: "D2-C002, D2-C003, D2-C004, SL-C002",
+        hmc: "Start with toil and reliability, not opaque authority."
+      },
+      {
+        company: "Monte Carlo",
+        theme: "data",
+        label: "Bad answers can be data failures",
+        text: "Agent readiness needs data, semantic, build, and trust observability.",
+        evidence: "D2-C007, D2-C008",
+        hmc: "Debug the data substrate before blaming the model."
+      },
+      {
+        company: "Google commerce",
+        theme: "execution",
+        label: "Structured data plus executors",
+        text: "Customer-facing agents need structured data and deterministic executors, not one model wandering with tools.",
+        evidence: "D2-C009",
+        hmc: "Separate persuasion, structured facts, and transaction execution."
+      }
+    ];
+
+    const pilotItems = [
+      ["toil", "Toil reduction", 8],
+      ["measurable", "Measurable success", 7],
+      ["rules", "Domain rules available", 6],
+      ["review", "Review capacity", 5],
+      ["blast", "Low blast radius", 8],
+      ["write", "Low write risk", 7]
+    ];
+
+    const filters = ["all", "capability", "runtime", "data", "validation", "governance", "infra", "context", "execution", "ethics"];
+    let activeFilter = "all";
+    let activeSignal = signals[0];
+
+    const planeMap = document.getElementById("planeMap");
+    const planeDetail = document.getElementById("planeDetail");
+    const capabilityChecks = document.getElementById("capabilityChecks");
+    const capScore = document.getElementById("capScore");
+    const capMeter = document.getElementById("capMeter");
+    const capGuidance = document.getElementById("capGuidance");
+    const resetCapability = document.getElementById("resetCapability");
+    const signalFilters = document.getElementById("signalFilters");
+    const signalSearch = document.getElementById("signalSearch");
+    const signalsGrid = document.getElementById("signalsGrid");
+    const drawer = document.getElementById("drawer");
+    const pilotSliders = document.getElementById("pilotSliders");
+    const pilotScore = document.getElementById("pilotScore");
+    const pilotMeter = document.getElementById("pilotMeter");
+    const pilotLabel = document.getElementById("pilotLabel");
+    const pilotText = document.getElementById("pilotText");
+    const toast = document.getElementById("toast");
+
+    function renderPlane(activeKey = "capability") {
+      planeMap.innerHTML = "";
+      planeItems.forEach((item) => {
+        const button = document.createElement("button");
+        button.className = `plane-node${item.key === activeKey ? " active" : ""}`;
+        button.type = "button";
+        button.innerHTML = `<span>${item.number}</span><strong>${item.title}</strong><p class="help-text">${item.summary}</p>`;
+        button.addEventListener("click", () => renderPlane(item.key));
+        planeMap.appendChild(button);
       });
-      counter.textContent = `${index + 1}/${slides.length}`;
-      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
-      const title = slides[index].dataset.title || `Slide ${index + 1}`;
-      document.title = `${title} | Agent Conference 2026`;
-      window.location.hash = `slide-${index + 1}`;
+
+      const item = planeItems.find((entry) => entry.key === activeKey) || planeItems[0];
+      planeDetail.innerHTML = `
+        <p class="kicker">Selected control</p>
+        <h3>${item.title}</h3>
+        <p class="detail-text">${item.summary}</p>
+        <ul class="detail-list">
+          <li><strong>Risk:</strong> ${item.risk}</li>
+          <li><strong>HMC move:</strong> ${item.move}</li>
+        </ul>
+        <button class="secondary-action" type="button" id="openPlaneEvidence">Open evidence context</button>
+      `;
+      document.getElementById("openPlaneEvidence").addEventListener("click", () => {
+        openDrawer({
+          company: item.title,
+          label: "Control-plane element",
+          text: item.summary,
+          evidence: "See Appendix B claim traceability in the executive packet.",
+          hmc: item.move
+        });
+      });
     }
 
-    prev.addEventListener("click", () => show(index - 1));
-    next.addEventListener("click", () => show(index + 1));
+    function renderCapability() {
+      capabilityChecks.innerHTML = "";
+      capabilityItems.forEach(([key, title, text], index) => {
+        const label = document.createElement("label");
+        label.className = "check-card";
+        label.innerHTML = `
+          <input type="checkbox" value="${key}" ${index < 2 ? "checked" : ""}>
+          <strong>${title}</strong>
+          <span>${text}</span>
+        `;
+        label.querySelector("input").addEventListener("change", updateCapabilityScore);
+        capabilityChecks.appendChild(label);
+      });
+      updateCapabilityScore();
+    }
 
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
-        event.preventDefault();
-        show(index + 1);
+    function updateCapabilityScore() {
+      const checked = capabilityChecks.querySelectorAll("input:checked").length;
+      const pct = Math.round((checked / capabilityItems.length) * 100);
+      capScore.textContent = `${pct}%`;
+      capMeter.style.width = `${pct}%`;
+      if (pct < 40) {
+        capGuidance.textContent = "This is still application plumbing. Define ownership, contracts, and side effects before agent use.";
+      } else if (pct < 80) {
+        capGuidance.textContent = "This is becoming a capability surface. Add policy, audit, review, and recovery before write access.";
+      } else {
+        capGuidance.textContent = "This is a plausible pilot surface. Keep it bounded and measure review burden, failures, and recovery.";
       }
-      if (event.key === "ArrowLeft" || event.key === "PageUp") {
-        event.preventDefault();
-        show(index - 1);
+    }
+
+    resetCapability.addEventListener("click", () => {
+      capabilityChecks.querySelectorAll("input").forEach((input, index) => {
+        input.checked = index < 2;
+      });
+      updateCapabilityScore();
+    });
+
+    function renderFilters() {
+      signalFilters.innerHTML = "";
+      filters.forEach((filter) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `chip-button${filter === activeFilter ? " active" : ""}`;
+        button.textContent = filter;
+        button.addEventListener("click", () => {
+          activeFilter = filter;
+          renderFilters();
+          renderSignals();
+        });
+        signalFilters.appendChild(button);
+      });
+    }
+
+    function renderSignals() {
+      const query = signalSearch.value.trim().toLowerCase();
+      signalsGrid.innerHTML = "";
+      signals
+        .filter((signal) => activeFilter === "all" || signal.theme === activeFilter)
+        .filter((signal) => {
+          const haystack = `${signal.company} ${signal.theme} ${signal.label} ${signal.text} ${signal.hmc}`.toLowerCase();
+          return !query || haystack.includes(query);
+        })
+        .forEach((signal) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `signal-card${signal.company === activeSignal.company ? " active" : ""}`;
+          button.innerHTML = `<small>${signal.theme}</small><strong>${signal.company}</strong><p>${signal.label}: ${signal.text}</p>`;
+          button.addEventListener("click", () => {
+            activeSignal = signal;
+            renderSignals();
+            openDrawer(signal);
+          });
+          signalsGrid.appendChild(button);
+        });
+    }
+
+    signalSearch.addEventListener("input", renderSignals);
+
+    function openDrawer(signal) {
+      drawer.classList.add("open");
+      drawer.innerHTML = `
+        <div class="drawer-head">
+          <div>
+            <p class="kicker">${signal.company}</p>
+            <h3>${signal.label}</h3>
+          </div>
+          <button class="drawer-close" type="button" aria-label="Close detail drawer">X</button>
+        </div>
+        <p class="detail-text">${signal.text}</p>
+        <div class="callout"><p><strong>HMC translation:</strong> ${signal.hmc}</p></div>
+        <p class="detail-text"><strong>Evidence:</strong> ${signal.evidence}</p>
+      `;
+      drawer.querySelector(".drawer-close").addEventListener("click", closeDrawer);
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("open");
+      drawer.innerHTML = "";
+    }
+
+    function renderPilot() {
+      pilotSliders.innerHTML = "";
+      pilotItems.forEach(([key, label, value]) => {
+        const row = document.createElement("div");
+        row.className = "slider-row";
+        row.innerHTML = `
+          <label for="pilot-${key}">${label}</label>
+          <input id="pilot-${key}" type="range" min="0" max="10" value="${value}">
+          <output>${value}</output>
+        `;
+        const input = row.querySelector("input");
+        const output = row.querySelector("output");
+        input.addEventListener("input", () => {
+          output.textContent = input.value;
+          updatePilot();
+        });
+        pilotSliders.appendChild(row);
+      });
+      updatePilot();
+    }
+
+    function updatePilot() {
+      const values = Array.from(pilotSliders.querySelectorAll("input")).map((input) => Number(input.value));
+      const total = values.reduce((sum, value) => sum + value, 0);
+      const pct = Math.round((total / (pilotItems.length * 10)) * 100);
+      pilotScore.textContent = pct;
+      pilotMeter.style.width = `${pct}%`;
+      if (pct < 45) {
+        pilotLabel.textContent = "Hold";
+        pilotText.textContent = "This candidate is likely to create more review and governance debt than recovered toil.";
+      } else if (pct < 75) {
+        pilotLabel.textContent = "Proposal-first pilot";
+        pilotText.textContent = "Reasonable candidate if it starts read-only or proposal-first, with explicit owner, audit, and review gates.";
+      } else {
+        pilotLabel.textContent = "Strong bounded pilot";
+        pilotText.textContent = "Good candidate for a controlled pilot. Keep scope narrow and measure control-plane maturity, not agent novelty.";
       }
-      if (event.key === "Home") {
-        event.preventDefault();
-        show(0);
-      }
-      if (event.key === "End") {
-        event.preventDefault();
-        show(slides.length - 1);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    document.getElementById("focusToggle").addEventListener("click", () => {
+      document.body.classList.toggle("focus-mode");
+      showToast(document.body.classList.contains("focus-mode") ? "Focus mode on" : "Focus mode off");
+    });
+
+    document.getElementById("copyTakeaway").addEventListener("click", async () => {
+      const line = "HMC should not rush to trust agents. HMC should shape the world agents are allowed to inhabit.";
+      try {
+        await navigator.clipboard.writeText(line);
+        showToast("Copied takeaway");
+      } catch {
+        showToast(line);
       }
     });
 
-    const match = window.location.hash.match(/slide-(\d+)/);
-    show(match ? Number(match[1]) - 1 : 0);
+    document.getElementById("evidenceButton").addEventListener("click", () => {
+      openDrawer({
+        company: "Source spine",
+        label: "Evidence context",
+        text: "This microsite is a presentation layer over the output packet, extracted claims, normalized ledgers, and raw evidence.",
+        evidence: "05_outputs, 04_analysis, 03_extracted-claims, 02_normalized, 01_raw-evidence",
+        hmc: "Use the microsite to present. Use the markdown artifacts to verify."
+      });
+    });
+
+    document.getElementById("topButton").addEventListener("click", () => {
+      document.getElementById("read").scrollIntoView({ behavior: "smooth" });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeDrawer();
+      }
+      if (event.key === "?") {
+        showToast("Shortcuts: Esc closes drawer. / focuses search. F toggles focus mode.");
+      }
+      if (event.key === "/" && document.activeElement !== signalSearch) {
+        event.preventDefault();
+        signalSearch.focus();
+      }
+      if (event.key.toLowerCase() === "f" && document.activeElement.tagName !== "INPUT") {
+        document.getElementById("focusToggle").click();
+      }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      document.querySelectorAll(".nav a").forEach((link) => {
+        link.classList.toggle("active", link.getAttribute("href") === `#${visible.target.id}`);
+      });
+    }, { threshold: [0.28, 0.5, 0.72] });
+
+    document.querySelectorAll("main section[id]").forEach((section) => observer.observe(section));
+
+    renderPlane();
+    renderCapability();
+    renderFilters();
+    renderSignals();
+    renderPilot();
   </script>
 </body>
 </html>
