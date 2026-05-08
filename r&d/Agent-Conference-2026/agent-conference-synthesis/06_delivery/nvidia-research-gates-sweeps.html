@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Research, Gates, Sweeps | Agent Conference 2026</title>
+  <style>
+    :root {
+      --bg: #101412;
+      --panel: #18211d;
+      --panel-2: #202820;
+      --ink: #f3f7ea;
+      --muted: #aeb9ad;
+      --green: #7cf29c;
+      --cyan: #57d6ff;
+      --yellow: #ffd166;
+      --red: #ff6f61;
+      --line: rgba(243, 247, 234, 0.18);
+      --shadow: rgba(0, 0, 0, 0.42);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(124, 242, 156, 0.12), transparent 30%),
+        radial-gradient(circle at 84% 20%, rgba(87, 214, 255, 0.10), transparent 32%),
+        linear-gradient(135deg, #0c100e 0%, #121814 48%, #15120f 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(243, 247, 234, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(243, 247, 234, 0.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .deck {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+      padding: clamp(28px, 5vw, 72px);
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      inset: 0;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    .slide-inner {
+      width: min(1180px, 100%);
+      max-height: 100%;
+      display: grid;
+      gap: 28px;
+    }
+
+    .two-col {
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+      align-items: center;
+    }
+
+    .kicker {
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin: 0 0 14px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(3.2rem, 9vw, 7.8rem);
+      line-height: 0.9;
+      max-width: 920px;
+    }
+
+    h2 {
+      font-size: clamp(2.4rem, 6vw, 5.2rem);
+      line-height: 0.96;
+      max-width: 980px;
+    }
+
+    h3 {
+      font-size: clamp(1.25rem, 2vw, 1.8rem);
+      line-height: 1.1;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      line-height: 1.45;
+      max-width: 900px;
+    }
+
+    .large-line {
+      font-size: clamp(1.55rem, 3.6vw, 3.2rem);
+      line-height: 1.05;
+      font-weight: 850;
+      max-width: 1000px;
+    }
+
+    .tagline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .tag {
+      border: 1px solid var(--line);
+      background: rgba(243, 247, 234, 0.05);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(243, 247, 234, 0.08), rgba(243, 247, 234, 0.035));
+      box-shadow: 0 24px 80px var(--shadow);
+      border-radius: var(--radius);
+      padding: clamp(18px, 2.6vw, 30px);
+    }
+
+    .terminal {
+      font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+      background: #060806;
+      color: #dfffe6;
+      border: 1px solid rgba(124, 242, 156, 0.35);
+      min-height: 420px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .terminal-bar {
+      display: flex;
+      gap: 7px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(124, 242, 156, 0.22);
+      background: rgba(124, 242, 156, 0.07);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      opacity: 0.84;
+    }
+
+    .dot:nth-child(2) {
+      background: var(--yellow);
+    }
+
+    .dot:nth-child(3) {
+      background: var(--red);
+    }
+
+    .terminal-lines {
+      padding: 22px;
+      display: grid;
+      align-content: center;
+      gap: 14px;
+      font-size: clamp(0.86rem, 1.5vw, 1.03rem);
+      line-height: 1.45;
+    }
+
+    .prompt {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .dim {
+      color: var(--muted);
+    }
+
+    .command {
+      color: #f8fff8;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.24);
+      border-radius: var(--radius);
+      padding: 18px;
+      min-height: 126px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .metric strong {
+      font-size: clamp(1.85rem, 4vw, 3.6rem);
+      line-height: 0.9;
+      color: var(--green);
+    }
+
+    .metric span {
+      color: var(--muted);
+      line-height: 1.25;
+      font-size: 0.95rem;
+    }
+
+    .gap-chart {
+      display: grid;
+      gap: 24px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      letter-spacing: 0.09em;
+    }
+
+    .bar-track {
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.24);
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 14px;
+      color: #09100b;
+      font-weight: 900;
+      min-width: 96px;
+    }
+
+    .bar.fast {
+      width: 92%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+    }
+
+    .bar.slow {
+      width: 42%;
+      background: linear-gradient(90deg, var(--yellow), var(--red));
+    }
+
+    .loop {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .loop-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 22px;
+      min-height: 210px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .loop-card h3 {
+      color: var(--green);
+    }
+
+    .loop-card p,
+    .source-card p,
+    .callout p {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .chip {
+      border: 1px solid rgba(87, 214, 255, 0.28);
+      background: rgba(87, 214, 255, 0.08);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      font-weight: 750;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .flow-step {
+      border: 1px solid var(--line);
+      background: rgba(243, 247, 234, 0.06);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      min-height: 128px;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step::after {
+      content: "->";
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--cyan);
+      font-weight: 900;
+    }
+
+    .flow-step:last-child::after {
+      content: "";
+    }
+
+    .flow-step strong {
+      color: var(--green);
+      font-size: 0.98rem;
+    }
+
+    .flow-step span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.25;
+    }
+
+    .substrate {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .substrate-card {
+      min-height: 180px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.22);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .substrate-card strong {
+      color: var(--yellow);
+      font-size: 1.1rem;
+    }
+
+    .substrate-card p {
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .source-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.24);
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .source-card strong {
+      color: var(--green);
+    }
+
+    .callout {
+      border-left: 4px solid var(--green);
+      padding: 16px 18px;
+      background: rgba(124, 242, 156, 0.07);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .nav {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .nav button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(16, 20, 18, 0.86);
+      color: var(--ink);
+      font-size: 1.35rem;
+      cursor: pointer;
+      box-shadow: 0 12px 30px var(--shadow);
+    }
+
+    .nav button:hover {
+      border-color: rgba(124, 242, 156, 0.8);
+      color: var(--green);
+    }
+
+    .counter {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 800;
+      min-width: 54px;
+      text-align: center;
+    }
+
+    .progress {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 5px;
+      background: rgba(243, 247, 234, 0.10);
+      z-index: 11;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--green), var(--cyan), var(--yellow));
+      transition: width 180ms ease;
+    }
+
+    .foot {
+      position: fixed;
+      left: 22px;
+      bottom: 18px;
+      color: rgba(243, 247, 234, 0.58);
+      font-size: 0.78rem;
+      font-weight: 750;
+      z-index: 10;
+    }
+
+    .citation {
+      color: var(--yellow);
+      font-weight: 850;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .deck {
+        height: auto;
+        overflow: visible;
+      }
+
+      .slide {
+        position: relative;
+        display: flex;
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .slide:not(.active) {
+        display: none;
+      }
+
+      .two-col,
+      .substrate,
+      .source-grid,
+      .loop {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step::after {
+        content: "";
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+      }
+
+      .terminal {
+        min-height: 320px;
+      }
+
+      .foot {
+        display: none;
+      }
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: #ffffff;
+        color: #111111;
+      }
+
+      body::before,
+      .nav,
+      .progress,
+      .foot {
+        display: none;
+      }
+
+      .deck {
+        height: auto;
+        overflow: visible;
+      }
+
+      .slide,
+      .slide.active {
+        display: flex;
+        position: relative;
+        height: auto;
+        min-height: 7.5in;
+        page-break-after: always;
+        color: #111111;
+      }
+
+      .panel,
+      .loop-card,
+      .source-card,
+      .substrate-card,
+      .metric,
+      .flow-step {
+        box-shadow: none;
+        border-color: #bbbbbb;
+        background: #ffffff;
+      }
+
+      .lead,
+      .dim,
+      .source-card p,
+      .substrate-card p,
+      .loop-card p,
+      .callout p {
+        color: #333333;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <section class="slide active" data-title="Opening">
+      <div class="slide-inner two-col">
+        <div>
+          <p class="kicker">Agent Conference 2026 / Field Deck</p>
+          <h1>Research. Gates. Sweeps.</h1>
+          <p class="lead" style="margin-top: 26px;">The NVIDIA talk landed because it treated agentic coding as an operating-system problem, not a demo problem. The story starts with CLIs, but the durable lesson is how an organization absorbs AI velocity without rotting.</p>
+          <div class="tagline">
+            <span class="tag">Note-backed signal</span>
+            <span class="tag">Julie Yaunches / NVIDIA</span>
+            <span class="tag">Agentic Engineering</span>
+          </div>
+        </div>
+        <div class="panel terminal">
+          <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="terminal-lines">
+            <div><span class="prompt">$</span> <span class="command">research topology --repo work</span></div>
+            <div><span class="dim">mapping history, standards, seams, artifacts...</span></div>
+            <div><span class="prompt">$</span> <span class="command">gate pull-request --policy layered</span></div>
+            <div><span class="dim">coverage ratchet, CODEOWNERS, security, migration guard...</span></div>
+            <div><span class="prompt">$</span> <span class="command">sweep recurring-rot --nightly</span></div>
+            <div><span class="dim">finding patterns gates cannot see...</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="CLI Adoption">
+      <div class="slide-inner">
+        <div>
+          <p class="kicker">The Surface Shift</p>
+          <h2>The CLI was the adoption surface.</h2>
+          <p class="lead" style="margin-top: 20px;">The raw notes preserve a practical story: coding harnesses, executable interfaces, and a stack of internal CLIs became the work surface people actually used. That matters because agents get more useful when they live where files, repos, commands, review, and execution already meet. <span class="citation">[1][2][4]</span></p>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><strong>25</strong><span>CLIs described as built in 10 weeks</span></div>
+          <div class="metric"><strong>30-40</strong><span>PRs/day noted against the CLI operating load</span></div>
+          <div class="metric"><strong>4</strong><span>engineers noted as supporting the CLI team</span></div>
+        </div>
+        <div class="callout">
+          <p>The point is not that everyone should live in a terminal. The point is that the work substrate matters. If an agent can see the repo, call tools, inspect history, propose changes, and run checks in one place, the GUI-vs-CLI debate is too small.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Velocity Gap">
+      <div class="slide-inner two-col">
+        <div>
+          <p class="kicker">The Core Problem</p>
+          <h2>The bottleneck moves from generation to absorption.</h2>
+          <p class="lead" style="margin-top: 22px;">Once agents make candidate work cheap, the scarce capacity becomes validation: review, security, architecture alignment, behavioral verification, regression detection, and human taste. <span class="citation">[2][3]</span></p>
+        </div>
+        <div class="panel gap-chart">
+          <div class="bar-row">
+            <div class="bar-label">Generation</div>
+            <div class="bar-track"><div class="bar fast">accelerated</div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Validation</div>
+            <div class="bar-track"><div class="bar slow">lagging</div></div>
+          </div>
+          <p class="lead" style="font-size: 1.1rem;">This is the velocity gap: writing can scale faster than the organization can prove, review, and safely absorb the work.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Research Gates Sweeps">
+      <div class="slide-inner">
+        <div>
+          <p class="kicker">The Operating Model</p>
+          <h2>Research, Gates, Sweeps is not a checklist.</h2>
+          <p class="lead" style="margin-top: 20px;">It is a loop. Research maps the system before acting. Gates block known failure modes before promotion. Sweeps find recurring rot that one PR or one review cannot see. <span class="citation">[1][2][3]</span></p>
+        </div>
+        <div class="loop">
+          <div class="loop-card">
+            <h3>Research</h3>
+            <p>Use the same agentic tools for system mapping: history, standards, topology, seams, artifacts, and diagrams humans can interrogate.</p>
+            <div class="chips"><span class="chip">map</span><span class="chip">history</span><span class="chip">standards</span><span class="chip">topology</span></div>
+          </div>
+          <div class="loop-card">
+            <h3>Gates</h3>
+            <p>Convert known review concerns into enforceable checks before work enters production or becomes expensive to unwind.</p>
+            <div class="chips"><span class="chip">security</span><span class="chip">coverage</span><span class="chip">CODEOWNERS</span><span class="chip">migration guards</span></div>
+          </div>
+          <div class="loop-card">
+            <h3>Sweeps</h3>
+            <p>Run recurring inspections for drift, repeated review patterns, conflicting work, and cross-cutting rot.</p>
+            <div class="chips"><span class="chip">nightly E2E</span><span class="chip">drift</span><span class="chip">conflicts</span><span class="chip">rot</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Gate Inventory">
+      <div class="slide-inner two-col">
+        <div>
+          <p class="kicker">Concrete Controls</p>
+          <h2>The controls were practical, not mystical.</h2>
+          <p class="lead" style="margin-top: 22px;">The NVIDIA notes preserve a stack of ordinary engineering controls made more important by agentic volume. Nothing here depends on magic. That is why it travels. <span class="citation">[1][2]</span></p>
+        </div>
+        <div class="panel">
+          <div class="chips">
+            <span class="chip">GitHub workflows</span>
+            <span class="chip">fast feedback</span>
+            <span class="chip">test-suite selection</span>
+            <span class="chip">cost-aware checks</span>
+            <span class="chip">behavioral verification</span>
+            <span class="chip">E2E in containers</span>
+            <span class="chip">drift detection</span>
+            <span class="chip">conflicting PR review</span>
+            <span class="chip">security review</span>
+            <span class="chip">architecture alignment</span>
+            <span class="chip">coverage ratchets</span>
+            <span class="chip">PR limits</span>
+            <span class="chip">dependency pinning</span>
+            <span class="chip">migration guards</span>
+            <span class="chip">CODEOWNERS</span>
+            <span class="chip">commit linting</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Loop">
+      <div class="slide-inner">
+        <div>
+          <p class="kicker">Absorbing AI Velocity</p>
+          <h2>The loop becomes the product.</h2>
+          <p class="lead" style="margin-top: 20px;">The software factory has to become explicit about topology, verification, policy, ownership, and repeated inspection. The loop is what makes acceleration survivable.</p>
+        </div>
+        <div class="flow">
+          <div class="flow-step"><strong>Research</strong><span>map topology and history</span></div>
+          <div class="flow-step"><strong>Proposal</strong><span>small reviewable change</span></div>
+          <div class="flow-step"><strong>Gate</strong><span>known failure checks</span></div>
+          <div class="flow-step"><strong>Review</strong><span>human taste and policy</span></div>
+          <div class="flow-step"><strong>Execute</strong><span>deterministic promotion</span></div>
+          <div class="flow-step"><strong>Trace</strong><span>cost, evals, audit</span></div>
+          <div class="flow-step"><strong>Sweep</strong><span>recurring rot and drift</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="HMC Translation">
+      <div class="slide-inner">
+        <div>
+          <p class="kicker">HMC Translation</p>
+          <h2>Do not copy the terminal. Copy the substrate logic.</h2>
+          <p class="lead" style="margin-top: 20px;">The HMC lesson is not "make everyone use a CLI." It is that powerful agentic surfaces only work when the underlying capabilities are bounded, observable, policy-aware, and reviewable. <span class="citation">[4][5]</span></p>
+        </div>
+        <div class="substrate">
+          <div class="substrate-card">
+            <strong>Wrong abstraction</strong>
+            <p>Agent inside a generic app with broad tools, unclear authority, hidden side effects, and review after the fact.</p>
+          </div>
+          <div class="substrate-card">
+            <strong>Better abstraction</strong>
+            <p>Agent inside a governed work substrate: typed capabilities, proposal-first workflows, policy gates, evals, traces, and deterministic execution.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p>The strategic question is where HMC work already lives: files, tickets, data, approvals, system access, review, audit, and execution. The agent surface should meet that substrate instead of pretending work starts in a blank chat box.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Microsite">
+      <div class="slide-inner two-col">
+        <div>
+          <p class="kicker">In The Spirit Of The Talk</p>
+          <h2>The medium should show the method.</h2>
+          <p class="lead" style="margin-top: 22px;">The raw notes explicitly preserve the presentation-as-microsite signal: VM, DNS, GitHub, and "never producing a deck." This artifact keeps that spirit while making the evidence usable for HMC leadership. <span class="citation">[1][2]</span></p>
+        </div>
+        <div class="panel terminal">
+          <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="terminal-lines">
+            <div><span class="prompt">$</span> <span class="command">make deck --format microsite</span></div>
+            <div><span class="dim">building an artifact people can read, present, print, and inspect...</span></div>
+            <div><span class="prompt">$</span> <span class="command">attach provenance --claim D2-C010</span></div>
+            <div><span class="dim">note-backed, not audio-backed...</span></div>
+            <div><span class="prompt">$</span> <span class="command">ship the loop</span></div>
+            <div><span class="dim">research -> gates -> sweeps -> sharper gates</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Sources">
+      <div class="slide-inner">
+        <div>
+          <p class="kicker">Evidence And Caveat</p>
+          <h2>Strong signal, specific caveat.</h2>
+          <p class="lead" style="margin-top: 20px;">No dedicated NVIDIA audio transcript is cataloged in the current corpus. Treat the CLI adoption details as note-backed field signal, not a verbatim transcript claim.</p>
+        </div>
+        <div class="source-grid">
+          <div class="source-card">
+            <strong>[1] Raw Day 2 notes</strong>
+            <p>`01_raw-evidence/notes/day2-notes.md`, lines around the NVIDIA session: CLI story, adoption, velocity gap, research/gates/sweeps, and concrete gate inventory.</p>
+          </div>
+          <div class="source-card">
+            <strong>[2] Extended Day 2 notes</strong>
+            <p>`01_raw-evidence/notes/day2-notes-extended.md`, NVIDIA section: speaker metadata, 25 CLIs, PR load, gate list, sweeps, and reactions.</p>
+          </div>
+          <div class="source-card">
+            <strong>[3] Extracted claim</strong>
+            <p>`03_extracted-claims/day2-claims.md`, `D2-C010`: NVIDIA notes describe CLI explosion and Research/Gates/Sweeps operating model.</p>
+          </div>
+          <div class="source-card">
+            <strong>[4] Raw take</strong>
+            <p>`04_analysis/raw-takes.md`: CLI-native workflows may be a materially different adoption path than GUI-first agent products.</p>
+          </div>
+          <div class="source-card">
+            <strong>[5] Day 2 synthesis</strong>
+            <p>`04_analysis/day2-synthesis.md`: generation accelerates first; validation, review, compliance, security, and operational confidence lag behind.</p>
+          </div>
+          <div class="source-card">
+            <strong>Delivery note</strong>
+            <p>This microsite is a leadership addendum. It should complement the distilled memo, not replace the source-backed packet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="foot">Agent Conference 2026 / NVIDIA field signal / HMC delivery addendum</div>
+  <div class="nav" aria-label="Slide navigation">
+    <button type="button" id="prev" aria-label="Previous slide">&lt;</button>
+    <span class="counter" id="counter"></span>
+    <button type="button" id="next" aria-label="Next slide">&gt;</button>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.getElementById("counter");
+    const progress = document.getElementById("progress");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    let index = 0;
+
+    function show(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === index);
+      });
+      counter.textContent = `${index + 1}/${slides.length}`;
+      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      const title = slides[index].dataset.title || `Slide ${index + 1}`;
+      document.title = `${title} | Research, Gates, Sweeps`;
+      window.location.hash = `slide-${index + 1}`;
+    }
+
+    prev.addEventListener("click", () => show(index - 1));
+    next.addEventListener("click", () => show(index + 1));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        show(index + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        show(index - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        show(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        show(slides.length - 1);
+      }
+    });
+
+    const match = window.location.hash.match(/slide-(\d+)/);
+    if (match) {
+      show(Number(match[1]) - 1);
+    } else {
+      show(0);
+    }
+  </script>
+</body>
+</html>

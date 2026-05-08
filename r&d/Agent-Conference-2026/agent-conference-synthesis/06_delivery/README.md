@@ -14,6 +14,12 @@ Use this as the primary executive read. It is short, clean, and framed around th
 
 Use this as the fuller source-backed packet. It includes field signals, vendor watchlist, company links, people to follow up with, caveats, and claim traceability.
 
+## Present As Microsite
+
+`06_delivery/nvidia-research-gates-sweeps.html`
+
+Use this as the short presentation artifact for the NVIDIA-inspired Research/Gates/Sweeps lesson. It is a standalone HTML microsite/slide deck and should be presented as a note-backed field signal, not as a verbatim transcript.
+
 ## Keep Internal Unless Asked
 
 `05_outputs/agent-conference-2026-patterns.md`
