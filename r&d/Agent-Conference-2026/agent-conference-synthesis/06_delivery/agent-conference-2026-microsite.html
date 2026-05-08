@@ -3,27 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Agent Conference 2026 | HMC Control-Plane Brief</title>
+  <title>Agent Conference 2026 | HMC Operating Model Brief</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #090b0d;
-      --bg2: #0f1316;
-      --panel: rgba(255,255,255,.055);
+      --bg: #080a0c;
+      --ink: #f4f0e8;
+      --muted: #b9c0c6;
+      --dim: #87929b;
+      --line: rgba(244,240,232,.15);
+      --panel: rgba(255,255,255,.052);
       --panel2: rgba(255,255,255,.09);
-      --ink: #f5f1e8;
-      --muted: #b7bdc2;
-      --dim: #87919a;
-      --line: rgba(245,241,232,.15);
-      --line2: rgba(245,241,232,.28);
       --green: #7df0a5;
-      --cyan: #76d8ff;
-      --amber: #ffd27a;
-      --red: #ff776a;
-      --blue: #a8c2ff;
+      --cyan: #77d8ff;
+      --amber: #ffd37d;
+      --red: #ff766d;
+      --blue: #a9c3ff;
       --max: 1180px;
-      --r: 14px;
-      --shadow: 0 28px 90px rgba(0,0,0,.42);
+      --r: 15px;
+      --shadow: 0 28px 90px rgba(0,0,0,.44);
     }
 
     * { box-sizing: border-box; }
@@ -39,9 +37,9 @@
       margin: 0;
       min-height: 100vh;
       background:
-        radial-gradient(circle at 8% -4%, rgba(118,216,255,.16), transparent 34%),
-        radial-gradient(circle at 84% 0%, rgba(125,240,165,.14), transparent 34%),
-        linear-gradient(135deg, #07090b 0%, #10161a 48%, #14100c 100%);
+        radial-gradient(circle at 8% -5%, rgba(119,216,255,.15), transparent 34%),
+        radial-gradient(circle at 86% 0%, rgba(125,240,165,.14), transparent 34%),
+        linear-gradient(135deg, #07090b 0%, #10161a 48%, #15100c 100%);
     }
 
     body::before {
@@ -50,16 +48,16 @@
       inset: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(255,255,255,.034) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.034) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), transparent 72%);
+        linear-gradient(rgba(255,255,255,.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.032) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.88), transparent 74%);
     }
 
-    body.compact .supporting,
-    body.compact #evidence,
-    body.compact #method,
-    body.compact footer { display: none; }
+    body.exec .supporting,
+    body.exec #field,
+    body.exec #method,
+    body.exec footer { display: none; }
 
     a { color: inherit; }
     button, input { font: inherit; }
@@ -68,7 +66,7 @@
     .skip {
       position: fixed;
       left: 14px;
-      top: -60px;
+      top: -64px;
       z-index: 100;
       padding: 10px 12px;
       border: 1px solid var(--line);
@@ -83,7 +81,7 @@
       top: 0;
       z-index: 50;
       border-bottom: 1px solid var(--line);
-      background: rgba(9, 12, 14, .86);
+      background: rgba(9,12,14,.86);
       backdrop-filter: blur(18px);
     }
 
@@ -92,14 +90,16 @@
       min-height: 68px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: minmax(210px, auto) 1fr auto;
+      grid-template-columns: minmax(245px, auto) 1fr auto;
       gap: 18px;
       align-items: center;
     }
 
     .brand { display: grid; gap: 3px; }
     .brand strong { font-size: .96rem; letter-spacing: .01em; }
-    .brand span, .eyebrow, .tag {
+    .brand span,
+    .eyebrow,
+    .tag {
       color: var(--dim);
       font-size: .74rem;
       font-weight: 850;
@@ -107,14 +107,11 @@
       text-transform: uppercase;
     }
 
-    .nav {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .nav { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 
-    .nav a, .pill, .small, .tab, .filter {
+    .nav a,
+    .small,
+    .filter {
       min-height: 34px;
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -129,7 +126,10 @@
       gap: 7px;
     }
 
-    .nav a:hover, .nav a.active, .small:hover, .tab.active, .filter.active, .pill.hot {
+    .nav a:hover,
+    .nav a.active,
+    .small:hover,
+    .filter.active {
       border-color: rgba(125,240,165,.65);
       color: var(--green);
       text-decoration: none;
@@ -150,33 +150,29 @@
     h1, h2, h3, p { margin: 0; }
 
     h1 {
-      max-width: 1000px;
-      font-size: clamp(3.4rem, 8vw, 7.8rem);
+      max-width: 1060px;
+      font-size: clamp(3.15rem, 7.6vw, 7.2rem);
       line-height: .88;
       letter-spacing: -.07em;
     }
 
     h2 {
       max-width: 980px;
-      font-size: clamp(2.15rem, 4.8vw, 4.9rem);
-      line-height: .94;
+      font-size: clamp(2.05rem, 4.7vw, 4.7rem);
+      line-height: .95;
       letter-spacing: -.05em;
     }
 
-    h3 { font-size: clamp(1.08rem, 1.8vw, 1.52rem); line-height: 1.12; }
+    h3 { font-size: clamp(1.08rem, 1.8vw, 1.48rem); line-height: 1.12; }
 
     .lead {
-      max-width: 940px;
+      max-width: 960px;
       color: var(--muted);
       font-size: clamp(1.08rem, 1.9vw, 1.42rem);
       line-height: 1.48;
     }
 
-    .copy {
-      color: var(--muted);
-      font-size: .98rem;
-      line-height: 1.5;
-    }
+    .copy { color: var(--muted); font-size: .98rem; line-height: 1.5; }
 
     .hero {
       min-height: calc(100vh - 68px);
@@ -186,7 +182,7 @@
 
     .hero-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(330px, .62fr);
+      grid-template-columns: minmax(0, 1.08fr) minmax(340px, .62fr);
       gap: 28px;
       align-items: stretch;
     }
@@ -195,7 +191,8 @@
 
     .actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
-    .primary, .secondary {
+    .primary,
+    .secondary {
       min-height: 46px;
       border-radius: 12px;
       border: 1px solid var(--line);
@@ -207,10 +204,14 @@
       justify-content: center;
       gap: 8px;
     }
+
     .primary { border-color: rgba(125,240,165,.72); color: var(--green); background: rgba(125,240,165,.12); }
     .secondary { color: var(--ink); background: rgba(255,255,255,.055); }
 
-    .panel, .card, .decision, .drawer {
+    .panel,
+    .card,
+    .decision,
+    .drawer {
       border: 1px solid var(--line);
       border-radius: var(--r);
       background: linear-gradient(180deg, var(--panel2), var(--panel));
@@ -219,11 +220,7 @@
 
     .panel { padding: clamp(18px, 2.4vw, 28px); }
 
-    .readout {
-      display: grid;
-      gap: 16px;
-      align-content: start;
-    }
+    .readout { display: grid; gap: 16px; align-content: start; }
 
     .readout-line {
       border-left: 4px solid var(--green);
@@ -236,7 +233,9 @@
 
     .section-head { display: grid; gap: 16px; margin-bottom: 28px; }
 
-    .thesis-grid {
+    .thesis-grid,
+    .pressure-grid,
+    .decision-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 14px;
@@ -254,19 +253,16 @@
     .card p { color: var(--muted); line-height: 1.42; }
     .card .tag { color: var(--amber); }
 
-    .architecture {
+    .operating-model {
       display: grid;
       grid-template-columns: minmax(300px, .42fr) minmax(0, 1fr);
       gap: 18px;
       align-items: start;
     }
 
-    .stack {
-      display: grid;
-      gap: 9px;
-    }
+    .rail { display: grid; gap: 9px; }
 
-    .stack button {
+    .rail button {
       width: 100%;
       min-height: 72px;
       border: 1px solid var(--line);
@@ -278,9 +274,9 @@
       display: grid;
       gap: 5px;
     }
-    .stack button span { color: var(--dim); font-size: .74rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
-    .stack button strong { font-size: 1rem; }
-    .stack button.active { border-color: rgba(125,240,165,.76); background: rgba(125,240,165,.1); }
+    .rail button span { color: var(--dim); font-size: .74rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .rail button strong { font-size: 1rem; }
+    .rail button.active { border-color: rgba(125,240,165,.76); background: rgba(125,240,165,.1); }
 
     .detail {
       min-height: 500px;
@@ -315,7 +311,7 @@
     }
 
     .step {
-      min-height: 220px;
+      min-height: 214px;
       border: 1px solid var(--line);
       border-radius: var(--r);
       background: rgba(255,255,255,.052);
@@ -338,16 +334,16 @@
     .step strong { color: var(--green); }
     .step p { color: var(--muted); line-height: 1.38; }
 
-    .surface-grid {
+    .work-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(330px,.55fr);
       gap: 18px;
       align-items: start;
     }
 
-    .surface-list { display: grid; gap: 12px; }
+    .work-list { display: grid; gap: 12px; }
 
-    .surface {
+    .work-card {
       border: 1px solid var(--line);
       border-radius: 12px;
       background: rgba(255,255,255,.045);
@@ -355,23 +351,17 @@
       display: grid;
       gap: 12px;
     }
-    .surface-head { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
-    .surface h3 { color: var(--ink); }
-    .surface p { color: var(--muted); line-height: 1.42; }
-    .surface.active { border-color: rgba(125,240,165,.68); background: rgba(125,240,165,.08); }
+    .work-head { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+    .work-card h3 { color: var(--ink); }
+    .work-card p { color: var(--muted); line-height: 1.42; }
+    .work-card.active { border-color: rgba(125,240,165,.68); background: rgba(125,240,165,.08); }
 
     .checklist {
       display: grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 10px;
     }
-    .check {
-      display: flex;
-      gap: 9px;
-      align-items: center;
-      color: var(--muted);
-      font-size: .91rem;
-    }
+    .check { display: flex; gap: 9px; align-items: center; color: var(--muted); font-size: .91rem; }
     .check input { width: 17px; height: 17px; accent-color: var(--green); }
 
     .score-card { position: sticky; top: 88px; display: grid; gap: 17px; align-content: start; }
@@ -379,35 +369,30 @@
     .meter { height: 14px; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: rgba(0,0,0,.26); }
     .meter span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--red), var(--amber), var(--green)); transition: width .18s ease; }
 
-    .pilot-grid {
+    .portfolio-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 14px;
     }
 
-    .pilot-card {
+    .portfolio-card {
       border: 1px solid var(--line);
       border-radius: var(--r);
       background: rgba(255,255,255,.05);
       padding: 17px;
-      min-height: 250px;
+      min-height: 258px;
       display: grid;
       gap: 12px;
       align-content: start;
       text-align: left;
       color: var(--ink);
     }
-    .pilot-card:hover, .pilot-card.active { border-color: rgba(125,240,165,.68); background: rgba(125,240,165,.085); }
-    .pilot-card small { color: var(--amber); font-weight: 850; text-transform: uppercase; letter-spacing: .1em; }
-    .pilot-card strong { color: var(--green); font-size: 1.12rem; }
-    .pilot-card p { color: var(--muted); line-height: 1.38; }
+    .portfolio-card:hover { border-color: rgba(125,240,165,.68); background: rgba(125,240,165,.085); }
+    .portfolio-card small { color: var(--amber); font-weight: 850; text-transform: uppercase; letter-spacing: .1em; }
+    .portfolio-card strong { color: var(--green); font-size: 1.12rem; }
+    .portfolio-card p { color: var(--muted); line-height: 1.38; }
 
-    .decision-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 14px;
-    }
-
+    .decision-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .decision {
       box-shadow: none;
       min-height: 180px;
@@ -423,7 +408,7 @@
     .decision.good strong { color: var(--green); }
     .decision p { color: var(--muted); line-height: 1.42; }
 
-    .evidence-tools {
+    .field-tools {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 12px;
@@ -461,7 +446,7 @@
       align-content: start;
       text-align: left;
     }
-    .signal:hover, .signal.active { border-color: rgba(125,240,165,.66); background: rgba(125,240,165,.08); }
+    .signal:hover { border-color: rgba(125,240,165,.66); background: rgba(125,240,165,.08); }
     .signal small { color: var(--amber); font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
     .signal strong { color: var(--ink); }
     .signal p { color: var(--muted); line-height: 1.35; font-size: .93rem; }
@@ -499,22 +484,15 @@
       gap: 7px;
     }
     .drawer-block strong { color: var(--amber); text-transform: uppercase; letter-spacing: .08em; font-size: .78rem; }
-    .drawer-block p, .drawer-block li { color: var(--muted); line-height: 1.42; font-size: .93rem; }
+    .drawer-block p,
+    .drawer-block li { color: var(--muted); line-height: 1.42; font-size: .93rem; }
     .drawer-block ul { padding-left: 18px; margin: 0; display: grid; gap: 5px; }
 
-    .method-grid, .source-grid {
+    .method-grid,
+    .source-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 14px;
-    }
-
-    code {
-      color: var(--cyan);
-      background: rgba(118,216,255,.08);
-      border: 1px solid rgba(118,216,255,.16);
-      border-radius: 6px;
-      padding: 1px 5px;
-      font-size: .9em;
     }
 
     .toast {
@@ -543,21 +521,52 @@
     }
 
     @media (max-width: 980px) {
-      .topbar-inner, .hero-grid, .architecture, .surface-grid, .evidence-tools { grid-template-columns: 1fr; }
+      .topbar-inner,
+      .hero-grid,
+      .operating-model,
+      .work-grid,
+      .field-tools { grid-template-columns: 1fr; }
       .nav { justify-content: start; overflow-x: auto; flex-wrap: nowrap; }
       .toolbar { justify-content: start; }
-      .thesis-grid, .sequence, .pilot-grid, .decision-grid, .signal-grid, .method-grid, .source-grid, .detail-grid, .checklist { grid-template-columns: 1fr; }
+      .thesis-grid,
+      .pressure-grid,
+      .sequence,
+      .portfolio-grid,
+      .decision-grid,
+      .signal-grid,
+      .method-grid,
+      .source-grid,
+      .detail-grid,
+      .checklist { grid-template-columns: 1fr; }
       .score-card { position: static; }
       .filters { justify-content: start; }
     }
 
     @media print {
       body { background: #fff; color: #111; }
-      body::before, .topbar, .drawer, .toast, .actions, .evidence-tools, button { display: none !important; }
+      body::before,
+      .topbar,
+      .drawer,
+      .toast,
+      .actions,
+      .field-tools,
+      button { display: none !important; }
       section { width: 100%; padding: 28px 0; page-break-inside: avoid; }
-      .panel, .card, .decision, .step, .signal, .surface, .mini { background: #fff; box-shadow: none; border-color: #bbb; color: #111; }
-      .lead, .copy, .card p, .mini p, .surface p, .step p, .decision p, .signal p { color: #333; }
-      code { color: #111; background: #f2f2f2; border-color: #ccc; }
+      .panel,
+      .card,
+      .decision,
+      .step,
+      .signal,
+      .work-card,
+      .mini { background: #fff; box-shadow: none; border-color: #bbb; color: #111; }
+      .lead,
+      .copy,
+      .card p,
+      .mini p,
+      .work-card p,
+      .step p,
+      .decision p,
+      .signal p { color: #333; }
     }
   </style>
 </head>
@@ -568,18 +577,18 @@
     <div class="topbar-inner">
       <div class="brand">
         <strong>Agent Conference 2026</strong>
-        <span>HMC control-plane brief</span>
+        <span>HMC operating model brief</span>
       </div>
       <nav class="nav" aria-label="Sections">
         <a href="#read">Read</a>
-        <a href="#argument">Argument</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#surface">Capability</a>
-        <a href="#pilot">Pilot</a>
-        <a href="#evidence">Evidence</a>
+        <a href="#shift">Shift</a>
+        <a href="#model">Model</a>
+        <a href="#work">Work lens</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#field">Signals</a>
       </nav>
       <div class="toolbar">
-        <button class="small" id="compactToggle" type="button">Exec mode</button>
+        <button class="small" id="execToggle" type="button">Exec mode</button>
         <button class="small" id="copyLine" type="button">Copy thesis</button>
       </div>
     </div>
@@ -590,140 +599,140 @@
       <div class="hero-grid">
         <div class="hero-copy">
           <p class="eyebrow">Executive read</p>
-          <h1>Build the control plane, not the magic trick.</h1>
-          <p class="lead">The conference did not make the case for unbounded agent rollout. It made the case for a governed execution architecture: identity, delegated authority, capability surfaces, context provenance, validation loops, observability, deterministic execution boundaries, and human review.</p>
+          <h1>A new class of worker is entering the firm.</h1>
+          <p class="lead">Agent Conference 2026 was not primarily about chatbots, vendors, or tools. It was about non-human work entering enterprise systems: work that can read, draft, inspect, call tools, generate artifacts, trigger workflows, and pressure infrastructure without the natural limits of a human operator.</p>
           <div class="actions">
-            <a class="primary" href="#argument">Read the argument</a>
-            <a class="secondary" href="#pilot">Pick the first pilot</a>
+            <a class="primary" href="#shift">Frame the shift</a>
+            <a class="secondary" href="#work">Assess active work</a>
           </div>
         </div>
         <aside class="panel readout" aria-label="Executive readout">
           <div class="readout-line">
-            <strong>What changed</strong>
-            <p>Agents are moving from chat objects to non-human actors that inspect, propose, call tools, generate artifacts, and pressure enterprise systems.</p>
+            <strong>The leadership issue</strong>
+            <p>Not whether agents are interesting. Whether the firm can make non-human work accountable, reviewable, reversible, and economically bounded.</p>
           </div>
           <div class="readout-line">
-            <strong>What it means</strong>
-            <p>The design unit is not the model. The design unit is the governed capability: typed input, known side effect, policy, audit, replay, and recovery.</p>
+            <strong>The architectural issue</strong>
+            <p>Models are only one layer. The harder problem is the operating envelope around authority, context, validation, observability, cost, and human judgment.</p>
           </div>
           <div class="readout-line">
-            <strong>What HMC should do</strong>
-            <p>Pilot one bounded, measurable toil workflow. Use it to build reusable control-plane muscle before broad autonomy spreads.</p>
+            <strong>The practical move</strong>
+            <p>Use active agent workstreams to build a reusable operating model instead of allowing each effort to invent its own governance, trace, and review path.</p>
           </div>
         </aside>
       </div>
     </section>
 
-    <section id="argument">
+    <section id="shift">
       <div class="section-head">
-        <p class="eyebrow">Core argument</p>
-        <h2>Do not pilot an agent. Pilot a governed surface.</h2>
-        <p class="lead">A successful pilot should prove whether HMC can expose a narrow, useful, auditable capability to non-human actors without creating invisible authority or unbounded operational load.</p>
+        <p class="eyebrow">The shift</p>
+        <h2>This is not another application category.</h2>
+        <p class="lead">Applications wait for users. Agents initiate, inspect, reason, retry, combine tools, and produce candidate work at a rate that can outrun review. That changes the operating model.</p>
       </div>
       <div class="thesis-grid">
         <article class="card">
-          <span class="tag">01 / Translation</span>
-          <strong>Vendor demos are the surface layer.</strong>
-          <p>The durable pattern is below the demo: auth, policy, evals, observability, data quality, tool contracts, infrastructure cost, and recoverability.</p>
+          <span class="tag">01 / Work</span>
+          <strong>The unit of analysis is work performed.</strong>
+          <p>Start with what the non-human actor does: reads, drafts, proposes, approves, executes, mutates, escalates, or decides. The label “agent” is too coarse.</p>
         </article>
         <article class="card">
-          <span class="tag">02 / Architecture</span>
-          <strong>Capabilities beat endpoints.</strong>
-          <p>Raw API exposure gives agents too much ambiguity. A capability should have a business name, owner, contract, side-effect class, policy, audit event, and rollback path.</p>
+          <span class="tag">02 / Authority</span>
+          <strong>Delegation becomes a design problem.</strong>
+          <p>Every workstream needs an explicit answer to: who asked, who acted, what authority was delegated, what systems were touched, and who remains accountable.</p>
         </article>
         <article class="card">
-          <span class="tag">03 / Operating model</span>
-          <strong>Validation is the throughput limit.</strong>
-          <p>AI generates candidate work first. The enterprise bottleneck becomes review, gates, sweeps, trace inspection, recovery, and human taste.</p>
+          <span class="tag">03 / Throughput</span>
+          <strong>Validation becomes the limiter.</strong>
+          <p>Generation accelerates candidate output first. The bottleneck moves to evidence, review, gates, sweeps, trace inspection, recovery, and human taste.</p>
         </article>
       </div>
     </section>
 
-    <section id="architecture">
+    <section id="model">
       <div class="section-head">
-        <p class="eyebrow">Control-plane map</p>
-        <h2>The architecture is the safety model.</h2>
-        <p class="lead">Click each layer. The point is not novelty; it is where failures become observable, reversible, and accountable.</p>
+        <p class="eyebrow">Operating model</p>
+        <h2>Make the work observable before it becomes invisible authority.</h2>
+        <p class="lead">Click each pressure point. This is the frame to give leaders who do not already carry the implementation shape in their heads.</p>
       </div>
-      <div class="architecture">
-        <div class="stack" id="stack"></div>
-        <aside class="panel detail" id="stackDetail" aria-live="polite"></aside>
+      <div class="operating-model">
+        <div class="rail" id="rail"></div>
+        <aside class="panel detail" id="modelDetail" aria-live="polite"></aside>
       </div>
     </section>
 
     <section class="supporting" id="sequence">
       <div class="section-head">
         <p class="eyebrow">Adoption sequence</p>
-        <h2>Small blast radius. Real governance. Reusable patterns.</h2>
+        <h2>Extract standards from the work already moving.</h2>
       </div>
       <div class="sequence">
-        <article class="step"><strong>Name the work</strong><p>Pick a concrete toil workflow. Avoid vague “agent platform” framing.</p></article>
-        <article class="step"><strong>Freeze the boundary</strong><p>Read-only or proposal-first until ownership, audit, and review are proven.</p></article>
-        <article class="step"><strong>Encode the surface</strong><p>Define typed input, output, side effects, permissions, trace fields, and recovery.</p></article>
-        <article class="step"><strong>Measure the loop</strong><p>Track time saved, review burden, false positives, drift, rework, and incidents.</p></article>
-        <article class="step"><strong>Promote the pattern</strong><p>Only generalize the control surface after the pilot proves useful and governable.</p></article>
+        <article class="step"><strong>Inventory the work</strong><p>List active efforts by owner, domain, systems touched, data touched, user population, and current review path.</p></article>
+        <article class="step"><strong>Classify authority</strong><p>Separate read, draft, propose, approve, execute, mutate, and destructive actions. These are not the same risk class.</p></article>
+        <article class="step"><strong>Attach evidence</strong><p>Make context provenance, source references, model/tool path, policy decisions, and reviewer actions visible after the fact.</p></article>
+        <article class="step"><strong>Measure operating load</strong><p>Track review burden, escalation, latency, false confidence, infrastructure pressure, recovery time, and failure modes.</p></article>
+        <article class="step"><strong>Promote reusable controls</strong><p>Turn repeated patterns into shared standards, templates, event schemas, review gates, and operational checklists.</p></article>
       </div>
     </section>
 
-    <section id="surface">
+    <section id="work">
       <div class="section-head">
-        <p class="eyebrow">Capability surface inspector</p>
-        <h2>Turn integration plumbing into governed action.</h2>
-        <p class="lead">Use this section to evaluate whether a candidate action is safe enough for non-human actors. The specific internal names are placeholders for the pattern: <code>env.API</code>, Crimson <code>env.*</code>, and legacy wrappers should be treated as governed capability surfaces, not convenience plumbing.</p>
+        <p class="eyebrow">Workstream lens</p>
+        <h2>Assess work by authority, evidence, and recoverability.</h2>
+        <p class="lead">This section is deliberately not tied to any one implementation surface. Use it against any current or planned agent workflow: research, coding, data quality, operations, retrieval, reporting, support, or workflow execution.</p>
       </div>
-      <div class="surface-grid">
-        <div class="surface-list" id="surfaceList"></div>
+      <div class="work-grid">
+        <div class="work-list" id="workList"></div>
         <aside class="panel score-card">
-          <p class="eyebrow">Surface maturity</p>
-          <div class="score" id="surfaceScore">0%</div>
-          <div class="meter"><span id="surfaceMeter"></span></div>
-          <p class="copy" id="surfaceGuidance">Select a surface, then mark which controls are explicit.</p>
-          <button class="secondary" id="resetSurface" type="button">Reset selected surface</button>
+          <p class="eyebrow">Operating maturity</p>
+          <div class="score" id="workScore">0%</div>
+          <div class="meter"><span id="workMeter"></span></div>
+          <p class="copy" id="workGuidance">Select a work type, then mark which controls are explicit.</p>
+          <button class="secondary" id="resetWork" type="button">Reset selected work type</button>
         </aside>
       </div>
     </section>
 
-    <section id="pilot">
+    <section id="portfolio">
       <div class="section-head">
-        <p class="eyebrow">Pilot recommendation</p>
-        <h2>Favor boring, measurable toil.</h2>
-        <p class="lead">The first pilot should be dull enough to govern and useful enough to matter. It should create evidence, not theater.</p>
+        <p class="eyebrow">Portfolio hardening</p>
+        <h2>The next move is not more demos. It is control extraction.</h2>
+        <p class="lead">The firm should use active workstreams to discover which controls recur across domains, then standardize those controls before the portfolio sprawls.</p>
       </div>
-      <div class="pilot-grid" id="pilotGrid"></div>
+      <div class="portfolio-grid" id="portfolioGrid"></div>
     </section>
 
     <section class="supporting" id="decision">
       <div class="section-head">
         <p class="eyebrow">Decision rules</p>
-        <h2>What to avoid. What to build.</h2>
+        <h2>What to prevent. What to standardize.</h2>
       </div>
       <div class="decision-grid">
         <article class="decision bad">
-          <strong>Avoid: broad agent access to raw systems.</strong>
-          <p>It will look fast until identity, permissions, prompt injection, state mutation, audit gaps, and infrastructure load become operational problems.</p>
+          <strong>Prevent: local wins becoming hidden authority.</strong>
+          <p>A useful agent workflow can quietly become a decision system if nobody classifies authority, review, escalation, and side effects.</p>
         </article>
         <article class="decision good">
-          <strong>Build: named capabilities with policy.</strong>
-          <p>Expose narrow actions with typed contracts, known side effects, actor rules, trace events, review gates, and rollback or compensation behavior.</p>
+          <strong>Standardize: action classes.</strong>
+          <p>Read, draft, propose, approve, execute, mutate, and destructive actions need different policies, traces, and review gates.</p>
         </article>
         <article class="decision bad">
-          <strong>Avoid: demo-first success metrics.</strong>
-          <p>“It worked in the room” is not a production claim. Measure end-to-end throughput, review burden, failures, recoverability, and user trust.</p>
+          <strong>Prevent: demo metrics driving production claims.</strong>
+          <p>“It worked” is not enough. Measure review burden, failure modes, recovery time, incident paths, data quality, and downstream confidence.</p>
         </article>
         <article class="decision good">
-          <strong>Build: gates, sweeps, and replay.</strong>
-          <p>Use repeatable evals, variance checks, policy gates, recurring sweeps, and event history so the organization can inspect what happened after the fact.</p>
+          <strong>Standardize: gates, sweeps, and replay.</strong>
+          <p>Use repeatable evals, variance checks, policy gates, recurring sweeps, and event history so the organization can inspect what happened.</p>
         </article>
       </div>
     </section>
 
-    <section id="evidence">
+    <section id="field">
       <div class="section-head">
-        <p class="eyebrow">Field evidence explorer</p>
+        <p class="eyebrow">Field signal explorer</p>
         <h2>Signals, not endorsements.</h2>
-        <p class="lead">These field signals explain the pattern. They should not be read as vendor recommendations.</p>
+        <p class="lead">These signals support the operating-model pattern. They should not be read as vendor recommendations.</p>
       </div>
-      <div class="evidence-tools">
+      <div class="field-tools">
         <input class="search" id="search" type="search" placeholder="Search company, theme, claim, or HMC translation" aria-label="Search field signals" />
         <div class="filters" id="filters"></div>
       </div>
@@ -746,13 +755,13 @@
       <div class="section-head">
         <p class="eyebrow">Source spine</p>
         <h2>This site is a presentation layer.</h2>
-        <p class="lead">The durable record should remain the markdown packet, extracted claims, normalized ledgers, and raw evidence tree.</p>
+        <p class="lead">The durable record should remain the memo, extracted claims, normalized ledgers, raw notes, slide captures, OCR, and audio transcripts.</p>
       </div>
       <div class="source-grid">
-        <article class="card"><strong>Executive packet</strong><p><code>05_outputs/agent-conference-2026-everything.md</code></p></article>
-        <article class="card"><strong>Distilled packet</strong><p><code>05_outputs/agent-conference-2026-everything-distilled.md</code></p></article>
-        <article class="card"><strong>Pattern memo</strong><p><code>05_outputs/agent-conference-2026-patterns.md</code></p></article>
-        <article class="card"><strong>Claim ledger</strong><p><code>03_extracted-claims/</code> backed by <code>02_normalized/</code> and <code>01_raw-evidence/</code>.</p></article>
+        <article class="card"><strong>Executive synthesis</strong><p>Claim-backed memo and distilled leadership readout.</p></article>
+        <article class="card"><strong>Analysis</strong><p>Day 1 and Day 2 synthesis, raw-take extraction, and thematic consolidation.</p></article>
+        <article class="card"><strong>Claim ledger</strong><p>Extracted claims across talks, slides, booths, and raw notes.</p></article>
+        <article class="card"><strong>Evidence tree</strong><p>Raw notes, slide captures, audio transcripts, OCR, and normalized source ledger.</p></article>
       </div>
     </section>
   </main>
@@ -761,179 +770,198 @@
   <div class="toast" id="toast" role="status"></div>
 
   <footer>
-    Static HTML. No external dependencies. Designed as an executive-facing interface over the Agent Conference 2026 evidence packet.
+    Static HTML. No external dependencies. Executive-facing interface over Agent Conference 2026 synthesis and evidence.
   </footer>
 
   <script>
-    const stackItems = [
+    const modelItems = [
       {
-        key: "identity",
+        key: "worker",
         n: "01",
-        title: "Actor identity",
-        short: "Agents are actors, not users.",
-        claim: "Production agents need subject/actor separation, delegated authority, scoped permissions, and traceable invocation identity.",
-        risk: "Broad service accounts erase accountability and make delegation invisible.",
-        hmc: "Create a minimum identity model before any write-capable pilot: human subject, agent actor, tool, permission scope, and policy decision.",
-        evidence: ["MCP panel", "DataRobot below-waterline material", "enterprise governance thread"]
+        title: "Non-human work",
+        short: "Start with the work being performed.",
+        claim: "The meaningful shift is that software can now perform knowledge-work-shaped activity: reading, drafting, inspecting, proposing, calling tools, and producing artifacts.",
+        risk: "If the firm describes everything as an agent, it misses the actual risk class of the work being performed.",
+        hmc: "Inventory work by action type, not by tool name or model name.",
+        evidence: ["Conference-wide pattern", "coding-agent material", "workflow and MCP talks"]
       },
       {
-        key: "capability",
+        key: "authority",
         n: "02",
-        title: "Governed capability",
-        short: "A capability is an owned action, not an endpoint.",
-        claim: "The safe design unit is a named business action with typed input, typed output, known side effects, policy, audit, and recovery.",
-        risk: "Raw tool catalogs let agents discover ambiguous actions without enough business context.",
-        hmc: "Treat env.API, Crimson env.*, and legacy wrappers as candidate capability surfaces for non-human actors.",
-        evidence: ["Apollo booth signal", "MCP tooling signal", "HMC capability-surface thesis"]
+        title: "Delegated authority",
+        short: "Who asked? Who acted? Who remains accountable?",
+        claim: "Every workstream needs a visible chain of delegation: requester, actor, approved authority, action class, system touched, and accountable owner.",
+        risk: "Authority can become invisible when a tool performs work under broad credentials or vague human approval.",
+        hmc: "Create an action-class taxonomy and require each workstream to declare its highest authority level.",
+        evidence: ["MCP destructive-action discussion", "customer-agent risk themes", "enterprise governance thread"]
       },
       {
-        key: "context",
+        key: "evidence",
         n: "03",
-        title: "Context provenance",
-        short: "Retrieval is runtime state.",
-        claim: "Context should carry source ID, version, permission, freshness, retrieval path, index version, and output reference.",
-        risk: "Answers without provenance become impossible to defend or debug.",
-        hmc: "Treat retrieval as governed infrastructure, not a feature bolted onto chat.",
-        evidence: ["LanceDB / You.com", "RAG and metadata talks", "slide OCR evidence"]
+        title: "Evidence and provenance",
+        short: "The answer needs a trail.",
+        claim: "Outputs should carry enough evidence to inspect how they were produced: source material, context freshness, model/tool path, policy decision, and reviewer action.",
+        risk: "Without provenance, a bad answer becomes a debate about vibes instead of a reconstructable event.",
+        hmc: "Treat evidence as part of the runtime, not as decoration on the final answer.",
+        evidence: ["LanceDB / You.com", "retrieval and metadata talks", "human-agent capture pipeline"]
       },
       {
         key: "validation",
         n: "04",
-        title: "Validation loop",
-        short: "Speed is not throughput unless review scales.",
-        claim: "AI increases candidate output before it increases trustworthy production output.",
-        risk: "Generated work can exceed review capacity, creating false momentum and quality debt.",
-        hmc: "Adopt gates, sweeps, eval variance checks, replay, and incident loops as pilot requirements.",
-        evidence: ["NVIDIA", "CircleCI / METR", "coding-agent material"]
+        title: "Validation capacity",
+        short: "Generation is not throughput.",
+        claim: "Agents increase candidate work before they increase trustworthy production work. The constraint moves to review, evals, gates, sweeps, and incident response.",
+        risk: "The organization can feel faster while actually accumulating review debt and quality risk.",
+        hmc: "Measure end-to-end throughput, not just generation speed.",
+        evidence: ["NVIDIA", "CircleCI / METR", "coding-agent talks"]
       },
       {
         key: "observability",
         n: "05",
         title: "Observability and replay",
-        short: "The run must be inspectable after the fact.",
-        claim: "Agent traces need tool calls, source references, policy decisions, actor identity, outputs, and follow-on side effects.",
-        risk: "Without replay, the enterprise can only trust vibes after a bad answer or bad action.",
-        hmc: "Define a minimum event schema for agent runs before pilots multiply.",
-        evidence: ["Monte Carlo", "MCP panel", "evals / traceability material"]
+        short: "The run must be inspectable later.",
+        claim: "Agent work needs run records: tool calls, source references, policy decisions, actor identity, outputs, side effects, reviewer actions, and recovery steps.",
+        risk: "Without replay, incidents turn into archaeology.",
+        hmc: "Define a minimum run record before active workstreams multiply further.",
+        evidence: ["Monte Carlo", "MCP panel", "eval and traceability material"]
+      },
+      {
+        key: "infrastructure",
+        n: "06",
+        title: "Infrastructure pressure",
+        short: "Agents do not breathe.",
+        claim: "Non-human work changes load on databases, APIs, queues, auth, CI, observability, and cost controls because agents can retry, inspect, and call tools continuously.",
+        risk: "Human traffic assumptions break when software operators generate sustained demand.",
+        hmc: "Model non-human traffic and cost separately from human usage.",
+        evidence: ["CockroachDB", "token economics", "infrastructure talks"]
       },
       {
         key: "determinism",
-        n: "06",
+        n: "07",
         title: "Deterministic boundary",
-        short: "Known procedures should not become probabilistic.",
-        claim: "Agents should research, reflect, hypothesize, and propose; deterministic systems should execute known procedures.",
-        risk: "Letting agents execute routine procedures directly converts solved workflows into probabilistic workflows.",
-        hmc: "Keep deterministic execution below the agent boundary for high-confidence, repeatable operations.",
+        short: "Known procedures should stay known.",
+        claim: "Agents are strongest at research, reflection, synthesis, and proposal. Known procedures should remain deterministic wherever possible.",
+        risk: "A solved workflow can become probabilistic if execution is moved into a general agent loop unnecessarily.",
+        hmc: "Keep deterministic execution beneath agent reasoning for high-confidence operations.",
         evidence: ["RingCentral", "Google commerce", "deterministic-vs-agent boundary notes"]
       },
       {
         key: "human",
-        n: "07",
-        title: "Human authority",
-        short: "Human judgment stays in the chain.",
-        claim: "Human review remains necessary for standards, criticality, taste, accountability, and whether the work should exist at all.",
-        risk: "Automation can become deflection, containment, or invisible authority.",
-        hmc: "Start with toil reduction and reliability, not opaque decision authority.",
+        n: "08",
+        title: "Human judgment",
+        short: "The human is still in the authority chain.",
+        claim: "Human review remains necessary for standards, criticality, taste, accountability, ethics, and deciding whether the work should exist at all.",
+        risk: "Automation can become deflection, containment, or opaque authority if review is treated as ceremonial.",
+        hmc: "Protect human judgment by making review explicit, scoped, and supported by evidence.",
         evidence: ["T-Mobile / Distyl", "customer-agent material", "human review themes"]
       }
     ];
 
-    const surfaces = [
+    const workTypes = [
       {
-        key: "api",
-        name: "env.API route",
-        type: "Application action",
-        text: "A whitelisted business action exposed through a narrow runtime surface.",
-        defaults: ["name", "owner", "input"]
+        key: "read",
+        name: "Read and retrieve",
+        type: "Low side-effect work",
+        text: "The system gathers information, retrieves context, summarizes source material, or answers with evidence.",
+        defaults: ["owner", "source", "audit", "review"]
       },
       {
-        key: "crimson",
-        name: "Crimson env.* surface",
-        type: "Runtime capability",
-        text: "A synthetic capability that can read, propose, cache, or coordinate within explicit platform limits.",
-        defaults: ["name", "owner", "input", "output"]
+        key: "draft",
+        name: "Draft and synthesize",
+        type: "Human-reviewed candidate work",
+        text: "The system prepares memos, tickets, code changes, analysis, reports, or recommendations for human review.",
+        defaults: ["owner", "source", "output", "audit", "review"]
       },
       {
-        key: "legacy",
-        name: "Legacy-system wrapper",
-        type: "Mediated legacy action",
-        text: "A wrapper around existing systems where the wrapper becomes the governed interface, not an implementation detail.",
-        defaults: ["name", "owner"]
+        key: "inspect",
+        name: "Inspect and monitor",
+        type: "Operating control work",
+        text: "The system watches traces, data quality, drift, review patterns, failed checks, or recurring issues.",
+        defaults: ["owner", "source", "audit", "metrics", "escalation"]
+      },
+      {
+        key: "act",
+        name: "Execute or mutate",
+        type: "Side-effecting work",
+        text: "The system changes state, triggers a workflow, writes data, modifies code, or calls a downstream system.",
+        defaults: ["owner", "authority", "side"]
       }
     ];
 
     const controls = [
-      ["name", "Business name"],
-      ["owner", "Owner"],
-      ["input", "Typed input"],
-      ["output", "Typed output"],
+      ["owner", "Named owner"],
+      ["authority", "Delegated authority"],
+      ["source", "Source provenance"],
+      ["output", "Reviewable output"],
       ["side", "Known side effects"],
-      ["policy", "Actor policy"],
-      ["audit", "Audit event"],
-      ["review", "Review gate"],
+      ["policy", "Policy check"],
+      ["audit", "Run record"],
+      ["review", "Human review"],
       ["criticality", "Criticality class"],
-      ["recovery", "Rollback path"]
+      ["recovery", "Recovery path"],
+      ["metrics", "Operating metrics"],
+      ["escalation", "Escalation path"]
     ];
 
-    const pilots = [
+    const portfolioMoves = [
       {
-        key: "recon",
-        grade: "Strong first candidate",
-        title: "Evidence and reconciliation assistant",
+        key: "inventory",
+        grade: "Immediate control move",
+        title: "Workstream inventory",
+        score: 92,
+        text: "Create a live map of active agent-related efforts: owner, domain, systems touched, data touched, users affected, current review path, and highest authority level.",
+        why: "This gives leadership a control view without pretending the firm is still before experimentation.",
+        mode: "Portfolio control layer, not another demo."
+      },
+      {
+        key: "taxonomy",
+        grade: "Foundation standard",
+        title: "Action-class taxonomy",
+        score: 89,
+        text: "Classify work as read, draft, propose, approve, execute, mutate, or destructive. Attach different expectations to each class.",
+        why: "This prevents low-risk retrieval work and high-risk mutation work from being governed under the same vague label.",
+        mode: "Required metadata for active and planned work."
+      },
+      {
+        key: "runrecord",
+        grade: "Required before scale",
+        title: "Minimum run record",
         score: 86,
-        text: "Read-only/proposal-first assistant that reconciles source material, extracts claims, detects inconsistencies, and prepares reviewable packets.",
-        why: "Low write risk, measurable toil reduction, strong provenance requirements, and direct reuse of the conference-capture pattern.",
-        mode: "Read-only plus generated recommendations. Human approves final memo or ticket."
+        text: "Define the event history for non-human work: requester, actor, source material, tool path, policy decision, output, reviewer, side effect, and recovery link.",
+        why: "Without this, failures become anecdotal and difficult to reconstruct.",
+        mode: "Shared trace contract across workstreams."
       },
       {
-        key: "gates",
-        grade: "Strong if scoped",
-        title: "Gates and sweeps assistant",
-        score: 79,
-        text: "Agent proposes recurring checks, review patterns, failed-test clusters, dependency drift, and trace anomalies; deterministic systems enforce gates.",
-        why: "Matches NVIDIA/CircleCI signal: generation pressure requires review and validation machinery.",
-        mode: "Proposal-first. No autonomous merge, deploy, destructive action, or policy change."
+        key: "review",
+        grade: "Throughput protection",
+        title: "Review-load measurement",
+        score: 82,
+        text: "Measure whether the system is actually reducing toil or merely moving work into review, rework, escalation, and confidence checking.",
+        why: "This is the difference between felt speed and real throughput.",
+        mode: "Track review burden as a first-class operating metric."
       },
       {
-        key: "dataquality",
-        grade: "Useful but needs ownership",
-        title: "Data quality monitor for agent workflows",
-        score: 72,
-        text: "Monitor data freshness, semantic drift, source gaps, failed retrievals, and provenance holes in one bounded domain.",
-        why: "Strong Monte Carlo/Bauplan fit, but requires clear data ownership and incident routing.",
-        mode: "Alert and explain only. Human owns remediation."
+        key: "sweeps",
+        grade: "Operational hardening",
+        title: "Gates and sweeps pattern",
+        score: 80,
+        text: "Turn recurring review findings, eval failures, trace anomalies, dependency issues, data drift, and prompt-injection evidence into repeatable controls.",
+        why: "This converts lessons from active work into reusable operating discipline.",
+        mode: "Apply across coding, data, retrieval, and workflow agents."
       },
       {
-        key: "workflow",
-        grade: "Hold until surface exists",
-        title: "Write-capable workflow executor",
-        score: 41,
-        text: "An agent that directly mutates operational systems based on natural-language goals.",
-        why: "Too much authority unless identity, capability registry, side-effect classification, audit, and rollback are already mature.",
-        mode: "Defer. Start by building the governed capabilities it would need."
-      },
-      {
-        key: "support",
-        grade: "Caution",
-        title: "Customer or employee-facing autonomous agent",
-        score: 53,
-        text: "A conversational interface that answers or acts on behalf of an internal process owner.",
-        why: "Can be useful, but the moral and authority boundary is sharper. Start with source-backed answer drafting, not containment or opaque authority.",
-        mode: "Answer-draft only. Require source citations and escalation path."
-      },
-      {
-        key: "platform",
-        grade: "Do not start here",
-        title: "General enterprise agent platform",
-        score: 28,
-        text: "A broad platform before HMC has proved the control surface, trace, policy, and review model.",
-        why: "Maximizes theater and sprawl. Minimizes learning discipline.",
-        mode: "Reject as first pilot. Build reusable control-plane primitives through one bounded pilot."
+        key: "domain",
+        grade: "Durable asset",
+        title: "Domain-rule capture",
+        score: 77,
+        text: "Convert SME rules, decision procedures, exceptions, examples, and approval thresholds into reusable assets instead of one-off prompts.",
+        why: "The scarce resource is not just tokens or models. It is encoded domain judgment.",
+        mode: "Attach to specific workstreams first, then promote shared rules."
       }
     ];
 
     const signals = [
-      { company: "Apollo", theme: "capability", label: "Cockpits, not keys", claim: "API mediation is useful only when schema, identity, runtime boundary, audit, and replay surround it.", hmc: "Expose governed capabilities, not raw endpoint catalogs.", evidence: ["Apollo booth", "vendor notes", "capability-surface synthesis"] },
+      { company: "Apollo", theme: "authority", label: "Cockpits, not keys", claim: "Tool access is useful only when schema, identity, runtime boundary, audit, and replay surround it.", hmc: "Generalize the lesson: governed work, not raw access.", evidence: ["Apollo booth", "vendor notes", "tool mediation synthesis"] },
       { company: "DataRobot", theme: "runtime", label: "Below the waterline", claim: "The visible agent is the smallest part; production readiness sits underneath.", hmc: "Budget for governance, CI/CD, observability, connectors, evals, auth, and economics.", evidence: ["Day 1 claims", "slide OCR", "below-waterline framing"] },
       { company: "Bauplan", theme: "data", label: "Safe failure for data", claim: "Data agents need sandboxed state, lineage, reviewable deltas, checks, and controlled promotion.", hmc: "Treat data mutation as staged promotion, not direct write access.", evidence: ["Day 2 claims", "slide evidence", "data-agent synthesis"] },
       { company: "NVIDIA", theme: "validation", label: "Velocity pressure", claim: "CLI-native work surfaces and code generation increase the need for Research/Gates/Sweeps.", hmc: "Build absorption capacity: gates, sweeps, harnesses, and review loops.", evidence: ["Day 2 raw notes", "NVIDIA talk", "validation synthesis"] },
@@ -942,26 +970,26 @@
       { company: "CockroachDB", theme: "infra", label: "Agents do not breathe", claim: "Agent traffic changes load on databases, APIs, queues, auth, CI, and observability.", hmc: "Model non-human traffic separately from human traffic.", evidence: ["CockroachDB notes", "infrastructure claims", "agent traffic synthesis"] },
       { company: "LanceDB / You.com", theme: "context", label: "Context is a workload", claim: "Retrieval has scale, latency, provenance, and budget pressure.", hmc: "Treat retrieval as governed infrastructure with cost controls.", evidence: ["Day 1/2 retrieval material", "slide OCR", "context synthesis"] },
       { company: "RingCentral", theme: "execution", label: "Specialize deeply", claim: "Agents should reason, research, hypothesize, and propose within mandates; deterministic systems execute known procedures.", hmc: "Keep mandates narrow and execution boundaries visible.", evidence: ["RingCentral talk", "swarm reflection note", "deterministic boundary synthesis"] },
-      { company: "T-Mobile / Distyl", theme: "ethics", label: "Agency can become containment", claim: "Use-case choice determines whether the substrate liberates work or tightens control.", hmc: "Start with toil and reliability, not opaque authority.", evidence: ["customer-agent material", "Day 2 claims", "ethics synthesis"] },
+      { company: "T-Mobile / Distyl", theme: "ethics", label: "Agency can become containment", claim: "Use-case choice determines whether the substrate liberates work or tightens control.", hmc: "Start hardening where agents reduce toil and improve reliability, not opaque authority.", evidence: ["customer-agent material", "Day 2 claims", "ethics synthesis"] },
       { company: "Monte Carlo", theme: "data", label: "Bad answers can be data failures", claim: "Agent readiness needs data, semantic, build, and trust observability.", hmc: "Debug the data substrate before blaming the model.", evidence: ["Monte Carlo talk", "Day 2 notes", "observability synthesis"] },
       { company: "Google commerce", theme: "execution", label: "Structured data plus executors", claim: "Customer-facing agents need structured data and deterministic executors.", hmc: "Separate persuasion, structured facts, and transaction execution.", evidence: ["Google commerce talk", "Day 2 timeline", "execution synthesis"] }
     ];
 
-    const stack = document.getElementById("stack");
-    const stackDetail = document.getElementById("stackDetail");
-    const surfaceList = document.getElementById("surfaceList");
-    const surfaceScore = document.getElementById("surfaceScore");
-    const surfaceMeter = document.getElementById("surfaceMeter");
-    const surfaceGuidance = document.getElementById("surfaceGuidance");
-    const pilotGrid = document.getElementById("pilotGrid");
+    const rail = document.getElementById("rail");
+    const modelDetail = document.getElementById("modelDetail");
+    const workList = document.getElementById("workList");
+    const workScore = document.getElementById("workScore");
+    const workMeter = document.getElementById("workMeter");
+    const workGuidance = document.getElementById("workGuidance");
+    const portfolioGrid = document.getElementById("portfolioGrid");
     const filters = document.getElementById("filters");
     const signalGrid = document.getElementById("signals");
     const search = document.getElementById("search");
     const drawer = document.getElementById("drawer");
     const toast = document.getElementById("toast");
 
-    let activeStack = "capability";
-    let activeSurface = "api";
+    let activeModel = "worker";
+    let activeWork = "draft";
     let activeFilter = "all";
 
     function toastMessage(text) {
@@ -970,12 +998,22 @@
       setTimeout(() => toast.classList.remove("show"), 1700);
     }
 
+    function block(title, text) {
+      if (!text) return "";
+      return `<div class="drawer-block"><strong>${title}</strong><p>${text}</p></div>`;
+    }
+
+    function listBlock(title, list) {
+      if (!list.length) return "";
+      return `<div class="drawer-block"><strong>${title}</strong><ul>${list.map(x => `<li>${x}</li>`).join("")}</ul></div>`;
+    }
+
     function openDrawer(item) {
       drawer.classList.add("open");
       drawer.innerHTML = `
         <div class="drawer-head">
           <div>
-            <p class="eyebrow">${item.company || item.title || "Detail"}</p>
+            <p class="eyebrow">${item.company || item.grade || item.title || "Detail"}</p>
             <h3>${item.label || item.title}</h3>
           </div>
           <button class="drawer-close" type="button" aria-label="Close drawer">×</button>
@@ -993,102 +1031,92 @@
       drawer.innerHTML = "";
     }
 
-    function block(title, text) {
-      if (!text) return "";
-      return `<div class="drawer-block"><strong>${title}</strong><p>${text}</p></div>`;
-    }
-
-    function listBlock(title, list) {
-      if (!list.length) return "";
-      return `<div class="drawer-block"><strong>${title}</strong><ul>${list.map(x => `<li>${x}</li>`).join("")}</ul></div>`;
-    }
-
-    function renderStack() {
-      stack.innerHTML = "";
-      stackItems.forEach(item => {
+    function renderModel() {
+      rail.innerHTML = "";
+      modelItems.forEach(item => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = item.key === activeStack ? "active" : "";
+        btn.className = item.key === activeModel ? "active" : "";
         btn.innerHTML = `<span>${item.n}</span><strong>${item.title}</strong><p class="copy">${item.short}</p>`;
         btn.addEventListener("click", () => {
-          activeStack = item.key;
-          renderStack();
+          activeModel = item.key;
+          renderModel();
         });
-        stack.appendChild(btn);
+        rail.appendChild(btn);
       });
 
-      const item = stackItems.find(x => x.key === activeStack) || stackItems[0];
-      stackDetail.innerHTML = `
-        <p class="eyebrow">Selected layer</p>
+      const item = modelItems.find(x => x.key === activeModel) || modelItems[0];
+      modelDetail.innerHTML = `
+        <p class="eyebrow">Selected pressure point</p>
         <h3>${item.title}</h3>
         <p class="lead">${item.claim}</p>
         <div class="detail-grid">
           <div class="mini"><strong>Failure mode</strong><p>${item.risk}</p></div>
           <div class="mini"><strong>HMC move</strong><p>${item.hmc}</p></div>
         </div>
-        <button class="secondary" id="stackEvidence" type="button">Open evidence texture</button>
+        <button class="secondary" id="modelEvidence" type="button">Open evidence texture</button>
       `;
-      document.getElementById("stackEvidence").addEventListener("click", () => openDrawer(item));
+      document.getElementById("modelEvidence").addEventListener("click", () => openDrawer(item));
     }
 
-    function renderSurfaces() {
-      surfaceList.innerHTML = "";
-      surfaces.forEach(surface => {
+    function renderWorkTypes() {
+      workList.innerHTML = "";
+      workTypes.forEach(work => {
         const node = document.createElement("article");
-        node.className = `surface ${surface.key === activeSurface ? "active" : ""}`;
+        node.className = `work-card ${work.key === activeWork ? "active" : ""}`;
         node.innerHTML = `
-          <div class="surface-head">
+          <div class="work-head">
             <div>
-              <p class="eyebrow">${surface.type}</p>
-              <h3>${surface.name}</h3>
+              <p class="eyebrow">${work.type}</p>
+              <h3>${work.name}</h3>
             </div>
-            <button class="small" type="button" data-select="${surface.key}">Select</button>
+            <button class="small" type="button" data-select="${work.key}">Select</button>
           </div>
-          <p>${surface.text}</p>
+          <p>${work.text}</p>
           <div class="checklist">
             ${controls.map(([key, label]) => `
-              <label class="check"><input type="checkbox" data-control="${key}" ${surface.defaults.includes(key) ? "checked" : ""}> ${label}</label>
+              <label class="check"><input type="checkbox" data-control="${key}" ${work.defaults.includes(key) ? "checked" : ""}> ${label}</label>
             `).join("")}
           </div>
         `;
         node.querySelector("[data-select]").addEventListener("click", () => {
-          activeSurface = surface.key;
-          renderSurfaces();
+          activeWork = work.key;
+          renderWorkTypes();
         });
-        node.querySelectorAll("input").forEach(input => input.addEventListener("change", updateSurfaceScore));
-        surfaceList.appendChild(node);
+        node.querySelectorAll("input").forEach(input => input.addEventListener("change", updateWorkScore));
+        workList.appendChild(node);
       });
-      updateSurfaceScore();
+      updateWorkScore();
     }
 
-    function updateSurfaceScore() {
-      const selected = [...surfaceList.querySelectorAll(".surface")].find(x => x.classList.contains("active"));
+    function updateWorkScore() {
+      const selected = [...workList.querySelectorAll(".work-card")].find(x => x.classList.contains("active"));
       if (!selected) return;
       const total = selected.querySelectorAll("input").length;
       const checked = selected.querySelectorAll("input:checked").length;
       const pct = Math.round((checked / total) * 100);
-      surfaceScore.textContent = `${pct}%`;
-      surfaceMeter.style.width = `${pct}%`;
-      if (pct < 40) surfaceGuidance.textContent = "This is still integration plumbing. Do not expose it to non-human actors except as a private prototype.";
-      else if (pct < 75) surfaceGuidance.textContent = "This is becoming a capability surface. Add policy, audit, review, criticality, and recovery before write access.";
-      else surfaceGuidance.textContent = "This is plausible pilot material if scope stays narrow and the run history is inspectable.";
+      workScore.textContent = `${pct}%`;
+      workMeter.style.width = `${pct}%`;
+      if (pct < 40) workGuidance.textContent = "This may be useful local automation, but the operating boundary is not explicit enough for enterprise trust.";
+      else if (pct < 75) workGuidance.textContent = "This is becoming governed work. Add the missing controls before increasing authority, scope, or blast radius.";
+      else workGuidance.textContent = "This is plausible enterprise-grade work if it remains measurable, inspectable, and recoverable.";
     }
 
-    function renderPilots() {
-      pilotGrid.innerHTML = "";
-      pilots.forEach(pilot => {
+    function renderPortfolio() {
+      portfolioGrid.innerHTML = "";
+      portfolioMoves.forEach(item => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "pilot-card";
+        btn.className = "portfolio-card";
         btn.innerHTML = `
-          <small>${pilot.grade}</small>
-          <strong>${pilot.title}</strong>
-          <p>${pilot.text}</p>
-          <div class="meter"><span style="width:${pilot.score}%"></span></div>
-          <p><strong style="color:var(--amber)">${pilot.score}/100</strong></p>
+          <small>${item.grade}</small>
+          <strong>${item.title}</strong>
+          <p>${item.text}</p>
+          <div class="meter"><span style="width:${item.score}%"></span></div>
+          <p><strong style="color:var(--amber)">${item.score}/100</strong></p>
         `;
-        btn.addEventListener("click", () => openDrawer({ company: "Pilot option", ...pilot, label: pilot.title, claim: pilot.text, evidence: [pilot.grade, `Score: ${pilot.score}/100`] }));
-        pilotGrid.appendChild(btn);
+        btn.addEventListener("click", () => openDrawer({ ...item, label: item.title, claim: item.text, evidence: [item.grade, `Control value: ${item.score}/100`] }));
+        portfolioGrid.appendChild(btn);
       });
     }
 
@@ -1125,15 +1153,15 @@
         });
     }
 
-    document.getElementById("resetSurface").addEventListener("click", () => renderSurfaces());
+    document.getElementById("resetWork").addEventListener("click", () => renderWorkTypes());
 
-    document.getElementById("compactToggle").addEventListener("click", () => {
-      document.body.classList.toggle("compact");
-      toastMessage(document.body.classList.contains("compact") ? "Executive mode on" : "Executive mode off");
+    document.getElementById("execToggle").addEventListener("click", () => {
+      document.body.classList.toggle("exec");
+      toastMessage(document.body.classList.contains("exec") ? "Executive mode on" : "Executive mode off");
     });
 
     document.getElementById("copyLine").addEventListener("click", async () => {
-      const line = "HMC should not rush to trust agents. HMC should shape the world agents are allowed to inhabit.";
+      const line = "A new class of worker is entering the firm. HMC needs an operating model for non-human work: authority, evidence, validation, observability, cost, review, and recovery.";
       try {
         await navigator.clipboard.writeText(line);
         toastMessage("Copied thesis");
@@ -1161,9 +1189,9 @@
     }, { threshold: [.28, .5, .72] });
     document.querySelectorAll("main section[id]").forEach(s => observer.observe(s));
 
-    renderStack();
-    renderSurfaces();
-    renderPilots();
+    renderModel();
+    renderWorkTypes();
+    renderPortfolio();
     renderFilters();
     renderSignals();
   </script>
