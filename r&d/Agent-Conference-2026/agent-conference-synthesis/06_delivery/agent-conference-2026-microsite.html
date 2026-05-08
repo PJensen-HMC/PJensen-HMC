@@ -658,6 +658,37 @@
       font-size: 1.35rem;
     }
 
+    .evidence-block {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(247, 244, 234, 0.055);
+      padding: 12px;
+    }
+
+    .evidence-block strong {
+      color: var(--yellow);
+      font-size: 0.88rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .evidence-block p,
+    .source-list li {
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 0.92rem;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 8px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
     .drawer-close {
       width: 34px;
       height: 34px;
@@ -666,6 +697,30 @@
       background: rgba(247, 244, 234, 0.06);
       color: var(--ink);
       font-weight: 900;
+    }
+
+    [data-evidence] {
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    [data-evidence]:hover,
+    [data-evidence]:focus {
+      border-color: rgba(118, 242, 154, 0.72);
+      background: rgba(118, 242, 154, 0.08);
+      outline: none;
+    }
+
+    .evidence-link {
+      justify-self: start;
+      min-height: 30px;
+      border: 1px solid rgba(255, 209, 102, 0.38);
+      border-radius: var(--radius);
+      background: rgba(255, 209, 102, 0.08);
+      color: var(--yellow);
+      padding: 6px 9px;
+      font-size: 0.78rem;
+      font-weight: 850;
     }
 
     .pilot {
@@ -923,9 +978,9 @@
             <div class="satellite">Human review</div>
           </div>
           <div class="stats">
-            <div class="metric"><strong>1</strong><span>bounded pilot before platform spread</span></div>
-            <div class="metric"><strong>7</strong><span>control-plane concerns to make explicit</span></div>
-            <div class="metric"><strong>12</strong><span>field signals preserved as evidence texture</span></div>
+            <div class="metric" data-evidence="bounded-pilot"><strong>1</strong><span>bounded pilot before platform spread</span></div>
+            <div class="metric" data-evidence="control-plane"><strong>7</strong><span>control-plane concerns to make explicit</span></div>
+            <div class="metric" data-evidence="field-signals"><strong>12</strong><span>field signals preserved as evidence texture</span></div>
           </div>
         </div>
       </div>
@@ -938,11 +993,11 @@
         <p class="lead">The conference was captured as a human-agent research pair. The human sensed the room. The agent carried normalization, extraction, comparison, caveat preservation, and synthesis.</p>
       </div>
       <div class="method-grid">
-        <div class="card">
+        <div class="card" data-evidence="human-capture">
           <strong>Human role</strong>
           <p>Choose rooms, sense credibility, notice energy, record audio, photograph slides, and decide what felt actionable in motion.</p>
         </div>
-        <div class="card">
+        <div class="card" data-evidence="agent-capture">
           <strong>Agent role</strong>
           <p>Reconcile schedules, index sources, extract claims, compare talks, preserve caveats, and turn the firehose into inspectable intelligence.</p>
         </div>
@@ -999,10 +1054,10 @@
         <p class="lead">Across coding-agent, validation, infrastructure, data, and MCP material, the pattern is the same: AI accelerates candidate work first. The organization has to scale review, gates, sweeps, replay, evals, and incident response around that new volume.</p>
       </div>
       <div class="moves-grid">
-        <div class="card"><strong>Gates</strong><p>Known failure modes before promotion: criticality policy, security checks, test selection, coverage ratchets, migration guards, CODEOWNERS, and destructive-action review.</p></div>
-        <div class="card"><strong>Sweeps</strong><p>Recurring inspections for drift, repeated review patterns, cross-cutting issues, trace anomalies, prompt-injection evidence, and eval variance.</p></div>
-        <div class="card"><strong>Replay</strong><p>Run history, source references, tool calls, actor identity, policy decisions, and output lineage need to be inspectable after the fact.</p></div>
-        <div class="card"><strong>Human taste</strong><p>Humans remain responsible for standards, authority, edge-case judgment, and whether the work should exist at all.</p></div>
+        <div class="card" data-evidence="gates"><strong>Gates</strong><p>Known failure modes before promotion: criticality policy, security checks, test selection, coverage ratchets, migration guards, CODEOWNERS, and destructive-action review.</p></div>
+        <div class="card" data-evidence="sweeps"><strong>Sweeps</strong><p>Recurring inspections for drift, repeated review patterns, cross-cutting issues, trace anomalies, prompt-injection evidence, and eval variance.</p></div>
+        <div class="card" data-evidence="replay"><strong>Replay</strong><p>Run history, source references, tool calls, actor identity, policy decisions, and output lineage need to be inspectable after the fact.</p></div>
+        <div class="card" data-evidence="human-taste"><strong>Human taste</strong><p>Humans remain responsible for standards, authority, edge-case judgment, and whether the work should exist at all.</p></div>
       </div>
     </section>
 
@@ -1020,6 +1075,7 @@
           <div class="meter" aria-hidden="true"><span id="pilotMeter"></span></div>
           <strong id="pilotLabel">Not ready</strong>
           <p class="detail-text" id="pilotText">Start in read-only or proposal-first mode until ownership, audit, and review boundaries are clear.</p>
+          <button class="secondary-action" id="pilotEvidence" type="button">Open pilot evidence</button>
         </aside>
       </div>
     </section>
@@ -1030,12 +1086,12 @@
         <h2>Start bounded. Build reusable control.</h2>
       </div>
       <div class="moves-grid">
-        <div class="card"><strong>1. Pick one bounded toil pilot</strong><p>Named owner, measurable success criteria, small blast radius, proposal-first or read-only starting mode.</p></div>
-        <div class="card"><strong>2. Define a capability registry standard</strong><p>Owner, contract, side-effect class, permissions, actor policy, audit fields, rollback path, and criticality level.</p></div>
-        <div class="card"><strong>3. Establish identity and gateway policy</strong><p>Subject/actor separation, delegated authority, scoped permissions, prompt-injection response, and destructive-action handling.</p></div>
-        <div class="card"><strong>4. Treat context provenance as platform infrastructure</strong><p>Source ID, version, permission, freshness, index version, and output references.</p></div>
-        <div class="card"><strong>5. Turn evals into guardrails</strong><p>Variance checks, repeatability checks, replay, gates, sweeps, and incident-response loops.</p></div>
-        <div class="card"><strong>6. Capture domain rules</strong><p>Reusable skills, domain-rule libraries, encoded decision procedures, and capability policies.</p></div>
+        <div class="card" data-evidence="move-pilot"><strong>1. Pick one bounded toil pilot</strong><p>Named owner, measurable success criteria, small blast radius, proposal-first or read-only starting mode.</p></div>
+        <div class="card" data-evidence="move-registry"><strong>2. Define a capability registry standard</strong><p>Owner, contract, side-effect class, permissions, actor policy, audit fields, rollback path, and criticality level.</p></div>
+        <div class="card" data-evidence="move-identity"><strong>3. Establish identity and gateway policy</strong><p>Subject/actor separation, delegated authority, scoped permissions, prompt-injection response, and destructive-action handling.</p></div>
+        <div class="card" data-evidence="move-context"><strong>4. Treat context provenance as platform infrastructure</strong><p>Source ID, version, permission, freshness, index version, and output references.</p></div>
+        <div class="card" data-evidence="move-evals"><strong>5. Turn evals into guardrails</strong><p>Variance checks, repeatability checks, replay, gates, sweeps, and incident-response loops.</p></div>
+        <div class="card" data-evidence="move-domain-rules"><strong>6. Capture domain rules</strong><p>Reusable skills, domain-rule libraries, encoded decision procedures, and capability policies.</p></div>
       </div>
     </section>
 
@@ -1092,7 +1148,10 @@
         title: "Actor Identity",
         summary: "Agents are actors, not users.",
         risk: "Broad service accounts erase accountability and make delegation invisible.",
-        move: "Separate subject, actor, delegated authority, tool invocation, and system of record."
+        move: "Separate subject, actor, delegated authority, tool invocation, and system of record.",
+        story: "The identity thread showed up repeatedly in the below-waterline and MCP material: production agents cannot be treated as anonymous users or broad service accounts.",
+        field: "The field impression was that identity is not a security afterthought. It is part of the product surface for non-human action.",
+        sources: ["D1-C005", "D1-C013", "SL-C012", "SL-C013", "05_outputs/agent-conference-2026-everything.md"]
       },
       {
         key: "capability",
@@ -1100,7 +1159,10 @@
         title: "Governed Capability",
         summary: "Capabilities are named actions with typed contracts.",
         risk: "Raw endpoint access lets agents discover and mutate systems without policy context.",
-        move: "Define owner, input, output, side effects, actor constraints, audit event, criticality, and recovery path."
+        move: "Define owner, input, output, side effects, actor constraints, audit event, criticality, and recovery path.",
+        story: "Apollo made the mediation idea concrete, but the HMC inference is broader: do not expose systems as raw endpoint catalogs. Expose governed actions.",
+        field: "This is where the memo's line came from: agents need cockpits, not keys to the building.",
+        sources: ["D2-C005", "V-C001", "D2-C016", "05_outputs/agent-conference-2026-everything-distilled.md"]
       },
       {
         key: "context",
@@ -1108,7 +1170,10 @@
         title: "Context Provenance",
         summary: "Retrieval is infrastructure, not garnish.",
         risk: "Answers without source, freshness, permissions, or index version cannot be defended.",
-        move: "Attach source IDs, versions, permissions, freshness, index version, and downstream output references."
+        move: "Attach source IDs, versions, permissions, freshness, index version, and downstream output references.",
+        story: "The retrieval material moved beyond naive RAG. LanceDB, You.com, and the slide evidence point to context as a workload with cost, latency, metadata, and provenance pressure.",
+        field: "The useful shift is to treat context like runtime state that must be governed and inspected.",
+        sources: ["D1-C007", "D1-C012", "D2-C006", "D2-C013", "SL-C003", "SL-C004", "SL-C005", "SL-C008", "SL-C021"]
       },
       {
         key: "validation",
@@ -1116,7 +1181,10 @@
         title: "Validation Loop",
         summary: "The fastest is wrong if validation cannot keep up.",
         risk: "Generation volume can exceed review, test, security, and recovery capacity.",
-        move: "Use evals, gates, sweeps, replay, variance checks, and incident response before pilots multiply."
+        move: "Use evals, gates, sweeps, replay, variance checks, and incident response before pilots multiply.",
+        story: "NVIDIA, CircleCI/METR, coding-agent, and eval material all point to the same bottleneck: AI accelerates candidate work before organizations can prove it is correct.",
+        field: "The field impression was blunt: speed is not throughput if review, recovery, and confidence lag behind.",
+        sources: ["D1-C011", "D1-C014", "D2-C010", "D2-C012", "SL-C009", "SL-C019", "SL-C020"]
       },
       {
         key: "execution",
@@ -1124,7 +1192,10 @@
         title: "Deterministic Boundary",
         summary: "Known procedures should stay deterministic.",
         risk: "Letting agents execute everything turns routine work into probabilistic work.",
-        move: "Have agents reason, research, and propose; let deterministic systems execute known procedures."
+        move: "Have agents reason, research, and propose; let deterministic systems execute known procedures.",
+        story: "RingCentral made the boundary vivid: specialize agents for reasoning and proposal work, but keep known procedures below a governed deterministic boundary.",
+        field: "The strongest reusable point is specialization, not free-form swarm chatter.",
+        sources: ["D2-C009", "D2-C015", "SL-C023", "SL-C024", "SL-C025", "SL-C026"]
       },
       {
         key: "human",
@@ -1132,9 +1203,188 @@
         title: "Human Review",
         summary: "Human judgment stays in the authority chain.",
         risk: "Automation can become opaque authority, surveillance, or containment.",
-        move: "Define review gates by criticality, use case, side effect, and recoverability."
+        move: "Define review gates by criticality, use case, side effect, and recoverability.",
+        story: "The customer-agent and banking-risk material showed the moral edge: the same substrate can reduce toil or become deflection and containment.",
+        field: "The safe starting point is toil and reliability, not opaque authority.",
+        sources: ["D1-C003", "D1-C004", "D2-C002", "D2-C003", "D2-C004", "SL-C002"]
       }
     ];
+
+    const evidenceLibrary = {
+      "bounded-pilot": {
+        company: "Bounded pilot",
+        label: "Start with one controlled surface",
+        text: "The deliverable recommends one toil pilot before platform spread.",
+        story: "Across the conference, the durable advice was not to launch broad autonomy. Start where success is measurable, blast radius is small, and the first mode can be read-only or proposal-first.",
+        field: "The user's own synthesis kept returning to 'go for toil' as the practical pilot-selection heuristic.",
+        hmc: "Pick one bounded pilot and measure control-plane maturity, not agent novelty.",
+        evidence: "D1-C003, D1-C004, D1-C008, D1-C015",
+        sources: ["05_outputs/agent-conference-2026-everything-distilled.md", "04_analysis/day1-synthesis.md", "03_extracted-claims/day1-claims.md"]
+      },
+      "control-plane": {
+        company: "Control plane",
+        label: "Seven explicit concerns",
+        text: "The conference pattern was identity, capability, context, validation, observability, infrastructure, and human review.",
+        story: "The model was not the center of gravity. The repeated evidence pointed to the operating substrate around the model.",
+        field: "This is why the executive line is 'build the control plane, not the magic trick.'",
+        hmc: "Treat non-human work as an architecture problem before it becomes a product-sprawl problem.",
+        evidence: "D1-C010, D2-C005, D2-C014, SL-C006, SL-C014, SL-C022",
+        sources: ["05_outputs/agent-conference-2026-everything.md", "05_outputs/agent-conference-2026-patterns.md"]
+      },
+      "field-signals": {
+        company: "Field signals",
+        label: "Anecdotes as architecture evidence",
+        text: "The field signals make the abstract architecture tangible without turning vendor material into endorsement.",
+        story: "Apollo, DataRobot, Bauplan, NVIDIA, CircleCI/METR, MCP, CockroachDB, LanceDB/You.com, RingCentral, T-Mobile/Distyl, Monte Carlo, and Google each illuminated one part of the system.",
+        field: "The memo preserved them because executives remember stories better than architecture grids.",
+        hmc: "Use field texture to explain the pattern, then keep procurement separate.",
+        evidence: "V-C001, V-C002, V-C003, V-C004, D2-C010, D2-C012, D2-C015",
+        sources: ["05_outputs/agent-conference-2026-everything.md", "03_extracted-claims/vendor-claims.md", "03_extracted-claims/day2-claims.md"]
+      },
+      "human-capture": {
+        company: "Human-agent capture",
+        label: "The human drank from the firehose",
+        text: "The human attended, sensed, selected, recorded, photographed, and marked what felt actionable.",
+        story: "This capture would have been much weaker as either pure human memory or pure post-hoc machine summary. The useful product came from the pair.",
+        field: "The human came away with actionable intelligence instead of being flattened by conference noise.",
+        hmc: "Keep human judgment at the center while assigning agents structured compression work.",
+        evidence: "D1-C001, D2-C001, D2-C016",
+        sources: ["01_raw-evidence/notes/day1-notes.md", "01_raw-evidence/notes/day2-notes.md", "02_normalized/source-ledger.md"]
+      },
+      "agent-capture": {
+        company: "Human-agent capture",
+        label: "The agent carried the compression layer",
+        text: "The agent normalized notes, reconciled schedules, indexed sources, extracted claims, and preserved caveats.",
+        story: "The pipeline itself is evidence for the broader thesis: the agent did structured work around human judgment while provenance stayed inspectable.",
+        field: "This is the 'drank from the firehose and came away unharmed' moment.",
+        hmc: "Use agents for volume, comparison, traceability, and synthesis where the task can be bounded.",
+        evidence: "D1-C001, D2-C001, D2-C016",
+        sources: ["02_normalized/source-ledger.md", "03_extracted-claims/", "04_analysis/"]
+      },
+      "gates": {
+        company: "Operating controls",
+        label: "Gates stop known rot",
+        text: "Known failure modes should be blocked before promotion.",
+        story: "The NVIDIA notes listed concrete engineering gates: workflows, behavioral verification, coverage ratchets, dependency pinning, migration guards, CODEOWNERS, and commit linting.",
+        field: "The strongest impression was that these controls were practical, not mystical.",
+        hmc: "Codify known failure modes before agent-created work reaches authoritative systems.",
+        evidence: "D2-C010, D2-C012, SL-C019, SL-C020",
+        sources: ["01_raw-evidence/notes/day2-notes.md", "01_raw-evidence/notes/day2-notes-extended.md", "04_analysis/day2-synthesis.md"]
+      },
+      "sweeps": {
+        company: "Operating controls",
+        label: "Sweeps find what gates miss",
+        text: "Recurring inspections catch drift, repeated review patterns, and cross-cutting rot.",
+        story: "The notes preserve the idea that sweeps clean what gates cannot see: nightly E2E, repeated review patterns, and ongoing evolution into sharper gates.",
+        field: "This was one of the most personally emphasized NVIDIA takeaways, but it generalizes to non-code work.",
+        hmc: "Schedule recurring sweeps for traces, eval variance, prompt-injection evidence, and policy misses.",
+        evidence: "D2-C010, D1-C014, SL-C009",
+        sources: ["01_raw-evidence/notes/day2-notes.md", "01_raw-evidence/notes/day2-notes-extended.md"]
+      },
+      "replay": {
+        company: "Operating controls",
+        label: "Replay makes judgment auditable",
+        text: "Run history, source references, tool calls, actor identity, and policy decisions need to be inspectable.",
+        story: "Replay appeared across eval, observability, MCP, and traceability material. It is the difference between hoping an agent behaved and knowing what happened.",
+        field: "The conference made trace inspection feel like part of the runtime, not a debugging afterthought.",
+        hmc: "Define the minimum event schema before pilots multiply.",
+        evidence: "D1-C014, D2-C014, SL-C009, SL-C022",
+        sources: ["05_outputs/agent-conference-2026-everything.md", "03_extracted-claims/slide-claims.md"]
+      },
+      "human-taste": {
+        company: "Operating controls",
+        label: "Humans retain taste and authority",
+        text: "Humans stay responsible for standards, edge cases, and whether the work should exist.",
+        story: "CircleCI/METR and coding-agent material separated subjective speed from measured throughput. Human taste became the bottleneck that should be protected, not bypassed.",
+        field: "The memo's shorthand became: you cannot outsource the care.",
+        hmc: "Keep review where quality, policy, taste, and accountability matter.",
+        evidence: "D1-C011, D2-C012, SL-C019, SL-C020",
+        sources: ["04_analysis/day2-synthesis.md", "05_outputs/agent-conference-2026-patterns.md"]
+      },
+      "move-pilot": {
+        company: "HMC move",
+        label: "Pick one bounded toil pilot",
+        text: "Start where work is repetitive, measurable, and low blast radius.",
+        story: "Day 1 and Day 2 both reinforced that the safest adoption path is toil and reliability, not broad opaque authority.",
+        field: "The phrase that survived the pipeline was 'go for toil.'",
+        hmc: "Choose a proposal-first or read-only pilot with named ownership.",
+        evidence: "D1-C003, D1-C004, D1-C008, D1-C015",
+        sources: ["05_outputs/agent-conference-2026-everything-distilled.md", "03_extracted-claims/day1-claims.md"]
+      },
+      "move-registry": {
+        company: "HMC move",
+        label: "Define a capability registry",
+        text: "A registry turns system access into owned, typed, policy-aware capabilities.",
+        story: "This is the HMC interpretation of the conference pattern. It is not yet socialized internally, and that is the point.",
+        field: "The strategic shift is from endpoint thinking to capability thinking.",
+        hmc: "Document owner, contract, side effects, policy, audit, criticality, and recovery for each exposed action.",
+        evidence: "D2-C005, V-C001, D2-C016",
+        sources: ["05_outputs/agent-conference-2026-everything-distilled.md", "05_outputs/agent-conference-2026-everything.md"]
+      },
+      "move-identity": {
+        company: "HMC move",
+        label: "Set identity and gateway policy",
+        text: "Broad write access is hard to justify without subject/actor separation and gateway policy.",
+        story: "MCP made tool access feel easy, but the safety conclusion was the opposite: connection standards are not security models.",
+        field: "The line to preserve is: prompt injection will happen. Design the gateway.",
+        hmc: "Define criticality, destructive-action policy, trace hygiene, DLP, and prompt-injection response.",
+        evidence: "D1-C005, D1-C013, D2-C014, SL-C012, SL-C013, SL-C022",
+        sources: ["03_extracted-claims/slide-claims.md", "04_analysis/day2-synthesis.md"]
+      },
+      "move-context": {
+        company: "HMC move",
+        label: "Make context provenance real",
+        text: "Context should carry source ID, version, permissions, freshness, and output references.",
+        story: "LanceDB, You.com, and the OCR material made retrieval feel less like a feature and more like a production workload.",
+        field: "The practical concern was not vector search; it was whether context could be trusted, budgeted, and defended.",
+        hmc: "Treat retrieval as a governed platform service.",
+        evidence: "D1-C007, D1-C012, D2-C006, D2-C013, SL-C003, SL-C004, SL-C005, SL-C008, SL-C021",
+        sources: ["03_extracted-claims/day1-claims.md", "03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md"]
+      },
+      "move-evals": {
+        company: "HMC move",
+        label: "Turn evals into guardrails",
+        text: "Evals should become repeatable operational controls, not launch-time decoration.",
+        story: "The material connected evals, replay, gates, sweeps, and variance checks into a post-generation operating model.",
+        field: "The strongest line here is: today's evals are tomorrow's guardrails.",
+        hmc: "Define eval variance, repeatability, replay, and incident loops before pilots multiply.",
+        evidence: "D1-C014, D2-C010, D2-C012, SL-C009, SL-C019, SL-C020",
+        sources: ["04_analysis/day2-synthesis.md", "05_outputs/agent-conference-2026-patterns.md"]
+      },
+      "move-domain-rules": {
+        company: "HMC move",
+        label: "Capture domain rules",
+        text: "SME judgment should become reusable skills, encoded procedures, fixtures, and policies.",
+        story: "The Day 1 wrap notes made the durable point: the scarce resource is not tokens. It is domain rules.",
+        field: "This is where HMC can create durable assets instead of one-off prompts.",
+        hmc: "Build reusable skills and decision procedures around the pilot domain.",
+        evidence: "D1-C003, D1-C004, D1-C008, D1-C015",
+        sources: ["01_raw-evidence/notes/day1-notes.md", "04_analysis/day1-synthesis.md"]
+      },
+      "pilot-selector": {
+        company: "Pilot selector",
+        label: "Why these sliders exist",
+        text: "The selector favors toil, measurable success, available domain rules, review capacity, low blast radius, and low write risk.",
+        story: "The pipeline repeatedly rejected broad autonomy as a first move. The right first pilot is boring enough to evaluate and useful enough to matter.",
+        field: "The goal is to recover toil while proving the control plane.",
+        hmc: "Use the selector as a conversation starter, not a governance substitute.",
+        evidence: "D1-C003, D1-C004, D1-C008, D1-C015, D2-C016",
+        sources: ["05_outputs/agent-conference-2026-everything-distilled.md"]
+      }
+    };
+
+    const capabilityEvidence = {
+      name: evidenceLibrary["move-registry"],
+      owner: evidenceLibrary["move-registry"],
+      input: evidenceLibrary["move-registry"],
+      output: evidenceLibrary["move-registry"],
+      effects: evidenceLibrary["move-registry"],
+      policy: evidenceLibrary["move-identity"],
+      audit: evidenceLibrary["replay"],
+      criticality: evidenceLibrary["move-identity"],
+      review: evidenceLibrary["human-taste"],
+      recovery: evidenceLibrary["replay"]
+    };
 
     const capabilityItems = [
       ["name", "Named action", "The capability has a business name that humans understand."],
@@ -1156,7 +1406,10 @@
         label: "Cockpits, not keys",
         text: "API descriptions can become mediated capabilities only when schema, identity, runtime boundary, audit, and replay surround them.",
         evidence: "D2-C005, V-C001",
-        hmc: "Do not expose raw endpoint catalogs to agents. Curate capability surfaces."
+        hmc: "Do not expose raw endpoint catalogs to agents. Curate capability surfaces.",
+        story: "The Apollo booth made the API mediation idea inspectable: API descriptions could be ingested and exposed as governed capabilities rather than dumped as raw endpoints.",
+        field: "This is the origin of the cockpit line. The field impression was architectural, not procurement-oriented.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/vendor-claims.md", "02_normalized/booth-index.md"]
       },
       {
         company: "DataRobot",
@@ -1164,7 +1417,10 @@
         label: "Below the waterline",
         text: "The production product is identity, auth, audit, evals, governance, observability, CI/CD, connectors, and economics.",
         evidence: "D1-C010, SL-C006, SL-C007, SL-C010",
-        hmc: "Budget for substrate, not only demos."
+        hmc: "Budget for substrate, not only demos.",
+        story: "DataRobot's slides gave the cleanest image for production readiness: the visible agent is only the surface. The production product sits underneath.",
+        field: "The useful story is that demos are the smallest part of the system.",
+        sources: ["03_extracted-claims/day1-claims.md", "03_extracted-claims/slide-claims.md", "01_raw-evidence/images/images-ocr.md"]
       },
       {
         company: "Bauplan",
@@ -1172,7 +1428,10 @@
         label: "Safe failure for data",
         text: "Data agents need sandboxed state, lineage, reviewable deltas, checks, and controlled promotion.",
         evidence: "D2-C007, SL-C015, SL-C016, SL-C017",
-        hmc: "Treat data mutation as staged promotion, not direct write access."
+        hmc: "Treat data mutation as staged promotion, not direct write access.",
+        story: "Bauplan made a subtle safety distinction concrete: code can fail safely through branches, tests, and pull requests. Data needs an equivalent safe-failure surface.",
+        field: "This was one of the clearest bridges from coding-agent practice to data-agent governance.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md", "02_normalized/day2-timeline.md"]
       },
       {
         company: "NVIDIA",
@@ -1180,7 +1439,10 @@
         label: "Velocity pressure",
         text: "CLI-native work surfaces and accelerated generation made Research/Gates/Sweeps one useful operating loop.",
         evidence: "D2-C010",
-        hmc: "The lesson is absorption capacity: review, gates, sweeps, and harnesses."
+        hmc: "The lesson is absorption capacity: review, gates, sweeps, and harnesses.",
+        story: "The NVIDIA notes preserve the CLI explosion, adoption energy, PR pressure, and the move from speed to engineering controls.",
+        field: "This was personally emphasized as a favorite talk, but it stays here as one field signal inside the broader validation story.",
+        sources: ["01_raw-evidence/notes/day2-notes.md", "01_raw-evidence/notes/day2-notes-extended.md", "03_extracted-claims/day2-claims.md"]
       },
       {
         company: "CircleCI / METR",
@@ -1188,7 +1450,10 @@
         label: "Felt speed is not throughput",
         text: "More generated code can increase review pressure and confidence gaps.",
         evidence: "D2-C012, SL-C019, SL-C020",
-        hmc: "Measure end-to-end throughput and recovery, not developer sensation."
+        hmc: "Measure end-to-end throughput and recovery, not developer sensation.",
+        story: "CircleCI/METR sharpened the difference between subjective speed and measured throughput.",
+        field: "The durable warning is: fastest is wrong if validation cannot keep up.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md", "04_analysis/day2-synthesis.md"]
       },
       {
         company: "MCP panel",
@@ -1196,7 +1461,10 @@
         label: "Gateway, not magic",
         text: "Prompt injection and tool sprawl will happen; destructive actions need criticality policy.",
         evidence: "D2-C014, SL-C022",
-        hmc: "Design the gateway before tool catalogs spread."
+        hmc: "Design the gateway before tool catalogs spread.",
+        story: "The MCP material made connection easy and governance urgent at the same time.",
+        field: "The phrase that survived was magic vs tragic: connection standards are not security models.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md", "04_analysis/day2-synthesis.md"]
       },
       {
         company: "CockroachDB",
@@ -1204,7 +1472,10 @@
         label: "Agents do not breathe",
         text: "Agent-shaped traffic changes load on databases, APIs, queues, auth, CI, and observability.",
         evidence: "D2-C011, SL-C018, V-C003",
-        hmc: "Model non-human traffic separately from human traffic."
+        hmc: "Model non-human traffic separately from human traffic.",
+        story: "CockroachDB supplied the infrastructure-pressure warning: agent traffic can retry, inspect, call tools, and load shared systems continuously.",
+        field: "The memorable line is simple: humans breathe. Agents do not.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/vendor-claims.md", "03_extracted-claims/slide-claims.md"]
       },
       {
         company: "LanceDB / You.com",
@@ -1212,7 +1483,10 @@
         label: "Context is a workload",
         text: "Retrieval has scale, latency, provenance, and budget pressure.",
         evidence: "D1-C012, D2-C013, SL-C008, SL-C021",
-        hmc: "Treat retrieval as governed infrastructure with cost controls."
+        hmc: "Treat retrieval as governed infrastructure with cost controls.",
+        story: "The LanceDB and You.com material pushed context out of the feature bucket and into infrastructure.",
+        field: "The important point is not just vector search. It is context with budget, freshness, provenance, and scale.",
+        sources: ["03_extracted-claims/day1-claims.md", "03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md"]
       },
       {
         company: "RingCentral",
@@ -1220,7 +1494,10 @@
         label: "Specialize deeply",
         text: "Agents should reason, research, hypothesize, and propose within mandates; deterministic systems execute known procedures.",
         evidence: "D2-C015, SL-C023, SL-C024, SL-C025, SL-C026",
-        hmc: "Keep mandates narrow and execution boundaries visible."
+        hmc: "Keep mandates narrow and execution boundaries visible.",
+        story: "RingCentral supplied the strongest specialization lesson: broad generalist agents create review debt, while specialized mandates can be managed.",
+        field: "Swarm reflection mattered, but the enduring point is specialization plus deterministic boundaries.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md", "01_raw-evidence/audio-transcripts/260505-1542-ring-central-talk.txt"]
       },
       {
         company: "T-Mobile / Distyl",
@@ -1228,7 +1505,10 @@
         label: "Agency can become containment",
         text: "Use-case choice determines whether the substrate liberates work or tightens control.",
         evidence: "D2-C002, D2-C003, D2-C004, SL-C002",
-        hmc: "Start with toil and reliability, not opaque authority."
+        hmc: "Start with toil and reliability, not opaque authority.",
+        story: "The T-Mobile and Distyl material exposed the moral edge of customer and enterprise agents.",
+        field: "The same substrate can help people or quietly contain them. Use-case choice is architecture.",
+        sources: ["03_extracted-claims/day2-claims.md", "03_extracted-claims/slide-claims.md", "04_analysis/day2-synthesis.md"]
       },
       {
         company: "Monte Carlo",
@@ -1236,7 +1516,10 @@
         label: "Bad answers can be data failures",
         text: "Agent readiness needs data, semantic, build, and trust observability.",
         evidence: "D2-C007, D2-C008",
-        hmc: "Debug the data substrate before blaming the model."
+        hmc: "Debug the data substrate before blaming the model.",
+        story: "Monte Carlo reframed some agent failures as data failures in disguise.",
+        field: "The useful operational lesson is to debug across data, semantics, build, and trust, not just prompts.",
+        sources: ["03_extracted-claims/day2-claims.md", "04_analysis/day2-synthesis.md"]
       },
       {
         company: "Google commerce",
@@ -1244,7 +1527,10 @@
         label: "Structured data plus executors",
         text: "Customer-facing agents need structured data and deterministic executors, not one model wandering with tools.",
         evidence: "D2-C009",
-        hmc: "Separate persuasion, structured facts, and transaction execution."
+        hmc: "Separate persuasion, structured facts, and transaction execution.",
+        story: "The Google commerce story turned customer-agent design into a structured-data and executor problem.",
+        field: "The memorable version: do not send one model wandering around the market with tools.",
+        sources: ["03_extracted-claims/day2-claims.md", "02_normalized/day2-timeline.md"]
       }
     ];
 
@@ -1286,7 +1572,19 @@
         button.className = `plane-node${item.key === activeKey ? " active" : ""}`;
         button.type = "button";
         button.innerHTML = `<span>${item.number}</span><strong>${item.title}</strong><p class="help-text">${item.summary}</p>`;
-        button.addEventListener("click", () => renderPlane(item.key));
+        button.addEventListener("click", () => {
+          renderPlane(item.key);
+          openDrawer({
+            company: item.title,
+            label: "Control-plane element",
+            text: item.summary,
+            story: item.story,
+            field: item.field,
+            evidence: item.sources.join(", "),
+            sources: item.sources,
+            hmc: item.move
+          });
+        });
         planeMap.appendChild(button);
       });
 
@@ -1306,7 +1604,10 @@
           company: item.title,
           label: "Control-plane element",
           text: item.summary,
-          evidence: "See Appendix B claim traceability in the executive packet.",
+          story: item.story,
+          field: item.field,
+          evidence: item.sources.join(", "),
+          sources: item.sources,
           hmc: item.move
         });
       });
@@ -1321,8 +1622,19 @@
           <input type="checkbox" value="${key}" ${index < 2 ? "checked" : ""}>
           <strong>${title}</strong>
           <span>${text}</span>
+          <button class="evidence-link" type="button" data-capability-evidence="${key}">Evidence</button>
         `;
         label.querySelector("input").addEventListener("change", updateCapabilityScore);
+        label.querySelector(".evidence-link").addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const evidence = capabilityEvidence[key];
+          openDrawer({
+            ...evidence,
+            label: title,
+            text: `${text} ${evidence.text}`
+          });
+        });
         capabilityChecks.appendChild(label);
       });
       updateCapabilityScore();
@@ -1390,6 +1702,28 @@
 
     signalSearch.addEventListener("input", renderSignals);
 
+    function evidenceBlock(title, body) {
+      if (!body) return "";
+      return `
+        <div class="evidence-block">
+          <strong>${title}</strong>
+          <p>${body}</p>
+        </div>
+      `;
+    }
+
+    function sourceList(sources = []) {
+      if (!sources.length) return "";
+      return `
+        <div class="evidence-block">
+          <strong>Source path</strong>
+          <ul class="source-list">
+            ${sources.map((source) => `<li>${source}</li>`).join("")}
+          </ul>
+        </div>
+      `;
+    }
+
     function openDrawer(signal) {
       drawer.classList.add("open");
       drawer.innerHTML = `
@@ -1401,8 +1735,11 @@
           <button class="drawer-close" type="button" aria-label="Close detail drawer">X</button>
         </div>
         <p class="detail-text">${signal.text}</p>
+        ${evidenceBlock("Story", signal.story)}
+        ${evidenceBlock("Field impression", signal.field)}
         <div class="callout"><p><strong>HMC translation:</strong> ${signal.hmc}</p></div>
-        <p class="detail-text"><strong>Evidence:</strong> ${signal.evidence}</p>
+        ${evidenceBlock("Claim IDs or evidence pointer", signal.evidence)}
+        ${sourceList(signal.sources || [])}
       `;
       drawer.querySelector(".drawer-close").addEventListener("click", closeDrawer);
     }
@@ -1410,6 +1747,23 @@
     function closeDrawer() {
       drawer.classList.remove("open");
       drawer.innerHTML = "";
+    }
+
+    function bindEvidenceCards() {
+      document.querySelectorAll("[data-evidence]").forEach((element) => {
+        const evidence = evidenceLibrary[element.dataset.evidence];
+        if (!evidence) return;
+        element.setAttribute("role", "button");
+        element.setAttribute("tabindex", "0");
+        element.setAttribute("aria-label", `Open evidence for ${evidence.label}`);
+        element.addEventListener("click", () => openDrawer(evidence));
+        element.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openDrawer(evidence);
+          }
+        });
+      });
     }
 
     function renderPilot() {
@@ -1477,9 +1831,21 @@
         company: "Source spine",
         label: "Evidence context",
         text: "This microsite is a presentation layer over the output packet, extracted claims, normalized ledgers, and raw evidence.",
+        story: "The site is intentionally not the evidence store. It is the executive interface over the evidence store.",
+        field: "Use the interaction to show the argument, then use the markdown packet to resolve disputes.",
         evidence: "05_outputs, 04_analysis, 03_extracted-claims, 02_normalized, 01_raw-evidence",
+        sources: [
+          "05_outputs/agent-conference-2026-everything-distilled.md",
+          "05_outputs/agent-conference-2026-everything.md",
+          "03_extracted-claims/",
+          "02_normalized/source-ledger.md"
+        ],
         hmc: "Use the microsite to present. Use the markdown artifacts to verify."
       });
+    });
+
+    document.getElementById("pilotEvidence").addEventListener("click", () => {
+      openDrawer(evidenceLibrary["pilot-selector"]);
     });
 
     document.getElementById("topButton").addEventListener("click", () => {
@@ -1514,6 +1880,7 @@
 
     document.querySelectorAll("main section[id]").forEach((section) => observer.observe(section));
 
+    bindEvidenceCards();
     renderPlane();
     renderCapability();
     renderFilters();
