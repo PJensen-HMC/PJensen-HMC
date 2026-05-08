@@ -16,9 +16,9 @@ Use this as the fuller source-backed packet. It includes field signals, vendor w
 
 ## Present As Microsite
 
-`06_delivery/nvidia-research-gates-sweeps.html`
+`06_delivery/agentic-engineering-microsite.html`
 
-Use this as the short presentation artifact for the NVIDIA-inspired Research/Gates/Sweeps lesson. It is a standalone HTML microsite/slide deck and should be presented as a note-backed field signal, not as a verbatim transcript.
+Use this as the short presentation artifact for the NVIDIA-inspired agentic-engineering lesson: CLI-native work surfaces, velocity gaps, review pressure, and the operating controls needed to absorb AI-generated work. Research/Gates/Sweeps appears inside the deck as one loop, not the whole thesis. It is a standalone HTML microsite/slide deck and should be presented as a note-backed field signal, not as a verbatim transcript.
 
 ## Keep Internal Unless Asked
 
