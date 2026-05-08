@@ -42,18 +42,12 @@ Primary output files:
 
 | File | Purpose |
 | --- | --- |
-| `05_outputs/agent-conference-2026.md` | Claim-backed internal memo synthesizing the conference into HMC architecture implications. |
+| `05_outputs/agent-conference-2026-everything-distilled.md` | Primary executive read. Shortest and cleanest leadership-facing artifact. |
+| `05_outputs/agent-conference-2026-everything.md` | Fuller source-backed packet with field signals, company and people indexes, caveats, and claim traceability. |
+| `05_outputs/agent-conference-2026-patterns.md` | Deep internal architecture memo for AI, platform, security, and follow-up discussion. |
 
-Primary everything files:
-
-| File | Purpose |
-| --- | --- |
-| `06_everything/agent-conference-2026-everything.md` | Everything together, companies, people, takeaways. |
-| `06_everything/README.md` | Stage guide for the full executive packet layer. |
-
-Primary final distillation files:
+Primary delivery files:
 
 | File | Purpose |
 | --- | --- |
-| `07_everything_distilled/agent-conference-2026-everything-distilled.md` | Final concise leadership packet distilled from `06_everything`. |
-| `07_everything_distilled/README.md` | Stage guide for the final distilled layer. |
+| `06_delivery/README.md` | Recommended delivery order and artifact map. |

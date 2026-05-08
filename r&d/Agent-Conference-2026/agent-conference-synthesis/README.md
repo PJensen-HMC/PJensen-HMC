@@ -7,8 +7,7 @@ This workspace is organized as a processing pipeline:
 3. `03_extracted-claims`: what sources actually say.
 4. `04_analysis`: what those claims likely mean.
 5. `05_outputs`: memos, deck notes, and final written artifacts.
-6. `06_everything`: full executive-facing packet with field texture, follow-up links, caveats, and claim traceability.
-7. `07_everything_distilled`: final concise leadership packet derived from `06_everything`.
+6. `06_delivery`: delivery index describing what to send, what to attach, and what to keep internal.
 
 The working rule is processing state first, source identity second, theme last.
 

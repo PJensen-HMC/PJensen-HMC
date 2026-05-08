@@ -140,9 +140,9 @@ That world is made of governed capabilities, explicit identity, provenance-aware
 
 ## Appendix A: Evidence Sources
 
-[1] `06_everything/agent-conference-2026-everything.md` - fuller executive packet with field texture, company/people indexes, caveats, and traceability.
+[1] `05_outputs/agent-conference-2026-everything.md` - fuller executive packet with field texture, company/people indexes, caveats, and traceability.
 
-[2] `05_outputs/agent-conference-2026.md` - claim-backed internal memo and traceability map.
+[2] `05_outputs/agent-conference-2026-patterns.md` - deep internal architecture memo and traceability map.
 
 [3] `04_analysis/day1-synthesis.md` - Day 1 interpretation grounded in extracted claims.
 
