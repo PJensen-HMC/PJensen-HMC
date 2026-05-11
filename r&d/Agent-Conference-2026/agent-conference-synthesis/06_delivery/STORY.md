@@ -39,6 +39,9 @@ The live reaction was:
 
 > I wonder if this can be used for financial modeling or higher level agents.
 
+^^ 1. agents that see the traces
+^^ 2. explore their time-series world-model on Huggingface
+
 That matters because it was the first moment the conference stopped being about chatbots. Observability data looked like a predictive substrate. Workflows themselves were becoming training and eval assets.
 
 The seed was planted: production agents do not just need prompts. *They need a model of the world they are acting inside.*
@@ -93,7 +96,7 @@ The memorable line in the notes was:
 
 And then:
 
-> Gotta run this shit all the time.
+> Gotta run this (evals) all the time.
 
 That talk pulled the hidden substrate into view: model, framework, prompt, developer experience, identity, auth, token economics, CI/CD, observability, connectors, lifecycle, capability discovery, routing, scheduling, multi-tenancy, and token pools.
 
@@ -115,17 +118,17 @@ PRs and review were becoming the constraint. AGENTS.md mattered. Harnesses matte
 
 The raw line that survived was:
 
-> Code review is where the shit gets generated.
+> Code review is where the ** gets generated.
 
 Then the more durable form:
 
-> Humans stop reading diffs and start consuming distilled signals.
+> Humans stop reading diffs and start consuming distilled signals. <-- love this
 
 That is a big deal. It says agent adoption changes the shape of attention. The human does not disappear; the human needs better review signals.
 
 The moral line was already there:
 
-> You cannot outsource the care.
+> You cannot outsource the care. <-- We've been knowing this deeply
 
 ## Day 1 Security And Evals: The Gateway Emerges
 
@@ -133,9 +136,9 @@ The rogue-agent identity material made the safety story explicit.
 
 The reactions were not subtle:
 
-> Do not roll your own shit.
+> Do not roll your own ****.
 
-> WE GOTTA HAVE A GATEWAY.
+> WE MUST HAVE A GATEWAY.
 
 > YOU WILL NOT MITIGATE PROMPT INJECTION. IT WILL HAPPEN.
 
@@ -155,7 +158,7 @@ By the end of Day 1, the shape was visible:
 
 The day closed with the line that probably should have been on the wall:
 
-> The scarce resource isn't tokens -- it's domain rules.
+> The scarce resource isn't tokens -- it's domain rules. <-- 10/10 -- understatement
 
 That moved the whole thing from model choice to organizational memory.
 
@@ -251,7 +254,7 @@ The raw notes make that obvious:
 
 > the adoption EXPLODED (I really like this story)
 
-> STRAIGHT TO ENGINEERING PRACTICES (IM HERE ALREADY)
+> STRAIGHT TO ENGINEERING PRACTICES (IM HERE MENTALLY ALREADY)
 
 This was not just about NVIDIA. It was about a practical substrate for accelerated work.
 
@@ -273,7 +276,7 @@ The live reaction:
 
 And then:
 
-> Sweeps clean what gates cannot see.
+> Sweeps clean what gates cannot see. <-- sweeps is something I personally implemented as well
 
 This is why the micro-site idea itself felt right. The speaker was not making a deck; the presentation was closer to a living artifact. The medium matched the thesis: show the system, let people inspect it, give them handles.
 
@@ -287,7 +290,7 @@ CockroachDB shifted the story from software delivery to infrastructure load.
 
 The reaction was intense because it connected to something obvious once said aloud:
 
-> agent driven load HAS NOT FUCKINNG LANDED
+> agent driven load HAS NOT ******* LANDED
 
 The live editorial version:
 
@@ -355,7 +358,7 @@ The live reaction was not subtle:
 
 Then:
 
-> THIS IS VERY FUCKING COOL -- I'm jazzed about what he's saying.
+> THIS IS VERY F****** COOL -- I'm jazzed about what he's saying.
 
 The talk landed because it drew the boundary cleanly:
 
@@ -367,7 +370,7 @@ The talk landed because it drew the boundary cleanly:
 
 The phrase that survived:
 
-> Architecture is the management structure.
+> Architecture *is* the management structure.
 
 That is where Day 2 ended. Not with "build a swarm," but with a governed organization of non-human work.
 
