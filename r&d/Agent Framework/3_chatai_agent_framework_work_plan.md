@@ -15,6 +15,14 @@ The target architecture should be a single Aivy agent built on Microsoft Agent F
 
 The migration should cull custom orchestration code aggressively, but only after a side-by-side agent path proves parity for streaming, SignalR status, SmartSearch2 blocks, Ask-Aivy, persistence, and cancellation.
 
+The Agent Framework provider plan needs three explicit axes:
+
+- Model provider: who owns the model family, such as OpenAI, Anthropic, Google, or open-weight model publishers.
+- Agent Framework provider: the runtime adapter HMC builds the agent with, such as Azure OpenAI, OpenAI, Microsoft Foundry, Anthropic, Ollama, GitHub Copilot, Copilot Studio, or a custom `IChatClient`.
+- Inference provider: where HMC sends the request and buys the capacity, such as Azure OpenAI, OpenAI direct, Microsoft Foundry, Anthropic direct, AWS Bedrock, Google Vertex AI, Google AI, or Ollama.
+
+Do not collapse those axes into one enum. `Claude via Agent Framework Anthropic`, `Claude via Microsoft Foundry`, and `Claude via a custom Bedrock/Vertex adapter` are different runtime profiles even when the underlying model snapshot is logically the same.
+
 ## Source Baseline
 
 Current service shape:
@@ -32,7 +40,34 @@ External docs checked:
 - Microsoft.Extensions.AI: https://learn.microsoft.com/en-us/dotnet/ai/ai-extensions
 - OpenAI Responses/API tools and models: https://platform.openai.com/docs/api-reference/responses, https://developers.openai.com/api/docs/models
 - Anthropic models, structured outputs, thinking, embeddings: https://platform.claude.com/docs/en/about-claude/models/overview, https://platform.claude.com/docs/en/build-with-claude/structured-outputs, https://platform.claude.com/docs/en/build-with-claude/extended-thinking, https://docs.anthropic.com/en/docs/build-with-claude/embeddings
-- Gemini models, function calling, structured outputs, embeddings, SDKs: https://ai.google.dev/gemini-api/docs/models/gemini-v2, https://ai.google.dev/gemini-api/docs/function-calling, https://ai.google.dev/gemini-api/docs/structured-output, https://ai.google.dev/gemini-api/docs/embeddings, https://ai.google.dev/gemini-api/docs/downloads
+- Anthropic procurement routes: https://docs.anthropic.com/en/api/claude-on-amazon-bedrock, https://docs.anthropic.com/en/api/claude-on-vertex-ai, https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-claude
+- Gemini models, function calling, structured outputs, embeddings, SDKs: https://ai.google.dev/gemini-api/docs/models/gemini-v2, https://ai.google.dev/gemini-api/docs/function-calling, https://ai.google.dev/gemini-api/docs/structured-output, https://ai.google.dev/gemini-api/docs/embeddings, https://ai.google.dev/gemini-api/docs/downloads, https://github.com/googleapis/dotnet-genai
+- Ollama Agent Framework provider: https://learn.microsoft.com/en-us/agent-framework/agents/providers/ollama
+
+## Agent Framework Provider Matrix
+
+This is the Agent Framework view of provider choice. It starts with the framework adapter HMC would code against, then maps to model families and procurement routes.
+
+| Agent Framework provider | Model families covered | Inference/provider surface | HMC use | Caveats |
+|---|---|---|---|---|
+| Azure OpenAI | OpenAI GPT / reasoning models deployed in Azure. | Azure OpenAI resource and deployments. | Default Phase 1 enterprise path for Aivy chat, streaming, function tools, structured output, and optional hosted tools. | Deployment names, quota, region, and API surface need to live in `ModelProfile`. |
+| OpenAI | OpenAI GPT / reasoning models from OpenAI direct. | OpenAI platform API. | Lowest-friction direct SDK path and useful non-Azure comparison target. | Production use depends on procurement/data policy. Keep separate from Azure OpenAI even if model names match. |
+| Microsoft Foundry | OpenAI and Foundry-hosted partner/community models; current docs include Claude preview support. | Microsoft Foundry project/model deployments and managed agents. | Enterprise procurement route and possible long-term managed-agent option. | More service-managed behavior. Validate history, persistence, hosted tools, quotas, and regions before replacing local orchestration. |
+| Anthropic | Claude model family. | Anthropic direct API through Agent Framework Anthropic provider. | Phase 3 primary reasoning alternative after OpenAI/Azure parity. | No Anthropic embeddings. Package/API shape and thinking/tool controls must be isolated behind profiles. |
+| Ollama | Open-weight/local models such as Llama/Mistral/Qwen depending on local pulls. | Local Ollama endpoint through `Microsoft.Extensions.AI.Ollama`. | Local development, offline evaluation, and privacy-sensitive spikes. | Not a production default. No hosted tools/background responses; HMC owns model ops and quality. |
+| Foundry Local | Supported local Foundry models. | Foundry Local runtime. | Watch for local/offline developer workflows. | Current provider comparison shows limited features; validate .NET availability before planning around it. |
+| GitHub Copilot | Copilot-routed model access. | GitHub Copilot provider. | Developer-facing assistant workflows only. | Not the production ChatAI backend; licensing and identity model differ. |
+| Copilot Studio | Copilot Studio agents. | Copilot Studio agent integration. | Enterprise bot handoff/integration target. | Not the core Aivy runtime; weak fit for HMC-owned SmartSearch2/persistence. |
+| Custom `IChatClient` | Gemini, Bedrock routes, Vertex routes, other catalog/self-hosted models. | Any `Microsoft.Extensions.AI.IChatClient` HMC implements or adopts. | Escape hatch for Gemini and provider routes not covered by first-party Agent Framework providers. | Treat as a spike until streaming, tools, structured output, cancellation, telemetry, and SmartSearch2 parity are proven. |
+
+Registry implication:
+
+| Registry field | Meaning |
+|---|---|
+| `ModelProvider` | Owner/family of the model: `OpenAI`, `Anthropic`, `Google`, `OpenWeights`, `Other`. |
+| `InferenceProvider` | Call/procurement route: `AzureOpenAI`, `OpenAIDirect`, `MicrosoftFoundry`, `AnthropicDirect`, `AWSBedrock`, `GoogleVertexAI`, `GoogleAI`, `Ollama`, `GitHubCopilot`, `CopilotStudio`, `Custom`. |
+| `FrameworkProvider` | Agent Framework adapter: `AzureOpenAI`, `OpenAI`, `MicrosoftFoundry`, `Anthropic`, `Ollama`, `FoundryLocal`, `GitHubCopilot`, `CopilotStudio`, or `CustomIChatClient`. |
+| `ModelProfile` | Concrete selectable profile tying together model id, deployment id, inference route, framework adapter, capability flags, compliance approval, quotas, and cost metadata. |
 
 ## Provider Capability Matrix
 
@@ -85,8 +120,10 @@ Suggested local concepts:
 
 | Concept | Purpose |
 |---|---|
-| `ProviderId` | `OpenAI`, `AzureOpenAI`, `Anthropic`, `Gemini`. |
-| `ModelProfile` | Friendly model alias, provider, deployment/model id, max context, max output, supports tools, supports structured output, supports vision, supports thinking, supports hosted tools. |
+| `ModelProvider` | Model owner/family: `OpenAI`, `Anthropic`, `Google`, `OpenWeights`, `Other`. |
+| `InferenceProvider` | Runtime/procurement route: `AzureOpenAI`, `OpenAIDirect`, `MicrosoftFoundry`, `AnthropicDirect`, `AWSBedrock`, `GoogleVertexAI`, `GoogleAI`, `Ollama`, `GitHubCopilot`, `CopilotStudio`, `Custom`. |
+| `FrameworkProvider` | Agent Framework or `IChatClient` adapter selected by the profile. |
+| `ModelProfile` | Friendly model alias, model provider, inference provider, framework provider, deployment/model id, max context, max output, supports tools, supports structured output, supports vision, supports thinking, supports hosted tools, procurement/compliance metadata. |
 | `ReasoningProfile` | Provider-neutral values such as `Default`, `Concise`, `Thinking`, `Deep`, mapped to OpenAI reasoning effort, Claude effort/thinking, or Gemini thinking configuration. |
 | `AivyAgentFactory` | Builds the single Aivy `AIAgent` for a request using profile, user instructions, tools, middleware, and run/session options. |
 | `AivyToolRegistry` | Converts HMC-owned tools into Agent Framework `AIFunction`s. |
@@ -125,11 +162,12 @@ These are planning targets, not immediate edits.
 - Add the provider matrix and model policy registry as planning artifacts.
 - Add a runtime switch such as `AgentFramework:Enabled`.
 - Add provider selection settings:
-  - `AgentFramework:DefaultProvider`
+  - `AgentFramework:DefaultInferenceProvider`
   - `AgentFramework:DefaultModelProfile`
   - `AgentFramework:ThinkingModelProfile`
   - `AgentFramework:ConciseModelProfile`
-  - `AgentFramework:EmbeddingProvider`
+  - `AgentFramework:EmbeddingModelProfile`
+  - `AgentFramework:AllowedInferenceProviders`
 - Decide whether production uses direct OpenAI, Azure OpenAI, Microsoft Foundry, direct Anthropic, Anthropic through Foundry/Bedrock/Vertex, or Gemini through Google AI/Vertex.
 
 ### Phase 1: Single Aivy Agent on OpenAI/Azure OpenAI
@@ -233,6 +271,7 @@ Suggested routing rules:
 | Anthropic package/API shape changes while prerelease. | Feature-flag provider and isolate Anthropic code behind `IChatClient`/agent factory. |
 | Gemini lacks a clean first-party Agent Framework .NET provider path. | Use a secondary-provider spike with official `Google.GenAI` and an `IChatClient` adapter. |
 | Long context tempts removal of truncation too early. | Keep token and Cosmos payload truncation until load tests prove safe margins. |
+| Model provider and inference provider get conflated. | Keep `ModelProvider`, `InferenceProvider`, and `FrameworkProvider` separate in the registry. |
 | Data flows to unapproved providers. | Add provider procurement/compliance metadata to model profiles and block unapproved profiles by environment. |
 | Hosted provider tools bypass HMC permissions. | Keep HMC-owned tools for internal data. Hosted tools require separate security review. |
 
