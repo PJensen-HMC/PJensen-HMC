@@ -1,19 +1,49 @@
-# HMC ChatAI Agent Framework Provider Capability Matrix
+# HMC ChatAI Agent Framework Migration and Provider Strategy
 
 Date: 2026-05-12  
 Status: capture / planning  
 Service: `HMC.ChatAI.Service`  
-Decision shape: single-agent first, provider-pluggable, no multi-agent migration by default
+Decision shape: migrate ChatAI to Microsoft Agent Framework, make OpenAI and Anthropic first-class providers, validate Gemini as the stretch provider, no multi-agent migration by default
 
 ## Executive Summary
 
-The target architecture should be a single Aivy agent built on Microsoft Agent Framework, with provider routing underneath it. The strategic provider posture is:
+This work plan has two goals:
 
-- Primary providers: OpenAI/Azure OpenAI and Anthropic Claude.
-- Secondary provider: Google Gemini, used first for long-context, multimodal, cost/performance experiments, and failover.
+1. Migrate `HMC.ChatAI.Service` from raw OpenAI SDK orchestration and manual tool loops to a single Aivy agent built on Microsoft Agent Framework.
+2. Make ChatAI provider-pluggable, with OpenAI/Azure OpenAI and Anthropic Claude as first-class runtime choices, and Google Gemini as the stretch provider after its .NET/Agent Framework integration path is proven.
+
+The sequencing should stay blunt:
+
+- Phase 1 proves Agent Framework parity on OpenAI/Azure OpenAI because it is closest to the current ChatAI implementation.
+- Phase 2 extracts provider/model policy so provider routing is a real abstraction, not controller-level `if` blocks.
+- Phase 3 makes Anthropic Claude a first-class provider for Aivy chat, tool use, structured output, streaming, and reasoning profiles.
+- Phase 4 validates Gemini through `Google.GenAI`, Vertex AI, and/or a custom `IChatClient` bridge before allowing production selection.
 - Avoid multi-agent orchestration unless a workflow has an explicit, durable business process. Provider routing is not multi-agent routing.
 
 The migration should cull custom orchestration code aggressively, but only after a side-by-side agent path proves parity for streaming, SignalR status, SmartSearch2 blocks, Ask-Aivy, persistence, and cancellation.
+
+## Strategic Plan
+
+Strategic intent: turn ChatAI from an OpenAI-shaped custom orchestration service into an Agent Framework-based Aivy runtime with a provider policy layer. The user-visible product contract should not change while the backend gains provider choice.
+
+| Strategic track | Outcome | Primary gate |
+|---|---|---|
+| Agent Framework cutover | A single Aivy agent can run the current ChatAI happy path through Agent Framework. | OpenAI/Azure OpenAI path matches current streaming, tool, persistence, cancellation, and Ask-Aivy behavior. |
+| Provider policy layer | Provider selection is centralized in model profiles, not scattered through controllers or tool code. | `ModelProfile`, `ReasoningProfile`, capability flags, and compliance approval can reject incompatible requests before runtime. |
+| Anthropic first-class support | Claude is a real runtime option, not an experiment hidden behind one-off code. | Claude passes text chat, streaming, tool use, structured output, SmartSearch2 synthesis, token accounting, and rollback tests. |
+| Gemini stretch validation | Gemini becomes selectable only after the integration path is proven. | `Google.GenAI`, Vertex AI, and/or custom `IChatClient` bridge passes the same parity harness as OpenAI and Anthropic. |
+| Legacy orchestration deletion | Manual tool loops and OpenAI-specific shims shrink or disappear. | Compatibility window is complete and rollback no longer depends on the old `ChatJob` loop. |
+
+Execution principles:
+
+- Treat OpenAI/Azure OpenAI as the migration wedge because it is closest to current ChatAI.
+- Treat Anthropic as the second first-class provider, with its own profiles and reasoning mappings.
+- Treat Gemini as a stretch provider until .NET/Agent Framework integration is proven against HMC workflows.
+- Keep HMC-owned RAG, SmartSearch2, SignalR blocks, Cosmos history, and distributed cancellation authoritative.
+- Keep provider routing separate from multi-agent orchestration.
+- Keep hosted provider tools optional; do not let them bypass HMC permissions, citations, or retrieval policy.
+
+Success means the same Aivy product surface can run against OpenAI/Azure OpenAI or Anthropic through Agent Framework, with Gemini on a validated path, while the custom OpenAI-only orchestration code becomes removable.
 
 The Agent Framework provider plan needs three explicit axes:
 
@@ -100,9 +130,9 @@ Legend:
 
 | Role | Provider | Why |
 |---|---|---|
-| Default implementation path | Azure OpenAI / OpenAI | Best Agent Framework parity, closest to current code, strongest hosted tool support, easiest Phase 1 migration. |
-| Primary reasoning alternative | Anthropic Claude | Strong model quality, strong long-context options, strong structured output and thinking controls, useful provider diversity. |
-| Secondary / specialist | Gemini | Strong long-context and multimodal capability, strong embeddings, useful cost/performance comparator, but needs .NET/Agent Framework integration validation. |
+| Phase 1 migration provider | Azure OpenAI / OpenAI | Best Agent Framework parity, closest to current code, strongest hosted tool support, easiest migration path. |
+| First-class second provider | Anthropic Claude | Strong model quality, long-context options, structured output, streaming, thinking controls, and provider diversity. |
+| Stretch provider | Gemini | Strong long-context and multimodal capability, strong embeddings, useful cost/performance comparator, but needs .NET/Agent Framework integration validation. |
 | Embeddings default | OpenAI or Gemini | Anthropic is not an embedding provider. Keep embeddings independently routable. |
 | HMC RAG backbone | Existing HMC indexing + SmartSearch2/Azure AI Search | Provider hosted search should not replace the extraction -> chunk -> embed -> index pipeline. |
 
@@ -159,7 +189,7 @@ These are planning targets, not immediate edits.
 
 ### Phase 0: Capture and Feature Flags
 
-- Add the provider matrix and model policy registry as planning artifacts.
+- Add the Agent Framework provider matrix and model policy registry as planning artifacts.
 - Add a runtime switch such as `AgentFramework:Enabled`.
 - Add provider selection settings:
   - `AgentFramework:DefaultInferenceProvider`
@@ -190,7 +220,7 @@ These are planning targets, not immediate edits.
   - Stop streaming still works.
   - Ask-Aivy still sends a coherent e-mail response.
 
-### Phase 2: Tool and Prompt Cleanup
+### Phase 2: Provider Abstraction, Tool, and Prompt Cleanup
 
 - Convert tools from JSON-string `WrapAsync` to typed methods where practical.
 - Replace reflective schema generation with `AIFunctionFactory.Create`.
@@ -198,7 +228,7 @@ These are planning targets, not immediate edits.
 - Collapse duplicated tool loops in `ChatJob` and `ReflectService`.
 - Keep one compatibility adapter only for tools that stream internal HMC blocks.
 
-### Phase 3: Anthropic Primary Provider
+### Phase 3: Anthropic First-Class Provider
 
 - Add Anthropic provider package or approved `IChatClient` path behind feature flag.
 - Map `ReasoningProfile` to Claude thinking/effort controls.
@@ -211,7 +241,7 @@ These are planning targets, not immediate edits.
   - data retention/procurement path
 - Promote Claude profiles for workloads where it wins on quality or cost.
 
-### Phase 4: Gemini Secondary Provider
+### Phase 4: Gemini Stretch Provider
 
 - Add official `Google.GenAI` SDK and/or an `IChatClient` bridge.
 - Validate Agent Framework compatibility before making Gemini selectable in production.
