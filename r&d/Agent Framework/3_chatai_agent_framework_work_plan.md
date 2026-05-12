@@ -57,11 +57,126 @@ Do not collapse those axes into one enum. `Claude via Agent Framework Anthropic`
 
 Current service shape:
 
-- `HMC.ChatAI.Service` currently uses the raw OpenAI .NET SDK via `OpenAI.Chat.ChatClient`.
+- `HMC.ChatAI.Service` in `../CoreServices` currently targets `net8.0` and uses `Rystem.OpenAi` via `IOpenAiFactory`, not Microsoft Agent Framework and not the raw `OpenAI.Chat.ChatClient` path.
 - The central orchestration point is `Domain/Services/ChatJob.cs`.
-- Tools are represented by `IChatFunction`, optional streaming/status interfaces, and a manual tool dispatch loop.
-- `ReflectService` contains a second manual tool loop for stateless/reflect calls.
+- Tools are represented by `IOpenAiChatFunction`, `Name`, `Description`, `Input`, and `WrapAsync(string)`.
+- The currently registered tools are WebSearch, Capabilities, UserPreferences, and LearningMemory. `SmartSearchFunction` exists in this checkout but is not registered and still returns `Coming soon!`.
+- No `ReflectService` was found in this checkout. Stateless/direct model calls currently live in controllers such as `ChatController.Introspect`, `ChatController.SetChatName`, and `DocumentController.DocumentAction`.
 - `ChatContext` and `ChatCoordinator` are product/runtime concerns and should survive the framework migration.
+
+## Code-Informed Specific Moves
+
+These moves are based on `../CoreServices/HMC.ChatAI.Service` as inspected on 2026-05-12.
+
+### Move 1: Add Agent Framework Beside Rystem
+
+- Keep the current `Rystem.OpenAi` path as the rollback path.
+- Add `AgentFramework:Enabled=false` and an `AgentFramework` options object.
+- Add Agent Framework packages only after validating `net8.0` compatibility in this repo.
+- Replace `AddHMCOpenAiImplementation` with a broader registration shape, for example:
+  - `AddHmcModelProviders`
+  - `AddHmcAgentFramework`
+  - `AddHmcLegacyOpenAi`
+- Register `AivyAgentFactory`, `AivyAgentRunService`, `AivyToolRegistry`, and `ModelProfileResolver`.
+
+### Move 2: Split `ChatJob` Without Changing Controllers First
+
+- Keep `ChatController` calling `ChatJob` initially.
+- Extract the repeated create/continue setup into a reusable turn-prep method:
+  - initialize `ChatContext`
+  - create or load `ChatHistory`
+  - append user entry and assistant placeholder
+  - save placeholder state
+  - signal controller return and chat start
+  - remove placeholder before model execution
+  - read documents through `DocumentReader`
+- Add a feature-flagged branch inside `ChatJob`:
+  - legacy path: current Rystem request builder and `ExecuteAsStreamAsync`
+  - new path: `AivyAgentRunService.RunStreamingAsync`
+- Preserve `CleanupAndCloseout` as the shared closeout until parity is proven.
+
+### Move 3: Introduce Provider-Neutral Chat Runtime Types
+
+- Do not let persistent models depend on provider SDK types long term.
+- Add local runtime types:
+  - `AivyChatRole`
+  - `AivyChatMessage`
+  - `AivyChatDelta`
+  - `AivyToolCallRecord`
+  - `AivyUsage`
+- First adapter maps existing `Rystem.OpenAi.Chat.ChatRole` and `ChatMessage` into these types.
+- Second adapter maps these local types into Agent Framework / `Microsoft.Extensions.AI` messages.
+- Later cleanup can remove Rystem types from `ChatEntry`, `ChatHistory`, and prompt/history construction.
+
+### Move 4: Convert Tools Through a Compatibility Adapter
+
+- Build a temporary adapter from `IOpenAiChatFunction` to Agent Framework functions.
+- Use each tool's existing `Name`, `Description`, and `Input` shape to generate function metadata.
+- Keep `WrapAsync(string)` initially so WebSearch, Capabilities, UserPreferences, and LearningMemory migrate without rewriting each tool.
+- Then convert tools one at a time to typed methods/delegates:
+  - WebSearch first because it is externally visible and already registered.
+  - Capabilities second because it is low risk.
+  - UserPreferences and LearningMemory after adding guardrails around profile writes.
+  - SmartSearch only after deciding whether this checkout's stub or a newer SmartSearch2 implementation is the parity target.
+
+### Move 5: Preserve SignalR and Cancellation Contracts
+
+- Treat `ChatContext` as the streaming event sink for both legacy and Agent Framework paths.
+- Map Agent Framework text deltas to `SignalChatDelta`.
+- Map tool start/stop/progress to `SignalChatAction` or a new narrow tool-event method on `ChatContext`.
+- Continue polling `ChatCoordinator.StopRequested(chatId)` because stop state is distributed.
+- Pass cancellation tokens into Agent Framework calls where supported, but do not rely only on local cancellation tokens across multiple app instances.
+
+### Move 6: Move Model Selection Out of Prompt Engineering
+
+- Keep `PromptEngineeringProvider` focused on prompt text and history construction.
+- Move `DefaultChatModel`, user `ChatModel`, temperature, reasoning profile, and provider choice into `ModelProfileResolver`.
+- Treat existing user/profile model strings as aliases that resolve to model profiles.
+- Reject incompatible combinations early, for example Anthropic chat profile with OpenAI-only hosted tools or Anthropic selected as an embedding provider.
+
+### Move 7: Sweep Direct OpenAI Call Sites After Chat Parity
+
+- After the main chat path works through Agent Framework, migrate direct model calls:
+  - `ChatController.Introspect`
+  - `ChatController.SetChatName`
+  - `DocumentController.DocumentAction`
+  - `MachineVision`
+  - `AudioExtractionService`
+  - OpenAI-specific status/health endpoints
+- Use smaller service interfaces instead of passing `IOpenAiFactory` into controllers:
+  - `IChatIntrospectionService`
+  - `IChatNamingService`
+  - `IDocumentAnalysisService`
+  - `IImageUnderstandingService`
+  - `IAudioTranscriptionService`
+- Keep vision/audio provider-specific until Anthropic/Gemini multimodal requirements are explicit.
+
+### Move 8: Add a Parity Harness Before Deleting Anything
+
+- There are no ChatAI-specific tests in this checkout.
+- Add focused tests for:
+  - prompt/history conversion
+  - tool registry metadata generation
+  - `IOpenAiChatFunction` compatibility adapter
+  - model profile resolution and capability rejection
+  - `ChatJob` legacy-vs-Agent Framework branch behavior with fake clients
+  - stop-request handling and final persistence ordering
+- Manual parity script should cover:
+  - create chat
+  - continue chat
+  - streaming start/delta/stop
+  - stop streaming
+  - web search tool
+  - document upload/read
+  - profile/memory tool behavior
+  - rename/introspect/document-analysis direct calls after they move
+
+### Move 9: Delete in the Right Order
+
+- Do not delete Rystem until OpenAI/Azure OpenAI Agent Framework parity is stable.
+- Do not delete `IOpenAiChatFunction` until every registered tool has either a typed Agent Framework implementation or a tested compatibility adapter.
+- Do not replace `ChatContext`, `ChatCoordinator`, `ChatHistory`, or `DocumentReader`; adapt around them first.
+- Do not make Gemini selectable in production until the custom `IChatClient` path passes the same harness as OpenAI and Anthropic.
 
 External docs checked:
 
