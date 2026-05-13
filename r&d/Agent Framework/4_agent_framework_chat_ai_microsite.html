@@ -6,7 +6,764 @@
   <title>HMC ChatAI Agent Framework Provider Capability Matrix</title>
   <style>
     :root {
+      --bg: #0b0f14;<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HMC ChatAI Agent Framework Capability Matrix</title>
+  <style>
+    :root {
       --bg: #0b0f14;
+      --panel: #111821;
+      --panel-2: #16202b;
+      --text: #e8eef5;
+      --muted: #9fb0c3;
+      --line: #263545;
+      --green: #72d391;
+      --blue: #7ab7ff;
+      --amber: #f2c66d;
+      --red: #ef8b8b;
+      --purple: #c7a7ff;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(114, 211, 145, 0.18), transparent 32rem),
+        radial-gradient(circle at 85% 10%, rgba(122, 183, 255, 0.16), transparent 34rem),
+        linear-gradient(180deg, #0b0f14 0%, #0d131a 45%, #090d12 100%);
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 56px 0 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(17, 24, 33, 0.72);
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 16px rgba(114, 211, 145, 0.9);
+    }
+
+    h1 {
+      max-width: 920px;
+      margin: 22px 0 16px;
+      font-size: clamp(40px, 7vw, 82px);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 22px);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      gap: 18px;
+      margin-top: 32px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17, 24, 33, 0.78);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-pad {
+      padding: 22px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .decision-item {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .value {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--line);
+      background: rgba(11, 15, 20, 0.82);
+      backdrop-filter: blur(16px);
+    }
+
+    nav .shell {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    nav a {
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    nav a:hover {
+      color: var(--text);
+      border-color: rgba(114, 211, 145, 0.45);
+    }
+
+    section {
+      padding: 34px 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .section-note {
+      max-width: 520px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .matrix-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17, 24, 33, 0.78);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    th, td {
+      padding: 15px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      position: sticky;
+      top: 51px;
+      z-index: 2;
+      background: #111821;
+      color: #cdd8e5;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td:first-child {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      border: 1px solid transparent;
+    }
+
+    .strong { color: #dff9e6; background: rgba(114, 211, 145, 0.13); border-color: rgba(114, 211, 145, 0.28); }
+    .usable { color: #dbeeff; background: rgba(122, 183, 255, 0.13); border-color: rgba(122, 183, 255, 0.28); }
+    .watch { color: #fff1cf; background: rgba(242, 198, 109, 0.13); border-color: rgba(242, 198, 109, 0.28); }
+    .gap { color: #ffe1e1; background: rgba(239, 139, 139, 0.13); border-color: rgba(239, 139, 139, 0.28); }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .tile {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17, 24, 33, 0.78);
+      min-height: 175px;
+    }
+
+    .tile h3 {
+      margin: 8px 0 8px;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+    }
+
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .icon {
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(114, 211, 145, 0.12);
+      border: 1px solid rgba(114, 211, 145, 0.25);
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+    }
+
+    .phase {
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .phase-num {
+      color: var(--green);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .phase h3 {
+      margin: 0 0 5px;
+      font-size: 17px;
+    }
+
+    .phase p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .risk {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(17, 24, 33, 0.78);
+    }
+
+    .risk strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .risk span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .callout {
+      padding: 24px;
+      border: 1px solid rgba(114, 211, 145, 0.28);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(114, 211, 145, 0.11), rgba(122, 183, 255, 0.07));
+      box-shadow: var(--shadow);
+    }
+
+    .callout h2 {
+      margin-bottom: 12px;
+    }
+
+    .callout p {
+      max-width: 880px;
+      margin: 0;
+      color: #d7e4ef;
+      font-size: 18px;
+    }
+
+    footer {
+      padding: 38px 0 56px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid,
+      .split,
+      .tiles,
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      th {
+        top: 49px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell">
+    <div class="eyebrow"><span class="dot"></span> HMC.ChatAI.Service · Agent Framework planning · 2026-05-12</div>
+    <h1>Agent Framework Capability Matrix</h1>
+    <p class="lead">A single-page decision surface for moving ChatAI toward a single Aivy agent, provider-pluggable underneath, without mistaking provider routing for multi-agent orchestration.</p>
+
+    <div class="hero-grid">
+      <div class="card card-pad">
+        <div class="label">Decision shape</div>
+        <div class="decision">
+          <div class="decision-item">
+            <div class="label">Architecture</div>
+            <div class="value">Single-agent first</div>
+          </div>
+          <div class="decision-item">
+            <div class="label">Provider posture</div>
+            <div class="value">Pluggable routing</div>
+          </div>
+          <div class="decision-item">
+            <div class="label">Constraint</div>
+            <div class="value">No multi-agent migration by default</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <div class="label">Repository truth</div>
+        <p class="muted">Current implementation is OpenAI-only. Anthropic, Gemini, Microsoft Agent Framework, and Microsoft.Extensions.AI are planning targets, not implemented providers.</p>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="shell">
+      <a href="#framework-capabilities">Framework Capabilities</a>
+      <a href="#matrix">Provider Appendix</a>
+      <a href="#roles">Provider Roles</a>
+      <a href="#boundary">HMC Boundary</a>
+      <a href="#migration">Migration</a>
+      <a href="#cull">Cull Map</a>
+      <a href="#risks">Risks</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="framework-capabilities" class="shell">
+      <div class="section-head">
+        <h2>Agent Framework capabilities</h2>
+        <p class="section-note">Read this first: the framework is not just provider routing. It brings agent runtime primitives, tool execution, state, memory/context, middleware, and workflow orchestration. ChatAI keeps the HMC product surface.</p>
+      </div>
+
+      <div class="matrix-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Agent Framework capability</th>
+              <th>ChatAI service today</th>
+              <th>What moves / what stays</th>
+              <th>Relative strength</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Agent runtime</td>
+              <td>AIAgent-style invocation, streaming runs, model clients, instructions, run options, and a consistent execution surface for open-ended conversational tasks.</td>
+              <td>ChatJob manually drives the raw OpenAI chat-completions loop, storage updates, SignalR lifecycle, tool detection, and closeout.</td>
+              <td><span class="pill usable">Moves</span><br />Move generic model/run orchestration into the framework. Keep ChatJob or a successor as the HMC facade.</td>
+              <td><span class="pill usable">Agent Framework</span><br />This is the cleanest place to remove custom agent-loop code.</td>
+            </tr>
+            <tr>
+              <td>Function tools</td>
+              <td>Function tools, typed tool registration, framework-managed invocation, tool approval patterns, and function-call middleware.</td>
+              <td>IChatFunction, JSON-string WrapAsync, reflective schema generation, ToolCallAccumulator, WebSearchFunction, and SmartSearch2Function.</td>
+              <td><span class="pill watch">Hybrid</span><br />Move schema/dispatch plumbing. Keep HMC tools and adapt them one by one.</td>
+              <td><span class="pill watch">Shared</span><br />Framework wins on mechanics; ChatAI wins on domain behavior.</td>
+            </tr>
+            <tr>
+              <td>MCP and tool ecosystems</td>
+              <td>MCP clients, hosted MCP tools where available, local tool integration, and a standard extension point for external capabilities.</td>
+              <td>Direct DI and HTTP-client integrations, HMC-owned chat functions, and explicit service-level permission boundaries.</td>
+              <td><span class="pill gap">Later</span><br />Use MCP only after internal tools are expressed cleanly and governance is settled.</td>
+              <td><span class="pill usable">Agent Framework</span><br />Strong standardization story, but not required for Phase 1.</td>
+            </tr>
+            <tr>
+              <td>Sessions and conversation state</td>
+              <td>AgentSession for multi-turn context, serialization/deserialization, state bags, and service conversation IDs where providers support them.</td>
+              <td>Cosmos ChatHistory, doc-session storage, distributed cache coordination, ChatCoordinator stop/cancel semantics, and persisted message metadata.</td>
+              <td><span class="pill strong">Stays initially</span><br />Keep ChatAI persistence authoritative. Evaluate AgentSession as an adapter boundary.</td>
+              <td><span class="pill strong">ChatAI today</span><br />Production behavior is already tied to HMC storage and UI contracts.</td>
+            </tr>
+            <tr>
+              <td>Context, memory, and RAG providers</td>
+              <td>Context providers, history providers, RAG/text-search providers, memory/persistence hooks, and context compaction patterns.</td>
+              <td>PromptEngineeringProvider, user profile, working memory shape, SmartSearch2, extraction, chunking, embeddings, Azure AI Search, and source-block semantics.</td>
+              <td><span class="pill strong">Mostly stays</span><br />Use framework context hooks to inject HMC context. Do not replace the HMC RAG backbone.</td>
+              <td><span class="pill strong">ChatAI</span><br />ChatAI has the internal knowledge model and permission boundary.</td>
+            </tr>
+            <tr>
+              <td>Middleware</td>
+              <td>Agent-run middleware, function-call middleware, and chat/IChatClient middleware for logging, validation, security checks, error handling, and result transformation.</td>
+              <td>OpenAiPayloadShapingPolicy, action filters, prompt/model policy, token telemetry, truncation, and tool callback conventions.</td>
+              <td><span class="pill usable">Moves selectively</span><br />Move cross-cutting agent/tool/chat concerns into middleware. Keep HMC policy decisions centralized.</td>
+              <td><span class="pill usable">Agent Framework</span><br />Best home for reusable interception points.</td>
+            </tr>
+            <tr>
+              <td>Streaming surface</td>
+              <td>Streaming agent responses and workflow events that can be consumed incrementally.</td>
+              <td>SignalR hub, ChatContext data blocks, SmartSearch2 blocks, status messages, heartbeats, stop streaming, and UI-visible sequencing.</td>
+              <td><span class="pill watch">Hybrid</span><br />Let the framework stream agent events. ChatAI translates them into the current SignalR contract.</td>
+              <td><span class="pill watch">Shared</span><br />Framework supplies events; ChatAI owns user-facing semantics.</td>
+            </tr>
+            <tr>
+              <td>Structured and typed outputs</td>
+              <td>Structured outputs where supported by the selected model/client, typed workflow messages, and schema-aware tool/result handling.</td>
+              <td>ReflectService and introspection endpoints use a separate stateless OpenAI/tool loop for structured API responses.</td>
+              <td><span class="pill usable">Moves after core parity</span><br />Reflect is a good cleanup target once main chat and tools are stable.</td>
+              <td><span class="pill usable">Agent Framework</span><br />Can reduce duplicated structured-response mechanics.</td>
+            </tr>
+            <tr>
+              <td>Model-client abstraction</td>
+              <td>Chat completions, responses-style clients, IChatClient paths, and a common surface for agent construction across supported runtimes.</td>
+              <td>OpenAI-only chat, embeddings, image/audio paths, and request shaping via the OpenAI .NET SDK.</td>
+              <td><span class="pill usable">Moves</span><br />Centralize model/client selection into ModelProfile and ReasoningProfile.</td>
+              <td><span class="pill usable">Agent Framework</span><br />Provider details become a registry concern, not orchestration code.</td>
+            </tr>
+            <tr>
+              <td>Workflows</td>
+              <td>Graph workflows with executors and edges, type-safe routing, conditional/parallel control flow, checkpointing, external request/response, human-in-the-loop, and multi-agent patterns.</td>
+              <td>Single Aivy chat experience. Ask-Aivy is a background e-mail handler, not a general multi-agent workflow engine.</td>
+              <td><span class="pill gap">Defer</span><br />Use only for explicit durable business processes, not provider routing.</td>
+              <td><span class="pill watch">Agent Framework later</span><br />Powerful, but deliberately outside the Phase 1 single-agent migration.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="matrix" class="shell">
+      <div class="section-head">
+        <h2>Provider appendix</h2>
+        <p class="section-note">Keep provider choice secondary to the framework boundary. OpenAI/Azure is the lowest-risk Phase 1 provider path, but the migration target is a single Aivy agent on Agent Framework.</p>
+      </div>
+
+      <div class="matrix-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>OpenAI / Azure OpenAI</th>
+              <th>Anthropic Claude</th>
+              <th>Google Gemini</th>
+              <th>HMC stance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Agent Framework .NET provider</td>
+              <td><span class="pill strong">Strong</span><br />Best Agent Framework parity and closest to current code.</td>
+              <td><span class="pill usable">Usable / Watch</span><br />Listed by Agent Framework docs, but package maturity needs validation.</td>
+              <td><span class="pill usable">Usable with adapter</span><br />Likely needs Google GenAI SDK plus IChatClient bridge.</td>
+              <td>OpenAI/Azure first. Add Anthropic behind a feature flag. Treat Gemini as secondary.</td>
+            </tr>
+            <tr>
+              <td>Text chat</td>
+              <td><span class="pill strong">Strong</span><br />Existing service already depends on OpenAI SDK patterns.</td>
+              <td><span class="pill strong">Strong</span><br />Strong for reasoning and knowledge work.</td>
+              <td><span class="pill strong">Strong</span><br />Mature text generation.</td>
+              <td>All providers should support Aivy core chat.</td>
+            </tr>
+            <tr>
+              <td>Multimodal input</td>
+              <td><span class="pill strong">Strong</span><br />Text and image input supported.</td>
+              <td><span class="pill strong">Strong</span><br />Text/image input supported.</td>
+              <td><span class="pill strong">Strong</span><br />Especially strong across image, audio, video, PDF, and long context.</td>
+              <td>Keep extraction provider-neutral. Use Gemini selectively after core parity.</td>
+            </tr>
+            <tr>
+              <td>Streaming</td>
+              <td><span class="pill strong">Strong</span><br />Supported by SDK and Agent Framework streaming.</td>
+              <td><span class="pill strong">Strong</span><br />SSE events include tool and thinking deltas.</td>
+              <td><span class="pill strong">Strong</span><br />Supports streaming content and structured chunks.</td>
+              <td>Provider streaming maps into ChatContext.SignalDataBlock.</td>
+            </tr>
+            <tr>
+              <td>Tool calling</td>
+              <td><span class="pill strong">Strong</span><br />Function tools and hosted tools through Responses.</td>
+              <td><span class="pill strong">Strong</span><br />Tools, tool choice, and strict tool use on current models.</td>
+              <td><span class="pill strong">Strong</span><br />Function calling across 2.5/3 families.</td>
+              <td>Replace ToolCallAccumulator and manual dispatch with Agent Framework invocation.</td>
+            </tr>
+            <tr>
+              <td>Strict schema / structured output</td>
+              <td><span class="pill strong">Strong</span><br />Structured outputs and strict tool schemas on compatible models.</td>
+              <td><span class="pill strong">Strong</span><br />Strict tool use and output_config.format on supported models.</td>
+              <td><span class="pill usable">Usable</span><br />Schema adherence is model and mode specific.</td>
+              <td>Use schema-based output. Keep HMC boundary validation.</td>
+            </tr>
+            <tr>
+              <td>Hosted web/file/code tools</td>
+              <td><span class="pill strong">Strong</span><br />Best aligned with hosted web search, file search, code interpreter, MCP, and background responses.</td>
+              <td><span class="pill watch">Mixed</span><br />Code interpreter and MCP appear in provider matrix; file/background less clear.</td>
+              <td><span class="pill watch">Mixed / Watch</span><br />Native tools exist, but .NET integration needs validation.</td>
+              <td>Do not replace SmartSearch2 with hosted provider search.</td>
+            </tr>
+            <tr>
+              <td>Background / async responses</td>
+              <td><span class="pill strong">Strong</span><br />Supported on OpenAI/Azure provider matrix.</td>
+              <td><span class="pill gap">Gap</span><br />Not a planning assumption in Agent Framework matrix.</td>
+              <td><span class="pill watch">Watch</span><br />Needs proof on provider-native and .NET path.</td>
+              <td>Keep ChatCoordinator, distributed cancellation, and persistence semantics.</td>
+            </tr>
+            <tr>
+              <td>Embeddings</td>
+              <td><span class="pill strong">Strong</span><br />Mature and fits current vectorization patterns.</td>
+              <td><span class="pill gap">Gap</span><br />Anthropic does not currently offer its own embedding model.</td>
+              <td><span class="pill strong">Strong</span><br />Gemini embedding supports configurable dimensions.</td>
+              <td>Chat provider and embedding provider must be separate choices.</td>
+            </tr>
+            <tr>
+              <td>Long context</td>
+              <td><span class="pill strong">Strong</span><br />Strong on latest OpenAI models.</td>
+              <td><span class="pill strong">Strong</span><br />1M context on selected models.</td>
+              <td><span class="pill strong">Strong</span><br />Gemini 2.5 Pro documents 1,048,576 input tokens.</td>
+              <td>Long context reduces pressure. It does not remove truncation and persistence controls.</td>
+            </tr>
+            <tr>
+              <td>Reasoning / thinking controls</td>
+              <td><span class="pill strong">Strong</span><br />Provider policy layer needed for model-specific reasoning effort.</td>
+              <td><span class="pill strong">Strong</span><br />Adaptive/extended thinking depending on model.</td>
+              <td><span class="pill strong">Strong</span><br />2.5/3 models expose thinking behavior.</td>
+              <td>Centralize a provider-neutral ReasoningProfile.</td>
+            </tr>
+            <tr>
+              <td>.NET implementation friction</td>
+              <td><span class="pill strong">Lowest</span><br />Current service uses OpenAI SDK and OpenAI Agent package is mature.</td>
+              <td><span class="pill usable">Medium</span><br />Provider path exists but needs spike.</td>
+              <td><span class="pill watch">Medium / High</span><br />Official C# SDK exists; Agent Framework bridge must be proven.</td>
+              <td>Sequence OpenAI → Anthropic → Gemini.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="roles" class="shell">
+      <div class="section-head">
+        <h2>Provider roles</h2>
+        <p class="section-note">Provider routing is a model-profile concern, not controller-level branching and not multi-agent routing.</p>
+      </div>
+      <div class="tiles">
+        <div class="tile"><span class="icon">1</span><h3>Default path</h3><p>Azure OpenAI / OpenAI. Best Agent Framework parity, closest to current code, easiest Phase 1 migration.</p></div>
+        <div class="tile"><span class="icon">2</span><h3>Primary alternative</h3><p>Anthropic Claude. Strong reasoning, long context, structured output, and useful provider diversity.</p></div>
+        <div class="tile"><span class="icon">3</span><h3>Secondary specialist</h3><p>Gemini. Long-context, multimodal, embedding, cost/performance, and failover experiments.</p></div>
+        <div class="tile"><span class="icon">4</span><h3>RAG backbone</h3><p>Existing HMC indexing + SmartSearch2 + Azure AI Search. Hosted provider search is optional augmentation.</p></div>
+      </div>
+    </section>
+
+    <section id="boundary" class="shell">
+      <div class="callout">
+        <h2>HMC abstraction boundary</h2>
+        <p>Use Agent Framework as the orchestration abstraction. Do not build a second agent framework inside HMC. ChatAI keeps Aivy instructions, tools, SignalR, persistence, user profile, document extraction, SmartSearch2 semantics, and policy. Provider-specific behavior belongs in one model/provider registry.</p>
+      </div>
+    </section>
+
+    <section class="shell">
+      <div class="split">
+        <div class="card card-pad">
+          <div class="label">Suggested concepts</div>
+          <table style="min-width: 0; margin-top: 12px;">
+            <tbody>
+              <tr><td>ProviderId</td><td class="muted">OpenAI, AzureOpenAI, Anthropic, Gemini.</td></tr>
+              <tr><td>ModelProfile</td><td class="muted">Provider, model id, max context, tool/schema/vision/thinking capabilities.</td></tr>
+              <tr><td>ReasoningProfile</td><td class="muted">Default, Concise, Thinking, Deep. Mapped centrally to provider knobs.</td></tr>
+              <tr><td>AivyAgentFactory</td><td class="muted">Builds the single Aivy agent for request-specific profile, tools, instructions, and run options.</td></tr>
+              <tr><td>AivyToolRegistry</td><td class="muted">Converts HMC tools into Agent Framework AIFunctions.</td></tr>
+              <tr><td>AivyAgentRunService</td><td class="muted">Replaces most of ChatJob orchestration while preserving HMC runtime semantics.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card card-pad">
+          <div class="label">What survives</div>
+          <p class="muted">ChatContext survives because it is the SignalR/UI contract. ChatCoordinator survives because it owns stop, cancellation, and persistence coordination. SmartSearch2 survives because it is the HMC RAG backbone, not generic hosted search.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="migration" class="shell">
+      <div class="section-head">
+        <h2>Migration path</h2>
+        <p class="section-note">Cull custom orchestration only after the side-by-side agent path proves parity.</p>
+      </div>
+      <div class="timeline">
+        <div class="phase"><div class="phase-num">Phase 0</div><div><h3>Capture and feature flags</h3><p>Add AgentFramework settings, provider profile settings, and decide approved procurement paths.</p></div></div>
+        <div class="phase"><div class="phase-num">Phase 1</div><div><h3>Single Aivy agent on OpenAI/Azure OpenAI</h3><p>Build AivyAgentFactory, wrap existing WebSearch and SmartSearch2, preserve SignalR, stop, persistence, and Ask-Aivy semantics.</p></div></div>
+        <div class="phase"><div class="phase-num">Phase 2</div><div><h3>Tool and prompt cleanup</h3><p>Convert JSON-string tools to typed methods, move status emission to middleware/event sinks, collapse duplicated loops.</p></div></div>
+        <div class="phase"><div class="phase-num">Phase 3</div><div><h3>Anthropic primary provider</h3><p>Add provider path behind feature flag. Validate tool calling, structured output, streaming, SmartSearch2 behavior, and token accounting.</p></div></div>
+        <div class="phase"><div class="phase-num">Phase 4</div><div><h3>Gemini secondary provider</h3><p>Use first for large-context, multimodal, embedding, cost/performance, and failover drills.</p></div></div>
+        <div class="phase"><div class="phase-num">Phase 5</div><div><h3>Memory / RAG revisit</h3><p>Keep extraction, chunking, embedding, and Azure AI Search indexing. Consider context providers only after source blocks, filters, and retrieval quality survive.</p></div></div>
+        <div class="phase"><div class="phase-num">Phase 6</div><div><h3>Delete legacy orchestration</h3><p>Delete only after parity and rollback window: accumulator, manual loops, compatibility layers, obsolete shims.</p></div></div>
+      </div>
+    </section>
+
+    <section id="cull" class="shell">
+      <div class="section-head">
+        <h2>Code cull map</h2>
+        <p class="section-note">This is the deletion pressure, not an immediate edit list.</p>
+      </div>
+      <div class="matrix-wrap">
+        <table>
+          <thead>
+            <tr><th>Current code</th><th>Target state</th><th>Guardrail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>IChatFunction</td><td>AIFunction delegates or typed tool classes.</td><td>Keep temporary adapter while tools migrate.</td></tr>
+            <tr><td>ToolCallAccumulator</td><td>Delete after Agent Framework invocation is authoritative.</td><td>Do not delete until streaming tool parity is proven.</td></tr>
+            <tr><td>FunctionCallingContext</td><td>Runtime context injection, closures, or middleware metadata.</td><td>Preserve user id, chat id, message id, nudge, and use-blocks semantics.</td></tr>
+            <tr><td>ChatJob manual loop</td><td>AivyAgentRunService invoking streaming agent run.</td><td>ChatJob can remain as facade during cutover.</td></tr>
+            <tr><td>ReflectService manual loop</td><td>Stateless agent invocation through same registry.</td><td>Good early candidate after main path proves tool parity.</td></tr>
+            <tr><td>AddHMCOpenAiImplementation</td><td>Provider-aware registration.</td><td>OpenAI path must remain stable during migration.</td></tr>
+            <tr><td>VectorizationExtensions</td><td>Split embedding-provider registration from vectorization orchestration.</td><td>Embeddings remain independently routable.</td></tr>
+            <tr><td>PromptEngineeringProvider.ChatModel / Nudge</td><td>Map into model-profile routing.</td><td>Do not scatter provider if-logic through controllers.</td></tr>
+            <tr><td>OpenAiPayloadShapingPolicy</td><td>Move into provider middleware or delete after framework path handles it.</td><td>Keep until Responses path is stable.</td></tr>
+            <tr><td>VectorizationService</td><td>Stays.</td><td>Agent memory does not own extraction/chunk/embed/index production.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="risks" class="shell">
+      <div class="section-head">
+        <h2>Risks</h2>
+        <p class="section-note">The dangerous failures are mostly semantic: losing UI block behavior, persistence semantics, or permission boundaries while chasing framework cleanliness.</p>
+      </div>
+      <div class="risk-grid">
+        <div class="risk"><strong>Provider parity is uneven.</strong><span>Centralize ModelProfile capabilities and reject incompatible request options early.</span></div>
+        <div class="risk"><strong>SmartSearch2 loses block semantics.</strong><span>Make SmartSearch2 the Phase 1 parity gate. Keep a streaming tool event adapter.</span></div>
+        <div class="risk"><strong>Framework memory conflicts with HMC persistence.</strong><span>Keep Cosmos ChatHistory authoritative until a custom history provider proves parity.</span></div>
+        <div class="risk"><strong>Gemini bridge is not clean.</strong><span>Run it as a secondary-provider spike. Do not block OpenAI or Anthropic sequencing.</span></div>
+        <div class="risk"><strong>Long context tempts premature truncation removal.</strong><span>Keep token and Cosmos payload controls until load tests prove margins.</span></div>
+        <div class="risk"><strong>Hosted tools bypass HMC permissions.</strong><span>Keep HMC-owned tools for internal data. Hosted tools require separate review.</span></div>
+      </div>
+    </section>
+
+    <section class="shell">
+      <div class="callout">
+        <h2>Immediate next move</h2>
+        <p>Add <code>AgentFramework:Enabled=false</code>, define provider profiles, spike <code>AivyAgentFactory</code> on OpenAI/Azure OpenAI only, adapt <code>WebSearchFunction</code> and <code>SmartSearch2Function</code>, and capture parity gaps before deleting legacy orchestration.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    Source: HMC ChatAI Agent Framework Capability Matrix · Status: capture / planning · Service: HMC.ChatAI.Service
+  </footer>
+</body>
+</html>
+
       --panel: #111821;
       --panel-2: #16202b;
       --text: #e8eef5;
