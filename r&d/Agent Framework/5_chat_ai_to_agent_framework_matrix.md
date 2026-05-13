@@ -13,6 +13,33 @@ The core question is not "OpenAI vs Anthropic vs Gemini." The core question is:
 
 > Which parts of ChatAI are HMC product/runtime capabilities, and which parts are generic agent framework mechanics that should move behind Microsoft Agent Framework?
 
+The migration frame should be read narrowly:
+
+> This is not a ChatAI service rewrite. It is an orchestration-layer rewrite behind the existing ChatAI product/runtime contracts.
+
+We keep ChatAI as the HMC-owned product shell, but replace the custom agent runtime inside it with Microsoft Agent Framework, using a strangler path and parity gates.
+
+What is not a rewrite:
+
+- Controllers/API shape.
+- SignalR/UI streaming contract.
+- Cosmos `ChatHistory`.
+- `ChatCoordinator` stop/cancel semantics.
+- SmartSearch2 RAG execution.
+- Document ingestion/vectorization pipeline.
+- User profile/prompt policy.
+- Ask-Aivy as an e-mail-native surface.
+
+What probably is a rewrite:
+
+- `ChatJob` agent loop.
+- Tool-call accumulation/dispatch.
+- `IChatFunction` schema/invocation plumbing.
+- Duplicated `ReflectService` tool loop.
+- Provider/model selection plumbing.
+- Parts of streaming/event translation.
+- Eventually, Ask-Aivy's shallow loop if it becomes more truly agentic.
+
 The target posture remains:
 
 - Single Aivy agent first.
