@@ -17,15 +17,15 @@ The target posture remains:
 
 - Single Aivy agent first.
 - Provider-pluggable underneath.
-- No multi-agent workflow migration by default.
+- No assumption that multi-agent workflows belong inside ChatAI by default.
 - Keep HMC retrieval, persistence, SignalR, user profile, prompt policy, and document pipeline authoritative until parity is proven.
 
 ## Executive Takeaways
 
-- Agent Framework is strongest where ChatAI currently has custom agent-loop plumbing: agent invocation, tool schema/invocation, middleware, sessions, and workflow primitives.
+- Agent Framework is strongest where ChatAI currently has custom agent-loop plumbing: agent invocation, tool schema/invocation, middleware, and session-like state.
 - ChatAI is strongest where the behavior is HMC-specific: SmartSearch2 semantics, source blocks, document extraction, Cosmos history shape, SignalR UI contract, stop/cancellation, user profile, and permission boundaries.
-- The migration should not start with multi-agent workflows. It should start by replacing the single-agent execution loop while preserving ChatAI's runtime contract.
-- Workflows are a later capability for explicit business processes, not a substitute for provider routing or ordinary chat orchestration.
+- The ChatAI migration should not start with multi-agent workflows. It should start by replacing the single-agent execution loop while preserving ChatAI's runtime contract.
+- Workflows are an Agent Framework capability for explicit business processes that may live in the owning domain service/API, not something ChatAI should absorb by default.
 - Provider abstraction matters, but it should be a `ModelProfile` / `ReasoningProfile` registry concern, not the headline of the migration.
 - Microsoft docs currently describe Agent Framework as public preview, so the initial implementation should stay feature-flagged, version-pinned, and rollbackable.
 
@@ -46,12 +46,12 @@ The target posture remains:
 | Function tools | Agent Framework supports custom function tools, tool approval patterns, function-call middleware, and provider-specific hosted tools where available. | Tools are `IChatFunction` implementations with JSON-string `WrapAsync`, reflective OpenAI tool schema generation, manual lookup, and `ToolCallAccumulator` for streamed tool-call fragments. | Hybrid. Move schema binding and invocation mechanics to Agent Framework. Keep HMC tools and adapt them one at a time. | Agent Framework is stronger for schema/invocation mechanics. ChatAI is stronger for business behavior inside tools. |
 | MCP and external tool ecosystem | Agent Framework exposes MCP client/tool integration and hosted MCP options depending on provider/client path. | ChatAI integrates directly through DI, typed HTTP clients, HMC packages, and hand-written chat functions. | Defer. Use MCP only after HMC-owned tools are expressed cleanly and governance/data-flow review is settled. | Agent Framework is stronger for tool standardization. ChatAI is stronger for current permission boundaries. |
 | Sessions and conversation state | `AgentSession` keeps conversation context between invocations and can be serialized/deserialized or rehydrated via service conversation IDs where supported. | Cosmos `ChatHistory`, document session storage, distributed cache, message metadata, and `ChatCoordinator` define the production conversation model. | Stays initially. Treat AgentSession as an adapter detail until storage parity and rollback are proven. | ChatAI is stronger today because production behavior is tied to existing HMC storage and UI contracts. |
-| Context, memory, and RAG | Agent Framework documents context providers, history providers, context compaction, storage patterns, and memory/persistence hooks. | `PromptEngineeringProvider`, user profile, working memory shape, SmartSearch2, extraction, chunking, embeddings, Azure AI Search, and source block semantics already define HMC context. | Mostly stays. Use framework context hooks to inject HMC context. Do not replace the HMC RAG backbone. | ChatAI is stronger for HMC knowledge, permissioning, and retrieval semantics. |
+| Context engineering and retrieval handoff | Agent Framework documents context providers, history providers, context compaction, storage patterns, and memory/persistence hooks. These help assemble and inject context around an agent run; they are not the RAG implementation by themselves. | `PromptEngineeringProvider`, user profile, working memory shape, document/session state, and source-block expectations shape the context sent to the model. SmartSearch2 owns the RAG call path and retrieval/synthesis semantics. | Hybrid. Use framework context hooks for context engineering and expose SmartSearch2 as a tool. Keep RAG execution inside SmartSearch2. | ChatAI/SmartSearch2 is stronger for HMC retrieval semantics. Agent Framework helps organize context injection. |
 | Middleware | Agent Framework supports agent-run middleware, function-call middleware, and chat/IChatClient middleware for logging, validation, security checks, error handling, and result transformation. | ChatAI has `OpenAiPayloadShapingPolicy`, action filters, prompt/model policy, token telemetry, truncation, and tool callback conventions spread across service code. | Moves selectively. Move cross-cutting agent/tool/chat concerns into middleware where the framework path owns the call. Keep HMC policy decisions centralized. | Agent Framework is stronger for reusable interception points. ChatAI still owns policy meaning. |
 | Streaming surface | Agent runs and workflows can stream events/results incrementally. | SignalR hub, `ChatContext.SignalDataBlock`, SmartSearch2 blocks, status messages, heartbeat, stop streaming, and UI-visible sequencing form the frontend contract. | Hybrid. Let Agent Framework emit agent/tool/workflow events. Translate them into the existing ChatAI SignalR contract. | Shared. Framework supplies execution events; ChatAI owns what users see and what gets persisted. |
 | Structured and typed outputs | Agent Framework supports schema-aware tool/result patterns and typed workflow messages; structured model outputs depend on selected model/client support. | `ReflectService` has a separate stateless OpenAI/tool loop for introspection and structured API responses. | Moves after core parity. Reflect is a good cleanup target once main chat and tools work through Agent Framework. | Agent Framework is stronger for removing duplicated structured-response mechanics. |
 | Model-client abstraction | Agent Framework sits over chat completion, responses-style, Foundry, Azure OpenAI, OpenAI, Anthropic, Ollama, and custom `IChatClient` paths depending on package/provider. | ChatAI is OpenAI-only for chat/embeddings today, with OpenAI-specific payload shaping and token handling. | Moves. Centralize provider/client choice into `ModelProfile` and `ReasoningProfile`. | Agent Framework is stronger for provider/client abstraction. ChatAI should keep provider policy, not provider plumbing. |
-| Workflows | Workflows are graph-based orchestration with executors, edges, type-safe routing, conditional/parallel execution, external request/response, checkpointing, human-in-the-loop, and multi-agent patterns. | ChatAI is a single Aivy chat service. Ask-Aivy is a background e-mail handler, not a general multi-agent workflow engine. | Defer. Use workflows only for explicit durable business processes. Do not use workflows just to route providers or ordinary chat turns. | Agent Framework is stronger for explicit business process orchestration, but that is not the Phase 1 goal. |
+| Workflows | Workflows are graph-based orchestration with executors, edges, type-safe routing, conditional/parallel execution, external request/response, checkpointing, human-in-the-loop, and multi-agent patterns. | ChatAI is a single Aivy chat service. Ask-Aivy is a background e-mail agentic loop/handler, not a general multi-agent workflow engine,| placement decision. Use workflows for explicit durable business processes in the service that owns the process. Do not use ChatAI as the default agent warehouse or provider router. | Agent Framework is stronger for workflow orchestration. Ownership should follow the domain, not the existing ChatAI service boundary. |
 | Telemetry and safety hooks | Middleware and workflow events provide natural locations for telemetry, validation, and safety checks. | Logging, status emission, token telemetry, model shaping, and safety-ish checks are distributed across service code. | Hybrid. Consolidate generic telemetry/safety hooks in middleware while preserving HMC audit and policy requirements. | Agent Framework improves consistency; ChatAI retains audit semantics. |
 | Hosting and integration surface | Agent Framework includes hosting/integration paths and can be composed into existing .NET services. | ChatAI is already an ASP.NET Core service with controllers, SignalR, Azure Service Bus handlers, Cosmos persistence, and HMC shared services. | Stays. Keep ChatAI as the host/application boundary. Agent Framework is an internal runtime dependency, not a new service boundary by default. | ChatAI is stronger as the HMC application shell. |
 
@@ -73,7 +73,7 @@ These should remain ChatAI-owned unless a later proof shows a better HMC-compati
 - SignalR and `ChatContext` user-visible streaming contract.
 - Cosmos `ChatHistory` shape and persisted message semantics.
 - `ChatCoordinator` stop, cancellation, and readiness semantics.
-- SmartSearch2 source blocks, filters, permissions, and answer semantics.
+- SmartSearch2 RAG execution, source blocks, filters, permissions, and answer semantics.
 - Document ingestion, extraction, thumbnailing, chunking, embeddings, and indexing.
 - Prompt engineering, Azure App Configuration prompts, user profile, and HMC policy choices.
 - Ask-Aivy e-mail orchestration and concurrency semantics.
@@ -87,7 +87,7 @@ These areas should bridge the two worlds rather than fully move or fully stay:
 |---|---|
 | Tools | Wrap existing `IChatFunction` tools as Agent Framework functions first. Convert to typed functions gradually. |
 | Streaming | Map framework stream events into `ChatContext.SignalDataBlock`, status, and block events. |
-| Context/memory | Use framework context providers to inject HMC-built context. Keep HMC extraction/RAG authoritative. |
+| Context engineering | Use framework context providers to assemble and inject user/profile/history/document context. Keep RAG execution in SmartSearch2. |
 | Sessions | Use AgentSession only as an internal framework construct until Cosmos parity is proven. |
 | Middleware | Move generic interception to framework middleware; keep HMC decisions in policy services. |
 | Provider choice | Use `ModelProfile` and `ReasoningProfile`; avoid controller-level provider branching. |
@@ -120,9 +120,10 @@ These areas should bridge the two worlds rather than fully move or fully stay:
 - Prefer schema-aware structured output over prompt-only JSON.
 - Delete the duplicated stateless tool loop after parity.
 
-### Phase 4: Workflow Evaluation
+### Phase 4: Organization-Level Workflow Evaluation
 
 - Only introduce Agent Framework workflows where HMC has a durable, explicit business process.
+- Place each workflow in the service/API that owns the business process instead of assuming ChatAI is the default host.
 - Good candidates may include review/approval flows, multi-step research workflows, or human-in-the-loop jobs.
 - Do not use workflows for ordinary provider routing.
 
