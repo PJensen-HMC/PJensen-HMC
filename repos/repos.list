@@ -1,9 +1,8 @@
 # Repos to clone/pull — one remote URL per line
 # ADO repos: PAT injected at runtime from ~/.claude/.secrets
 # GitHub repos: public, no PAT needed
-# https://dev.azure.com/HarvMgmt/HMCgit/_git/Shared -- migrated
-# https://dev.azure.com/HarvMgmt/HMCgit/_git/CoreServices -- migrated
-# https://dev.azure.com/HarvMgmt/HMCgit/_git/Crimson.Legacy -- migrated
 https://dev.azure.com/HarvMgmt/APPCONFIG/_git/APPCONFIG
+https://github.com/Harvard-Management-Company-Inc/crimson-services.git
+https://github.com/Harvard-Management-Company-Inc/shared.git
 https://github.com/JuliusBrussee/caveman
 https://github.com/PJensen/reflect-js-mcp
