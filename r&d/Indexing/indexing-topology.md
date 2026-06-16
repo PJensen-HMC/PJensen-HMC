@@ -277,3 +277,102 @@ Soft-delete also available: sets `EntryType = "Note, Deleted"` (merge operation,
 | `Shared` | `HMC.Shared.ResearchManagementIndex` | `IndexingService`, `ResearchIndexBlobCache`, `ResearchIndex` model, Azure AI Search write |
 | `Shared` | `HMC.Shared.ChatAiClient` | HTTP client to ChatAI; `IDocument`, `ChunkFrag` |
 | `CoreServices` | `HMC.ChatAI.Service` | extraction, chunking, vectorization pipeline |
+
+---
+
+## Appendix: Supported Indexing Routes
+
+The topology above is the canonical architecture. This appendix is a compact HTTP route reference derived from the Swagger surface. It is intentionally organized by resource and operating concern rather than by controller order.
+
+### Resource Map
+
+| Resource / concern | Route family | Use |
+|---|---|---|
+| **Notes** | `/api/v1/Indexing/Notes/...`, `/api/v1/Indexing/{entryType}` | Index one note, many notes, or mixed note/attachment/document payloads. |
+| **Attachments** | `/api/v1/Indexing/Attachments/...`, `/api/v1/Indexing/{entryType}` | Index attachment binaries from Research Management. |
+| **Documents** | `/api/v1/Indexing/Documents/...`, `/api/v1/Indexing/Sweep/...` | Index document-management files and run document sweeps. |
+| **Firms** | `/api/v1/Indexing/Firms/...` | Index missing notes, attachments, and documents beneath firm-linked entities. |
+| **Manifest / reconciliation** | `/api/v1/Indexing/Manifest...`, `/api/v1/Indexing/Ids...`, `/api/v1/Indexing/CrossReference...` | Generate manifests, compare index membership, import missing entries. |
+| **Search-selected repair** | `/api/v1/Indexing/Search...` | Select index records by Azure AI Search filter, then repair or delete that set. |
+| **Operational status** | `/api/v1/Indexing/Status`, `/Monitoring`, `/Performance/Tracking`, `/Count`, `/Settings` | Inspect queues, monitoring state, performance counters, index count, and runtime settings. |
+| **Cache / recovery** | `/api/v1/Indexing/ReloadFromCache` | Rehydrate Azure AI Search from the blob cache without re-calling ChatAI. |
+
+### Direct Indexing Routes
+
+| Route | Use |
+|---|---|
+| `POST /api/v1/Indexing/Notes/{noteId}/Index` | Index one note. Does not start monitoring. Can include or skip child attachments. |
+| `POST /api/v1/Indexing/Attachments/{attachmentId}/Index` | Index one attachment. Does not start monitoring. |
+| `POST /api/v1/Indexing/Documents/{documentId}/Index` | Index one document. Does not start monitoring. |
+| `PATCH /api/v1/Indexing/{entryType}/{id}` | Generic single-entry indexing route for a note, attachment, or document. |
+| `PATCH /api/v1/Indexing/{entryType}` | Index many identifiers of the same entry type. Starts monitoring if not already started. |
+| `PATCH /api/v1/Indexing` | Bulk mixed indexing payload using `{ type, id }` entries. Useful for repair workflows. |
+
+### Firm-Scoped Indexing Routes
+
+| Route | Use |
+|---|---|
+| `POST /api/v1/Indexing/Firms` | Index many firms. Always pushes work to the bus. |
+| `POST /api/v1/Indexing/Firms/{firmId}` | Index missing notes, attachments, and documents for one firm. |
+| `POST /api/v1/Indexing/Firms/{firmId}/Notes` | Index missing notes for one firm. Starts monitoring if needed. |
+| `POST /api/v1/Indexing/Firms/{firmId}/Documents` | Index documents for one firm, optionally filtered by `searchTerm`. Starts monitoring if needed. |
+| `GET /api/v1/Indexing/Firms/{firmId}/Manifest` | Export a CSV manifest for one firm's indexed entities. |
+
+### Search, Repair, and Delete Routes
+
+| Route | Use |
+|---|---|
+| `POST /api/v1/Indexing/Search` | Run an Azure AI Search filter and return simplified entries suitable for bulk indexing. |
+| `PATCH /api/v1/Indexing/Search/Repair` | Search, then force-reload the matching subset. Supports `dryRun` before repair. |
+| `DELETE /api/v1/Indexing/Search/Delete` | Search, then delete the matching subset. Supports `dryRun` and `hardDelete`. |
+| `DELETE /api/v1/Indexing/{indexEntryId}` | Delete one index entry by identifier. Supports bus dispatch and hard-delete behavior. |
+| `DELETE /api/v1/Indexing` | Delete many index entries by identifier. Supports bus dispatch and hard-delete behavior. |
+
+### Manifest and Reconciliation Routes
+
+| Route | Use |
+|---|---|
+| `GET /api/v1/Indexing/Ids/DocMgmt` | Export IDs for everything in document management that could or should be indexed. |
+| `POST /api/v1/Indexing/Ids` | List identifiers currently present in the index, filtered by entry type. |
+| `POST /api/v1/Indexing/CrossReference/Upload` | Upload GUIDs and cross-reference index presence against DocMgmt database presence. |
+| `POST /api/v1/Indexing/Manifest` | Generate a CSV manifest of indexed notes, attachments, and documents for specified firms. |
+| `POST /api/v1/Indexing/Manifest/Import` | Import a CSV manifest and enqueue missing entities for indexing. |
+
+### Sweep, Cache, and Recovery Routes
+
+| Route | Use |
+|---|---|
+| `POST /api/v1/Indexing/Documents/Index/Sweep` | Run the document indexing sweep. |
+| `POST /api/v1/Indexing/Sweep/{mode}` | Run an indexing sweep by mode. Supports created/updated sweep and deleted sweep behavior. |
+| `PATCH /api/v1/Indexing/ReloadFromCache` | Reload Azure AI Search from cached `ResearchIndex[]` blobs. Requires confirmation. |
+
+### Operational and Diagnostic Routes
+
+| Route | Use |
+|---|---|
+| `GET /api/v1/Indexing/{Id}` | Fetch index entries for one identifier. Useful for direct inspection. |
+| `GET /api/v1/Indexing/Status` | Inspect queue status for indexing operations. |
+| `POST /api/v1/Indexing/Monitoring` | Start monitoring and reset performance tracking. |
+| `GET /api/v1/Indexing/Monitoring` | Check whether monitoring is active. |
+| `DELETE /api/v1/Indexing/Monitoring` | Stop monitoring. |
+| `GET /api/v1/Indexing/Performance/Tracking` | Read current indexing performance metrics. |
+| `DELETE /api/v1/Indexing/Performance/Tracking` | Reset indexing performance metrics. |
+| `GET /api/v1/Indexing/Count` | Return current document count in the index. |
+| `GET /api/v1/Indexing/Settings` | Return current indexing service settings. |
+
+### Common Route Switches
+
+| Switch | Meaning |
+|---|---|
+| `force` | Ignore existing cache/index state and re-index. In cache-backed flows this rewrites cache and index output. |
+| `fireAndForget` | Dispatch work asynchronously through the bus and return immediately. |
+| `quality` | Override document analysis quality, generally `low`, `medium`, `high`, or `variable`. |
+| `hardDelete` | Physically remove records instead of soft-marking them as deleted. |
+| `dryRun` | Return the impacted records without mutating the index. Used by repair/delete workflows. |
+| `filter` | Azure AI Search filter expression used to select the affected subset. |
+| `mode` | Sweep mode for created/updated versus deleted document behavior. |
+
+### Route Shape Notes
+
+Some route templates intentionally overlap and are disambiguated by HTTP method and route constraints. For example, `GET /api/v1/Indexing/{Id}` reads an entry, while `DELETE /api/v1/Indexing/{indexEntryId}` deletes an entry. Client code and generated SDKs should treat method + path as the unique operation key, not path alone.
+
