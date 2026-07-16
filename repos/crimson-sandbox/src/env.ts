@@ -27,8 +27,8 @@ export type {
 } from "./capabilities/notes.ts";
 export type {
   NotificationPayload,
-  NotificationResult,
   NotificationsBinding,
+  NotificationSendOptions,
 } from "./capabilities/notifications.ts";
 export type {
   TaskCreateOptions,

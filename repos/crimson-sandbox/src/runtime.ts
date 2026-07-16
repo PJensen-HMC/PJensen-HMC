@@ -52,6 +52,12 @@ export interface ServiceUrls {
   cosmos: string;
 }
 
+export interface ServiceRoutes {
+  notifications: {
+    events: string;
+  };
+}
+
 export interface TokenProvider {
   getToken(
     scope: TokenScope,
@@ -63,6 +69,7 @@ export interface RuntimeContext {
   appIdentity: AppIdentity;
   tokens: TokenProvider;
   serviceUrls: ServiceUrls;
+  serviceRoutes: ServiceRoutes;
 }
 
 export class RuntimeError extends Error {
@@ -110,11 +117,20 @@ async function fetchWithAuth(
   return res;
 }
 
+function resolveServiceRoute(baseUrl: string, route: string): URL {
+  return new URL(route, `${baseUrl.replace(/\/$/, "")}/`);
+}
+
 export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
   for (const key of SERVICE_URL_KEYS) {
     if (!ctx.serviceUrls[key]) {
       throw new RuntimeError(`Missing required service URL: ${key}`);
     }
+  }
+  if (!ctx.serviceRoutes?.notifications?.events) {
+    throw new RuntimeError(
+      "Missing required service route: notifications.events",
+    );
   }
 
   const AI: AIBinding = {
@@ -264,16 +280,20 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
   };
 
   const NOTIFICATIONS: NotificationsBinding = {
-    async send(payload) {
-      const res = await fetchWithAuth(
-        `${ctx.serviceUrls.notifications}/v1/send`,
-        "crimson.notifications",
-        ctx,
-        { method: "POST", body: JSON.stringify(payload) },
+    async send(payload, options) {
+      const url = resolveServiceRoute(
+        ctx.serviceUrls.notifications,
+        ctx.serviceRoutes.notifications.events,
       );
-      return await res.json() as Awaited<
-        ReturnType<NotificationsBinding["send"]>
-      >;
+      if (options?.userId) {
+        url.searchParams.set("userId", options.userId);
+      }
+
+      await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
     },
   };
 

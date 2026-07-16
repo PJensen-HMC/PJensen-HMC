@@ -142,10 +142,7 @@ Deno.test("dashboard detects breach, creates task and note above threshold", asy
     NOTIFICATIONS: {
       send: () => {
         notificationSent = true;
-        return Promise.resolve({
-          deliveryId: "dlv-001",
-          acceptedAt: "2026-04-02T00:00:00.000Z",
-        });
+        return Promise.resolve();
       },
     },
   });

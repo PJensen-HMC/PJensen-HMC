@@ -5,6 +5,7 @@ import {
   createEnv,
   type RuntimeContext,
   RuntimeError,
+  type ServiceRoutes,
   type ServiceUrls,
   type TokenScope,
 } from "../src/runtime.ts";
@@ -23,6 +24,12 @@ const TEST_SERVICE_URLS: ServiceUrls = {
   universes: "https://universes.crimson.test",
   web: "https://web.crimson.test",
   cosmos: "https://cosmos.crimson.test",
+};
+
+const TEST_SERVICE_ROUTES: ServiceRoutes = {
+  notifications: {
+    events: "/hmc-notifications/api/v1/Events",
+  },
 };
 
 const TEST_APP_IDENTITY: AppIdentity = {
@@ -55,6 +62,7 @@ function makeContext(overrides: Partial<RuntimeContext> = {}): RuntimeContext {
       getToken: (scope: TokenScope) => Promise.resolve(makeToken(scope)),
     },
     serviceUrls: TEST_SERVICE_URLS,
+    serviceRoutes: TEST_SERVICE_ROUTES,
     ...overrides,
   };
 }
@@ -86,6 +94,63 @@ Deno.test("createEnv throws RuntimeError when a service URL is missing", () => {
     throw new Error("Expected RuntimeError to be thrown");
   } catch (err) {
     assertInstanceOf(err, RuntimeError);
+  }
+});
+
+Deno.test("createEnv throws RuntimeError when a service route is missing", () => {
+  const ctx = makeContext({
+    serviceRoutes: { notifications: {} } as ServiceRoutes,
+  });
+  try {
+    createEnv(ctx);
+    throw new Error("Expected RuntimeError to be thrown");
+  } catch (err) {
+    assertInstanceOf(err, RuntimeError);
+  }
+});
+
+Deno.test("notifications uses the configured public events route", async () => {
+  let capturedUrl = "";
+  let capturedBody = "";
+  let capturedAuthorization: string | null = null;
+  let tokenRequested = false;
+  const ctx = makeContext({
+    tokens: {
+      getToken: (scope: TokenScope) => {
+        tokenRequested = true;
+        return Promise.resolve(makeToken(scope));
+      },
+    },
+    serviceRoutes: {
+      notifications: { events: "/custom/notification-events" },
+    },
+  });
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    capturedUrl = input.toString();
+    capturedBody = String(init?.body);
+    capturedAuthorization = new Headers(init?.headers).get("Authorization");
+    return Promise.resolve(new Response(null, { status: 202 }));
+  }) as typeof fetch;
+
+  try {
+    const env = createEnv(ctx);
+    await env.NOTIFICATIONS.send(
+      { name: "test", metadata: { source: "runtime-test" } },
+      { userId: "user-001" },
+    );
+    assertEquals(
+      capturedUrl,
+      "https://notifications.crimson.test/custom/notification-events?userId=user-001",
+    );
+    assertEquals(
+      capturedBody,
+      JSON.stringify({ name: "test", metadata: { source: "runtime-test" } }),
+    );
+    assertEquals(capturedAuthorization, null);
+    assertEquals(tokenRequested, false);
+  } finally {
+    globalThis.fetch = origFetch;
   }
 });
 

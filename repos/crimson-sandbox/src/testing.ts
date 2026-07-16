@@ -74,11 +74,7 @@ const defaultNotes: NotesBinding = {
 };
 
 const defaultNotifications: NotificationsBinding = {
-  send: () =>
-    Promise.resolve({
-      deliveryId: "mock-delivery-id",
-      acceptedAt: "2026-01-01T00:00:00.000Z",
-    }),
+  send: () => Promise.resolve(),
 };
 
 const defaultTasks: TasksBinding = {

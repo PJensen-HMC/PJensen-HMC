@@ -126,12 +126,15 @@ export default defineCrimsonApp(async (env) => {
 
       // Alert the account holder
       await env.NOTIFICATIONS.send({
-        channel: "email",
-        to: identity.email,
-        subject:
-          `Liquidity alert: exposure ${riskLimits.currency} ${totalExposure.toLocaleString()} exceeds threshold`,
-        body: aiResult.response,
-        metadata: { accountId: identity.userId, severity: "high" },
+        name: "liquidity-threshold-exceeded",
+        metadata: {
+          userId: identity.userId,
+          accountId: identity.userId,
+          severity: "high",
+          currency: riskLimits.currency,
+          exposure: String(totalExposure),
+          message: aiResult.response,
+        },
       });
 
       // Assign a follow-up task to the risk manager

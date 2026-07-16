@@ -1,16 +1,16 @@
 export interface NotificationPayload {
-  channel: string;
-  to: string | string[];
-  subject?: string;
-  body: string;
-  metadata?: Record<string, unknown>;
+  name: string;
+  metadata?: Record<string, string>;
 }
 
-export interface NotificationResult {
-  deliveryId: string;
-  acceptedAt: string;
+export interface NotificationSendOptions {
+  /** Send the event for this user when no authenticated user is available. */
+  userId?: string;
 }
 
 export interface NotificationsBinding {
-  send(payload: NotificationPayload): Promise<NotificationResult>;
+  send(
+    payload: NotificationPayload,
+    options?: NotificationSendOptions,
+  ): Promise<void>;
 }

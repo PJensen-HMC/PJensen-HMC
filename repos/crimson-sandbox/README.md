@@ -51,6 +51,22 @@ const tokens = AzureTokenProvider.fromEnv({
 });
 ```
 
-`fromEnv` reads `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and
-`AZURE_CLIENT_SECRET`. `StaticTokenProvider` is available for local tests and
-controlled development scenarios; do not commit real tokens.
+`fromEnv` reads `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and `AZURE_CLIENT_SECRET`.
+`StaticTokenProvider` is available for local tests and controlled development
+scenarios; do not commit real tokens.
+
+Runtime service routes are configured separately from service base URLs. This
+keeps deployment-specific paths out of capability bindings and leaves room for
+additional named endpoints:
+
+```ts
+const serviceRoutes = {
+  notifications: {
+    events: "/hmc-notifications/api/v1/Events",
+  },
+};
+```
+
+The notifications events route is public. Pass `userId` in the `send` options to
+place it on the query string, or include it in the event metadata property bag.
+An authenticated caller does not need to provide it explicitly.
