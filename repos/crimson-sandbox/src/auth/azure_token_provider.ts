@@ -36,9 +36,15 @@ export class AzureTokenProvider implements TokenProvider {
     return new AzureTokenProvider(tenantId, clientId, clientSecret, scopeMap);
   }
 
-  async getToken(scope: TokenScope, opts?: { forceRefresh?: boolean }): Promise<AccessToken> {
+  async getToken(
+    scope: TokenScope,
+    opts?: { forceRefresh?: boolean },
+  ): Promise<AccessToken> {
     const cached = this.#cache.get(scope);
-    if (!opts?.forceRefresh && cached && cached.expiresAt > Date.now() + REFRESH_BUFFER_MS) {
+    if (
+      !opts?.forceRefresh && cached &&
+      cached.expiresAt > Date.now() + REFRESH_BUFFER_MS
+    ) {
       return cached;
     }
     const token = await this.#acquire(scope);
@@ -71,7 +77,10 @@ export class AzureTokenProvider implements TokenProvider {
       );
     }
 
-    const data = await res.json() as { access_token: string; expires_in: number };
+    const data = await res.json() as {
+      access_token: string;
+      expires_in: number;
+    };
     return {
       value: data.access_token,
       expiresAt: Date.now() + data.expires_in * 1_000,

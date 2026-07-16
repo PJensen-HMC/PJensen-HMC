@@ -10,7 +10,11 @@ import type {
   UniversesBinding,
   WebBinding,
 } from "./env.ts";
-import type { Fabric, FabricQueryOptions, FabricQueryResult } from "./capabilities/fabric.ts";
+import type {
+  Fabric,
+  FabricQueryOptions,
+  FabricQueryResult,
+} from "./capabilities/fabric.ts";
 
 export type TokenScope =
   | "crimson.api"
@@ -25,6 +29,7 @@ export type TokenScope =
 
 export interface AccessToken {
   value: string;
+  /** Expiration time as milliseconds since the Unix epoch. */
   expiresAt: number;
 }
 
@@ -48,7 +53,10 @@ export interface ServiceUrls {
 }
 
 export interface TokenProvider {
-  getToken(scope: TokenScope, opts?: { forceRefresh?: boolean }): Promise<AccessToken>;
+  getToken(
+    scope: TokenScope,
+    opts?: { forceRefresh?: boolean },
+  ): Promise<AccessToken>;
 }
 
 export interface RuntimeContext {
@@ -117,21 +125,35 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
         ctx,
         { method: "POST", body: JSON.stringify({ model, ...options }) },
       );
-      return await res.json() as ReturnType<AIBinding["run"]> extends Promise<infer R> ? R : never;
+      return await res.json() as ReturnType<AIBinding["run"]> extends
+        Promise<infer R> ? R : never;
     },
   };
 
   const API: APIBinding = {
-    async call<T = unknown>(path: string, options?: { params?: Record<string, string>; body?: unknown; method?: string }) {
+    async call<T = unknown>(
+      path: string,
+      options?: {
+        params?: Record<string, string>;
+        body?: unknown;
+        method?: string;
+      },
+    ) {
       const url = new URL(`${ctx.serviceUrls.api}${path}`);
       if (options?.params) {
         for (const [k, v] of Object.entries(options.params)) {
           url.searchParams.set(k, v);
         }
       }
-      const method = options?.method ?? (options?.body !== undefined ? "POST" : "GET");
-      const body = options?.body !== undefined ? JSON.stringify(options.body) : undefined;
-      const res = await fetchWithAuth(url.toString(), "crimson.api", ctx, { method, body });
+      const method = options?.method ??
+        (options?.body !== undefined ? "POST" : "GET");
+      const body = options?.body !== undefined
+        ? JSON.stringify(options.body)
+        : undefined;
+      const res = await fetchWithAuth(url.toString(), "crimson.api", ctx, {
+        method,
+        body,
+      });
       const data = await res.json() as T;
       return { status: res.status, data };
     },
@@ -202,7 +224,9 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
       return {
         release: async () => {
           await fetchWithAuth(
-            `${ctx.serviceUrls.cosmos}/v1/lock/${encodeURIComponent(key)}/${lockId}`,
+            `${ctx.serviceUrls.cosmos}/v1/lock/${
+              encodeURIComponent(key)
+            }/${lockId}`,
             "crimson.cosmos",
             ctx,
             { method: "DELETE" },
@@ -213,7 +237,10 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
   };
 
   const FABRIC: Fabric = {
-    async query<T = unknown>(dataset: string, options?: FabricQueryOptions): Promise<FabricQueryResult<T>> {
+    async query<T = unknown>(
+      dataset: string,
+      options?: FabricQueryOptions,
+    ): Promise<FabricQueryResult<T>> {
       const res = await fetchWithAuth(
         `${ctx.serviceUrls.fabric}/v1/query`,
         "crimson.fabric",
@@ -244,7 +271,9 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
         ctx,
         { method: "POST", body: JSON.stringify(payload) },
       );
-      return await res.json() as Awaited<ReturnType<NotificationsBinding["send"]>>;
+      return await res.json() as Awaited<
+        ReturnType<NotificationsBinding["send"]>
+      >;
     },
   };
 
@@ -272,12 +301,16 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
     },
     async constituents(universeId) {
       const res = await fetchWithAuth(
-        `${ctx.serviceUrls.universes}/v1/universes/${encodeURIComponent(universeId)}/constituents`,
+        `${ctx.serviceUrls.universes}/v1/universes/${
+          encodeURIComponent(universeId)
+        }/constituents`,
         "crimson.universes",
         ctx,
         { method: "GET" },
       );
-      return await res.json() as Awaited<ReturnType<UniversesBinding["constituents"]>>;
+      return await res.json() as Awaited<
+        ReturnType<UniversesBinding["constituents"]>
+      >;
     },
   };
 
@@ -285,11 +318,26 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
     async search(query, options?) {
       const url = new URL(`${ctx.serviceUrls.web}/v1/search`);
       url.searchParams.set("q", query);
-      if (options?.limit !== undefined) url.searchParams.set("limit", String(options.limit));
-      const res = await fetchWithAuth(url.toString(), "crimson.web", ctx, { method: "GET" });
+      if (options?.limit !== undefined) {
+        url.searchParams.set("limit", String(options.limit));
+      }
+      const res = await fetchWithAuth(url.toString(), "crimson.web", ctx, {
+        method: "GET",
+      });
       return await res.json() as Awaited<ReturnType<WebBinding["search"]>>;
     },
   };
 
-  return { AI, API, CONFIGURATION, COSMOS, FABRIC, NOTES, NOTIFICATIONS, TASKS, UNIVERSES, WEB };
+  return {
+    AI,
+    API,
+    CONFIGURATION,
+    COSMOS,
+    FABRIC,
+    NOTES,
+    NOTIFICATIONS,
+    TASKS,
+    UNIVERSES,
+    WEB,
+  };
 }

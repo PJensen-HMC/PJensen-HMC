@@ -1,3 +1,4 @@
+// deno-lint-ignore no-namespace -- Preserve the public Errors.Base/AI/Cosmos API.
 export namespace Errors {
   export class Base extends Error {
     constructor(message: string, cause?: unknown) {

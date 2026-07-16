@@ -1,10 +1,10 @@
 import { assertEquals, assertInstanceOf, assertRejects } from "@std/assert";
 import {
-  createEnv,
-  RuntimeError,
   type AccessToken,
   type AppIdentity,
+  createEnv,
   type RuntimeContext,
+  RuntimeError,
   type ServiceUrls,
   type TokenScope,
 } from "../src/runtime.ts";
@@ -44,7 +44,7 @@ const TEST_APP_IDENTITY: AppIdentity = {
 function makeToken(scope: string): AccessToken {
   return {
     value: `mock-token-${scope}`,
-    expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    expiresAt: Date.now() + 3_600_000,
   };
 }
 
@@ -110,7 +110,10 @@ Deno.test("binding calls getToken with correct scope for AI", async () => {
   globalThis.fetch = () =>
     Promise.resolve(
       new Response(
-        JSON.stringify({ response: "ok", usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 } }),
+        JSON.stringify({
+          response: "ok",
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 },
+        }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
     );
@@ -197,7 +200,14 @@ Deno.test("binding retries with refreshed token on 401", async () => {
     const status = callCount === 1 ? 401 : 200;
     return Promise.resolve(
       new Response(
-        JSON.stringify({ taskId: "t-001", createdAt: "", title: "", assignedTo: "", status: "open", priority: "normal" }),
+        JSON.stringify({
+          taskId: "t-001",
+          createdAt: "",
+          title: "",
+          assignedTo: "",
+          status: "open",
+          priority: "normal",
+        }),
         { status, headers: { "Content-Type": "application/json" } },
       ),
     );
@@ -224,7 +234,8 @@ Deno.test("binding throws RuntimeError when 401 persists after token refresh", a
   try {
     const env = createEnv(ctx);
     await assertRejects(
-      () => env.NOTES.deposit({ subject: "test", content: "x", createdBy: "u-1" }),
+      () =>
+        env.NOTES.deposit({ subject: "test", content: "x", createdBy: "u-1" }),
       RuntimeError,
     );
   } finally {
@@ -250,7 +261,12 @@ Deno.test("TokenProvider.getToken receives the scope it was called with", async 
 
   const origFetch = globalThis.fetch;
   globalThis.fetch = (() =>
-    Promise.resolve(new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } }))) as typeof fetch;
+    Promise.resolve(
+      new Response("{}", {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    )) as typeof fetch;
 
   try {
     const env = createEnv(ctx);

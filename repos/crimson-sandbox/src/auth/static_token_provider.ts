@@ -16,7 +16,9 @@ export class StaticTokenProvider implements TokenProvider {
     const value = this.#tokens[scope];
     if (!value) {
       return Promise.reject(
-        new RuntimeError(`StaticTokenProvider: no token configured for scope "${scope}"`),
+        new RuntimeError(
+          `StaticTokenProvider: no token configured for scope "${scope}"`,
+        ),
       );
     }
     return Promise.resolve({ value, expiresAt: Date.now() + this.#ttlMs });

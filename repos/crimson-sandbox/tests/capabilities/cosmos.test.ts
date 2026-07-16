@@ -86,7 +86,8 @@ Deno.test("COSMOS.lock default stub returns a releasable handle", async () => {
 Deno.test("COSMOS.lock throws Errors.Cosmos when unavailable", async () => {
   const env = createMockEnv({
     COSMOS: {
-      lock: () => Promise.reject(new Errors.Cosmos("Lock unavailable: timeout")),
+      lock: () =>
+        Promise.reject(new Errors.Cosmos("Lock unavailable: timeout")),
     },
   });
 

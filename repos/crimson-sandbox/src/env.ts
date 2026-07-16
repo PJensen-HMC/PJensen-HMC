@@ -1,13 +1,54 @@
 export type { AIBinding, AIOptions, AIResult } from "./capabilities/ai.ts";
-export type { APIBinding, APICallOptions, APICallResult } from "./capabilities/api.ts";
-export type { ConfigurationBinding, UserIdentity, AppPolicy } from "./capabilities/configuration.ts";
-export type { CosmosBinding, CosmosSetOptions, CosmosLockOptions, LockHandle } from "./capabilities/cosmos.ts";
-export type { Fabric, FabricQueryOptions, FabricQueryResult } from "./capabilities/fabric.ts";
-export type { NotesBinding, NoteDepositOptions, NoteResult } from "./capabilities/notes.ts";
-export type { NotificationsBinding, NotificationPayload, NotificationResult } from "./capabilities/notifications.ts";
-export type { TasksBinding, TaskCreateOptions, TaskResult, TaskStatus, TaskPriority } from "./capabilities/tasks.ts";
-export type { UniversesBinding, Universe, Constituent, ConstituentsResult } from "./capabilities/universes.ts";
-export type { WebBinding, WebHit, WebSearchResult, WebSearchOptions } from "./capabilities/web.ts";
+export type {
+  APIBinding,
+  APICallOptions,
+  APICallResult,
+} from "./capabilities/api.ts";
+export type {
+  AppPolicy,
+  ConfigurationBinding,
+  UserIdentity,
+} from "./capabilities/configuration.ts";
+export type {
+  CosmosBinding,
+  CosmosLockOptions,
+  CosmosSetOptions,
+  LockHandle,
+} from "./capabilities/cosmos.ts";
+export type {
+  Fabric,
+  FabricQueryOptions,
+  FabricQueryResult,
+} from "./capabilities/fabric.ts";
+export type {
+  NoteDepositOptions,
+  NoteResult,
+  NotesBinding,
+} from "./capabilities/notes.ts";
+export type {
+  NotificationPayload,
+  NotificationResult,
+  NotificationsBinding,
+} from "./capabilities/notifications.ts";
+export type {
+  TaskCreateOptions,
+  TaskPriority,
+  TaskResult,
+  TasksBinding,
+  TaskStatus,
+} from "./capabilities/tasks.ts";
+export type {
+  Constituent,
+  ConstituentsResult,
+  Universe,
+  UniversesBinding,
+} from "./capabilities/universes.ts";
+export type {
+  WebBinding,
+  WebHit,
+  WebSearchOptions,
+  WebSearchResult,
+} from "./capabilities/web.ts";
 
 import type { AIBinding } from "./capabilities/ai.ts";
 import type { APIBinding } from "./capabilities/api.ts";

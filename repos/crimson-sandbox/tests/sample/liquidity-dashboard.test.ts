@@ -23,8 +23,18 @@ function buildEnv(overrides = {}) {
           universeId,
           asOf: "2026-04-02T00:00:00.000Z",
           constituents: [
-            { symbol: "AAPL", name: "Apple Inc.", assetClass: "equity", currency: "USD" },
-            { symbol: "MSFT", name: "Microsoft Corp.", assetClass: "equity", currency: "USD" },
+            {
+              symbol: "AAPL",
+              name: "Apple Inc.",
+              assetClass: "equity",
+              currency: "USD",
+            },
+            {
+              symbol: "MSFT",
+              name: "Microsoft Corp.",
+              assetClass: "equity",
+              currency: "USD",
+            },
           ],
         }),
     },
@@ -37,20 +47,26 @@ function buildEnv(overrides = {}) {
         }),
     },
     API: {
-      call: () => Promise.resolve({ status: 200, data: MOCK_RISK_LIMITS as never }),
+      call: () =>
+        Promise.resolve({ status: 200, data: MOCK_RISK_LIMITS as never }),
     },
     WEB: {
       search: (query) =>
         Promise.resolve({
           query,
-          hits: [{ title: "Market conditions stable", url: "https://example.com", snippet: "Markets are calm." }],
+          hits: [{
+            title: "Market conditions stable",
+            url: "https://example.com",
+            snippet: "Markets are calm.",
+          }],
           estimatedTotal: 1,
         }),
     },
     AI: {
       run: () =>
         Promise.resolve({
-          response: "Exposure is within normal range. No immediate liquidity concerns.",
+          response:
+            "Exposure is within normal range. No immediate liquidity concerns.",
           usage: { promptTokens: 50, completionTokens: 30, totalTokens: 80 },
         }),
     },
@@ -73,7 +89,10 @@ Deno.test("dashboard returns summary and position count below threshold", async 
 Deno.test("dashboard returns identity from CONFIGURATION", async () => {
   const result = await app(buildEnv()) as DashboardResult;
 
-  assertObjectMatch(result.identity, { userId: "test-user-id", displayName: "Test User" });
+  assertObjectMatch(result.identity, {
+    userId: "test-user-id",
+    displayName: "Test User",
+  });
 });
 
 Deno.test("dashboard detects breach, creates task and note above threshold", async () => {
@@ -85,7 +104,12 @@ Deno.test("dashboard detects breach, creates task and note above threshold", asy
     FABRIC: {
       query: () =>
         Promise.resolve({
-          rows: [{ symbol: "AAPL", quantity: 1000, value: 150_000, currency: "USD" }],
+          rows: [{
+            symbol: "AAPL",
+            quantity: 1000,
+            value: 150_000,
+            currency: "USD",
+          }],
           total: 1,
           hasMore: false,
         }),
@@ -118,7 +142,10 @@ Deno.test("dashboard detects breach, creates task and note above threshold", asy
     NOTIFICATIONS: {
       send: () => {
         notificationSent = true;
-        return Promise.resolve({ deliveryId: "dlv-001", acceptedAt: "2026-04-02T00:00:00.000Z" });
+        return Promise.resolve({
+          deliveryId: "dlv-001",
+          acceptedAt: "2026-04-02T00:00:00.000Z",
+        });
       },
     },
   });
@@ -150,7 +177,11 @@ Deno.test("dashboard returns cached result on second call", async () => {
     FABRIC: {
       query: () => {
         fabricCallCount++;
-        return Promise.resolve({ rows: MOCK_POSITIONS, total: MOCK_POSITIONS.length, hasMore: false });
+        return Promise.resolve({
+          rows: MOCK_POSITIONS,
+          total: MOCK_POSITIONS.length,
+          hasMore: false,
+        });
       },
     },
   });

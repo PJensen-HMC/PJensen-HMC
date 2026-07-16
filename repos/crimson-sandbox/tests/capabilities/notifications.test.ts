@@ -30,7 +30,10 @@ Deno.test("NOTIFICATIONS.send override receives full payload", async () => {
     NOTIFICATIONS: {
       send: (payload) => {
         captured = payload;
-        return Promise.resolve({ deliveryId: "dlv-001", acceptedAt: "2026-04-02T00:00:00.000Z" });
+        return Promise.resolve({
+          deliveryId: "dlv-001",
+          acceptedAt: "2026-04-02T00:00:00.000Z",
+        });
       },
     },
   });
@@ -76,7 +79,8 @@ Deno.test("NOTIFICATIONS.send override returns custom delivery ID", async () => 
 Deno.test("NOTIFICATIONS.send throws Errors.Notifications on rejected channel", async () => {
   const env = createMockEnv({
     NOTIFICATIONS: {
-      send: () => Promise.reject(new Errors.Notifications("Channel not permitted")),
+      send: () =>
+        Promise.reject(new Errors.Notifications("Channel not permitted")),
     },
   });
 

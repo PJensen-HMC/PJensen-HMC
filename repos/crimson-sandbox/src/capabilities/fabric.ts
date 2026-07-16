@@ -12,5 +12,8 @@ export interface FabricQueryResult<T> {
 }
 
 export interface Fabric {
-  query<T = unknown>(dataset: string, options?: FabricQueryOptions): Promise<FabricQueryResult<T>>;
+  query<T = unknown>(
+    dataset: string,
+    options?: FabricQueryOptions,
+  ): Promise<FabricQueryResult<T>>;
 }

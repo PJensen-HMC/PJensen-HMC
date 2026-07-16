@@ -3,7 +3,7 @@ import { defineCrimsonApp } from "../src/env.ts";
 import { createMockEnv } from "../src/testing.ts";
 
 Deno.test("defineCrimsonApp returns the handler unchanged", () => {
-  const handler = async () => ({ ok: true });
+  const handler = () => Promise.resolve({ ok: true });
   const app = defineCrimsonApp(handler);
   assertEquals(app, handler);
 });
@@ -11,9 +11,9 @@ Deno.test("defineCrimsonApp returns the handler unchanged", () => {
 Deno.test("handler receives env.CONFIGURATION identity", async () => {
   let receivedUserId = "";
 
-  const app = defineCrimsonApp(async (env) => {
+  const app = defineCrimsonApp((env) => {
     receivedUserId = env.CONFIGURATION.getIdentity().userId;
-    return { ok: true };
+    return Promise.resolve({ ok: true });
   });
 
   await app(createMockEnv());
@@ -56,7 +56,9 @@ Deno.test("mock CONFIGURATION.get returns undefined for unknown keys", () => {
 
 Deno.test("mock CONFIGURATION.get returns overridden value", () => {
   const env = createMockEnv({
-    CONFIGURATION: { get: (key) => key === "APP_URL" ? "https://app.example.com" : undefined },
+    CONFIGURATION: {
+      get: (key) => key === "APP_URL" ? "https://app.example.com" : undefined,
+    },
   });
   assertEquals(env.CONFIGURATION.get("APP_URL"), "https://app.example.com");
   assertEquals(env.CONFIGURATION.get("OTHER"), undefined);

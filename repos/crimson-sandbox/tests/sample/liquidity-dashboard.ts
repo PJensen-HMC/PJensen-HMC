@@ -20,7 +20,6 @@
 
 import { defineCrimsonApp } from "../../src/env.ts";
 import { Errors } from "../../src/errors.ts";
-import type { Fabric } from "../../src/capabilities/fabric.ts";
 
 interface Position {
   symbol: string;
@@ -58,7 +57,10 @@ export default defineCrimsonApp(async (env) => {
   const cached = await env.COSMOS.get<DashboardResult>(cacheKey);
   if (cached) return { ...cached, fromCache: true };
 
-  const lock = await env.COSMOS.lock(`lock:${cacheKey}`, { ttlMs: 30_000, waitMs: 5_000 });
+  const lock = await env.COSMOS.lock(`lock:${cacheKey}`, {
+    ttlMs: 30_000,
+    waitMs: 5_000,
+  });
 
   try {
     const afterLock = await env.COSMOS.get<DashboardResult>(cacheKey);
@@ -79,16 +81,23 @@ export default defineCrimsonApp(async (env) => {
     const totalExposure = positions.rows.reduce((sum, p) => sum + p.value, 0);
 
     // Fetch risk limits for this account
-    const { data: riskLimits } = await env.API.call<RiskLimits>("/risk/v1/limits", {
-      params: { accountId: identity.userId },
-    });
+    const { data: riskLimits } = await env.API.call<RiskLimits>(
+      "/risk/v1/limits",
+      {
+        params: { accountId: identity.userId },
+      },
+    );
 
     // Pull current market context via web search to ground the AI summary
     const marketContext = await env.WEB.search(
-      `liquidity risk ${riskLimits.currency} market conditions ${new Date().getFullYear()}`,
+      `liquidity risk ${riskLimits.currency} market conditions ${
+        new Date().getFullYear()
+      }`,
       { limit: 3 },
     );
-    const contextSnippets = marketContext.hits.map((h) => `- ${h.title}: ${h.snippet}`).join("\n");
+    const contextSnippets = marketContext.hits.map((h) =>
+      `- ${h.title}: ${h.snippet}`
+    ).join("\n");
 
     const topPositions = positions.rows
       .slice(0, 5)
@@ -119,14 +128,16 @@ export default defineCrimsonApp(async (env) => {
       await env.NOTIFICATIONS.send({
         channel: "email",
         to: identity.email,
-        subject: `Liquidity alert: exposure ${riskLimits.currency} ${totalExposure.toLocaleString()} exceeds threshold`,
+        subject:
+          `Liquidity alert: exposure ${riskLimits.currency} ${totalExposure.toLocaleString()} exceeds threshold`,
         body: aiResult.response,
         metadata: { accountId: identity.userId, severity: "high" },
       });
 
       // Assign a follow-up task to the risk manager
       const task = await env.TASKS.create({
-        title: `Review liquidity breach: ${identity.displayName} — ${riskLimits.currency} ${totalExposure.toLocaleString()}`,
+        title:
+          `Review liquidity breach: ${identity.displayName} — ${riskLimits.currency} ${totalExposure.toLocaleString()}`,
         assignedTo: riskLimits.riskManagerId,
         status: "open",
         priority: "high",
@@ -164,4 +175,3 @@ export default defineCrimsonApp(async (env) => {
     await lock.release();
   }
 });
-

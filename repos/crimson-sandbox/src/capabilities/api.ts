@@ -10,5 +10,8 @@ export interface APICallResult<T> {
 }
 
 export interface APIBinding {
-  call<T = unknown>(path: string, options?: APICallOptions): Promise<APICallResult<T>>;
+  call<T = unknown>(
+    path: string,
+    options?: APICallOptions,
+  ): Promise<APICallResult<T>>;
 }

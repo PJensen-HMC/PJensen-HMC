@@ -39,8 +39,15 @@ const defaultAPI: APIBinding = {
 
 const defaultConfiguration: ConfigurationBinding = {
   get: () => undefined,
-  getIdentity: () => ({ userId: "test-user-id", displayName: "Test User", email: "test@example.com" }),
-  getPolicy: () => ({ maxAITokensPerRequest: 4096, allowedFabricDatasets: ["*"] }),
+  getIdentity: () => ({
+    userId: "test-user-id",
+    displayName: "Test User",
+    email: "test@example.com",
+  }),
+  getPolicy: () => ({
+    maxAITokensPerRequest: 4096,
+    allowedFabricDatasets: ["*"],
+  }),
 };
 
 const defaultCosmos: CosmosBinding = {
@@ -68,7 +75,10 @@ const defaultNotes: NotesBinding = {
 
 const defaultNotifications: NotificationsBinding = {
   send: () =>
-    Promise.resolve({ deliveryId: "mock-delivery-id", acceptedAt: "2026-01-01T00:00:00.000Z" }),
+    Promise.resolve({
+      deliveryId: "mock-delivery-id",
+      acceptedAt: "2026-01-01T00:00:00.000Z",
+    }),
 };
 
 const defaultTasks: TasksBinding = {
@@ -86,7 +96,11 @@ const defaultTasks: TasksBinding = {
 const defaultUniverses: UniversesBinding = {
   list: () => Promise.resolve({ universes: [] }),
   constituents: (universeId) =>
-    Promise.resolve({ universeId, asOf: "2026-01-01T00:00:00.000Z", constituents: [] }),
+    Promise.resolve({
+      universeId,
+      asOf: "2026-01-01T00:00:00.000Z",
+      constituents: [],
+    }),
 };
 
 const defaultWeb: WebBinding = {

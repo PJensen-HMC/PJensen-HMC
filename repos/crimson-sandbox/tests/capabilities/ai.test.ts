@@ -79,7 +79,10 @@ Deno.test("AI.run throws Errors.AI when token budget exceeded", async () => {
   });
 
   await assertRejects(
-    () => env.AI.run("@cf/meta/llama-3.1-8b-instruct", { prompt: "x".repeat(10000) }),
+    () =>
+      env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+        prompt: "x".repeat(10000),
+      }),
     Errors.AI,
     "Token budget exceeded",
   );

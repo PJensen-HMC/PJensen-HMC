@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "exports": {
     ".": "./src/mod.ts",
+    "./auth": "./src/auth/mod.ts",
     "./testing": "./src/testing.ts",
     "./runtime": "./src/runtime.ts"
   },
