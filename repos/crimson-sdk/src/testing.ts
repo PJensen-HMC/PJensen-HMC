@@ -73,6 +73,7 @@ const defaultNotes: NotesBinding = {
       createdBy: opts.createdBy,
       linkedEntities: opts.linkedEntities ?? [],
     }),
+  reindex: () => Promise.resolve(),
   downloadAttachment: (attachmentId) =>
     Promise.resolve({
       attachmentId,

@@ -110,7 +110,9 @@ async function fetchWithAuth(
   const headers = new Headers(init.headers);
   headers.set("Authorization", `Bearer ${token.value}`);
   headers.set("X-Crimson-App-Id", ctx.appIdentity.appId);
-  headers.set("Content-Type", "application/json");
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
   let res = await fetch(url, { ...init, headers });
 
@@ -400,6 +402,40 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
         { method: "POST", body: JSON.stringify(options) },
       );
       return await res.json() as Awaited<ReturnType<NotesBinding["deposit"]>>;
+    },
+    async reindex(entries, options) {
+      if (entries.length === 0) {
+        throw new RuntimeError("At least one indexing entry is required");
+      }
+      if (
+        entries.some((entry) => !entry.entryType.trim() || !entry.id.trim())
+      ) {
+        throw new RuntimeError("Indexing entries require entryType and id");
+      }
+
+      const url = new URL(`${ctx.serviceUrls.notes}/v1/Indexing`);
+      url.searchParams.set(
+        "fireAndForget",
+        String(options?.fireAndForget ?? true),
+      );
+      url.searchParams.set("force", String(options?.force ?? true));
+      url.searchParams.set("quality", options?.quality ?? "med");
+      const res = await fetchWithAuth(
+        url.toString(),
+        "crimson.notes",
+        ctx,
+        {
+          method: "PATCH",
+          headers: {
+            Accept: "*/*",
+            "Content-Type": "application/json-patch+json",
+          },
+          body: JSON.stringify(entries),
+        },
+      );
+      if (!res.ok) {
+        throw new RuntimeError(`Notes reindex failed: HTTP ${res.status}`);
+      }
     },
     async downloadAttachment(attachmentId) {
       if (!attachmentId.trim()) {

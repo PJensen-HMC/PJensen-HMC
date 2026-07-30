@@ -23,6 +23,8 @@ export type {
 export type {
   NoteAttachment,
   NoteDepositOptions,
+  NoteIndexEntry,
+  NoteReindexOptions,
   NoteResult,
   NotesBinding,
 } from "./capabilities/notes.ts";

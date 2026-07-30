@@ -80,6 +80,7 @@ Deno.test("createEnv returns a valid CrimsonSDKEnv with all bindings", () => {
   assertEquals(typeof env.FABRIC.query, "function");
   assertEquals(typeof env.NOTES.deposit, "function");
   assertEquals(typeof env.NOTES.downloadAttachment, "function");
+  assertEquals(typeof env.NOTES.reindex, "function");
   assertEquals(typeof env.NOTIFICATIONS.send, "function");
   assertEquals(typeof env.SERVICE_BUS.send, "function");
   assertEquals(typeof env.TASKS.create, "function");
@@ -244,6 +245,50 @@ Deno.test("binding injects X-Crimson-App-Id header", async () => {
   }
 });
 
+Deno.test("notes bulk reindexes entries", async () => {
+  let capturedUrl = "";
+  let capturedMethod = "";
+  let capturedContentType = "";
+  let capturedBody = "";
+  let capturedScope = "";
+  const ctx = makeContext({
+    serviceUrls: {
+      ...TEST_SERVICE_URLS,
+      notes: "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api",
+    },
+    tokens: {
+      getToken: (scope: TokenScope) => {
+        capturedScope = scope;
+        return Promise.resolve(makeToken(scope));
+      },
+    },
+  });
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const headers = new Headers(init?.headers);
+    capturedUrl = input.toString();
+    capturedMethod = init?.method ?? "";
+    capturedContentType = headers.get("Content-Type") ?? "";
+    capturedBody = String(init?.body);
+    return Promise.resolve(new Response(null, { status: 202 }));
+  }) as typeof fetch;
+
+  try {
+    const env = createEnv(ctx);
+    const entries = [{ entryType: "Attachment", id: "attachment-001" }];
+    await env.NOTES.reindex(entries);
+    assertEquals(
+      capturedUrl,
+      "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api/v1/Indexing?fireAndForget=true&force=true&quality=med",
+    );
+    assertEquals(capturedMethod, "PATCH");
+    assertEquals(capturedScope, "crimson.notes");
+    assertEquals(capturedContentType, "application/json-patch+json");
+    assertEquals(capturedBody, JSON.stringify(entries));
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});
 Deno.test("notes downloads an attachment from Research Management", async () => {
   let capturedUrl = "";
   let capturedScope = "";
