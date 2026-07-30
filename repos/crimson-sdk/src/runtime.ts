@@ -121,6 +121,23 @@ function resolveServiceRoute(baseUrl: string, route: string): URL {
   return new URL(route, `${baseUrl.replace(/\/$/, "")}/`);
 }
 
+function contentDispositionFileName(value: string | null): string | null {
+  if (!value) return null;
+
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(value)?.[1];
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded);
+    } catch {
+      return encoded;
+    }
+  }
+
+  return /filename="([^"]+)"/i.exec(value)?.[1] ??
+    /filename=([^;]+)/i.exec(value)?.[1]?.trim() ??
+    null;
+}
+
 export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
   for (const key of SERVICE_URL_KEYS) {
     if (!ctx.serviceUrls[key]) {
@@ -276,6 +293,37 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
         { method: "POST", body: JSON.stringify(options) },
       );
       return await res.json() as Awaited<ReturnType<NotesBinding["deposit"]>>;
+    },
+    async downloadAttachment(attachmentId) {
+      if (!attachmentId.trim()) {
+        throw new RuntimeError("Attachment ID is required");
+      }
+
+      const url = new URL(
+        `${ctx.serviceUrls.notes}/v1/Attachments/${
+          encodeURIComponent(attachmentId)
+        }`,
+      );
+      const res = await fetchWithAuth(
+        url.toString(),
+        "crimson.notes",
+        ctx,
+        { method: "GET", headers: { Accept: "*/*" } },
+      );
+      if (!res.ok) {
+        throw new RuntimeError(
+          `Attachment download failed for "${attachmentId}": HTTP ${res.status}`,
+        );
+      }
+
+      return {
+        attachmentId,
+        content: new Uint8Array(await res.arrayBuffer()),
+        contentType: res.headers.get("Content-Type"),
+        fileName: contentDispositionFileName(
+          res.headers.get("Content-Disposition"),
+        ),
+      };
     },
   };
 

@@ -79,6 +79,7 @@ Deno.test("createEnv returns a valid CrimsonSDKEnv with all bindings", () => {
   assertEquals(typeof env.COSMOS.get, "function");
   assertEquals(typeof env.FABRIC.query, "function");
   assertEquals(typeof env.NOTES.deposit, "function");
+  assertEquals(typeof env.NOTES.downloadAttachment, "function");
   assertEquals(typeof env.NOTIFICATIONS.send, "function");
   assertEquals(typeof env.TASKS.create, "function");
   assertEquals(typeof env.UNIVERSES.list, "function");
@@ -237,6 +238,73 @@ Deno.test("binding injects X-Crimson-App-Id header", async () => {
     const env = createEnv(ctx);
     await env.WEB.search("test query");
     assertEquals(capturedAppId, "app-test-001");
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});
+
+Deno.test("notes downloads an attachment from Research Management", async () => {
+  let capturedUrl = "";
+  let capturedScope = "";
+  let capturedAccept = "";
+  const ctx = makeContext({
+    serviceUrls: {
+      ...TEST_SERVICE_URLS,
+      notes: "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api",
+    },
+    tokens: {
+      getToken: (scope: TokenScope) => {
+        capturedScope = scope;
+        return Promise.resolve(makeToken(scope));
+      },
+    },
+  });
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    capturedUrl = input.toString();
+    capturedAccept = new Headers(init?.headers).get("Accept") ?? "";
+    return Promise.resolve(
+      new Response(new Uint8Array([1, 2, 3]), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="report.pdf"',
+        },
+      }),
+    );
+  }) as typeof fetch;
+
+  try {
+    const env = createEnv(ctx);
+    const result = await env.NOTES.downloadAttachment("attachment/id");
+    assertEquals(
+      capturedUrl,
+      "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api/v1/Attachments/attachment%2Fid",
+    );
+    assertEquals(capturedScope, "crimson.notes");
+    assertEquals(capturedAccept, "*/*");
+    assertEquals(result.attachmentId, "attachment/id");
+    assertEquals(result.content, new Uint8Array([1, 2, 3]));
+    assertEquals(result.contentType, "application/pdf");
+    assertEquals(result.fileName, "report.pdf");
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});
+
+Deno.test("notes attachment download rejects unsuccessful responses", async () => {
+  const origFetch = globalThis.fetch;
+  globalThis.fetch =
+    (() =>
+      Promise.resolve(new Response(null, { status: 404 }))) as typeof fetch;
+
+  try {
+    const env = createEnv(makeContext());
+    await assertRejects(
+      () => env.NOTES.downloadAttachment("missing"),
+      RuntimeError,
+      'Attachment download failed for "missing": HTTP 404',
+    );
   } finally {
     globalThis.fetch = origFetch;
   }

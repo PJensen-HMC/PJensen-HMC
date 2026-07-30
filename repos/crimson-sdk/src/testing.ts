@@ -71,6 +71,13 @@ const defaultNotes: NotesBinding = {
       createdBy: opts.createdBy,
       linkedEntities: opts.linkedEntities ?? [],
     }),
+  downloadAttachment: (attachmentId) =>
+    Promise.resolve({
+      attachmentId,
+      content: new Uint8Array(),
+      contentType: "application/octet-stream",
+      fileName: null,
+    }),
 };
 
 const defaultNotifications: NotificationsBinding = {

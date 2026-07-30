@@ -21,6 +21,7 @@ export type {
   FabricQueryResult,
 } from "./capabilities/fabric.ts";
 export type {
+  NoteAttachment,
   NoteDepositOptions,
   NoteResult,
   NotesBinding,

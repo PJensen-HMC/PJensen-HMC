@@ -13,6 +13,14 @@ export interface NoteResult {
   linkedEntities: Array<{ type: string; id: string }>;
 }
 
+export interface NoteAttachment {
+  attachmentId: string;
+  content: Uint8Array;
+  contentType: string | null;
+  fileName: string | null;
+}
+
 export interface NotesBinding {
   deposit(options: NoteDepositOptions): Promise<NoteResult>;
+  downloadAttachment(attachmentId: string): Promise<NoteAttachment>;
 }
