@@ -57,6 +57,7 @@ Deno.test("env exposes immutable API and QUEUES registries", () => {
   const env = createEnv(context());
   assertEquals(typeof env.API.service, "function");
   assertEquals(typeof env.QUEUES.send, "function");
+  assertEquals(typeof env.QUEUES.stats, "function");
   assertEquals(Object.isFrozen(env), true);
   assertEquals("NOTES" in env, false);
   assertEquals("SERVICE_BUS" in env, false);
@@ -84,6 +85,18 @@ Deno.test("snapshot validation rejects malformed and unsupported descriptors", (
             provider: "other",
             entity: "q",
             connectionStringSecret: "q-secret",
+          },
+        },
+      },
+      {
+        version: "v",
+        api: {},
+        queues: {
+          bad: {
+            provider: "azure-service-bus",
+            entity: "q",
+            connectionStringSecret: "q-secret",
+            capabilities: ["consume"],
           },
         },
       },
@@ -326,6 +339,80 @@ Deno.test("QUEUES rejects unknown bindings, scoped mismatches, and failed sends"
   }
 });
 
+Deno.test("QUEUES returns Azure runtime counts for inspect grants", async () => {
+  const originalFetch = globalThis.fetch;
+  let request: Request | undefined;
+  globalThis.fetch = (input, init) => {
+    request = new Request(input, init);
+    return Promise.resolve(
+      new Response(`
+      <entry xmlns="http://www.w3.org/2005/Atom">
+        <content>
+          <QueueDescription xmlns="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
+            <d:MessageCount xmlns:d="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">17</d:MessageCount>
+            <d:SizeInBytes xmlns:d="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">4096</d:SizeInBytes>
+            <d:CountDetails xmlns:d="http://schemas.microsoft.com/netservices/2010/10/servicebus/connect">
+              <d:ActiveMessageCount>11</d:ActiveMessageCount>
+              <d:DeadLetterMessageCount>2</d:DeadLetterMessageCount>
+              <d:ScheduledMessageCount>3</d:ScheduledMessageCount>
+              <d:TransferMessageCount>1</d:TransferMessageCount>
+              <d:TransferDeadLetterMessageCount>0</d:TransferDeadLetterMessageCount>
+            </d:CountDetails>
+          </QueueDescription>
+        </content>
+      </entry>
+    `),
+    );
+  };
+  try {
+    const ctx = queueContext();
+    ctx.bindingSnapshot.queues.indexing.capabilities = ["inspect"];
+    const queues = createEnv(ctx).QUEUES;
+    assertEquals(await queues.stats("indexing"), {
+      activeMessageCount: 11,
+      deadLetterMessageCount: 2,
+      scheduledMessageCount: 3,
+      transferMessageCount: 1,
+      transferDeadLetterMessageCount: 0,
+      totalMessageCount: 17,
+      sizeInBytes: 4096,
+    });
+    assertEquals(
+      request?.url,
+      "https://bus.test/research-indexing?api-version=2021-05",
+    );
+    assertEquals(request?.method, "GET");
+    assertEquals(request?.headers.get("accept"), "application/atom+xml");
+    await assertRejects(
+      () => queues.send("indexing", {}),
+      RuntimeError,
+      "send",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+Deno.test("QUEUES keeps inspection separately granted and propagates failures", async () => {
+  await assertRejects(
+    () => createEnv(queueContext()).QUEUES.stats("indexing"),
+    RuntimeError,
+    "stats",
+  );
+  const ctx = queueContext();
+  ctx.bindingSnapshot.queues.indexing.capabilities = ["inspect"];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = () => Promise.resolve(new Response(null, { status: 403 }));
+  try {
+    await assertRejects(
+      () => createEnv(ctx).QUEUES.stats("indexing"),
+      RuntimeError,
+      "HTTP 403",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
 Deno.test("secrets are absent from env and error messages", () => {
   const env = createEnv(queueContext());
   assertNotEquals(JSON.stringify(env).includes("test-key"), true);

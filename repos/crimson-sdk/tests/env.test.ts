@@ -63,3 +63,18 @@ Deno.test("mock CONFIGURATION.get returns overridden value", () => {
   assertEquals(env.CONFIGURATION.get("APP_URL"), "https://app.example.com");
   assertEquals(env.CONFIGURATION.get("OTHER"), undefined);
 });
+
+Deno.test("mock QUEUES supports named runtime stats", async () => {
+  const expected = {
+    activeMessageCount: 5,
+    deadLetterMessageCount: 1,
+    scheduledMessageCount: 0,
+    transferMessageCount: 0,
+    transferDeadLetterMessageCount: 0,
+    totalMessageCount: 6,
+  };
+  const env = createMockEnv({
+    QUEUES: { indexing: { stats: () => expected } },
+  });
+  assertEquals(await env.QUEUES.stats("indexing"), expected);
+});

@@ -26,7 +26,7 @@ export type {
   NotificationsBinding,
   NotificationSendOptions,
 } from "./capabilities/notifications.ts";
-export type { QueueRegistry } from "./capabilities/queues.ts";
+export type { QueueRegistry, QueueStats } from "./capabilities/queues.ts";
 export type {
   TaskCreateOptions,
   TaskPriority,

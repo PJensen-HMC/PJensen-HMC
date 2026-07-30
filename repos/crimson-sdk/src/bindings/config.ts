@@ -10,11 +10,14 @@ export interface APIBindingDescriptor {
   defaultHeaders?: Record<string, string>;
 }
 
+export type QueueCapability = "send" | "inspect";
+
 export interface AzureServiceBusQueueDescriptor {
   provider: "azure-service-bus";
   entity: string;
   connectionStringSecret: string;
   sasTokenTtlSeconds?: number;
+  capabilities?: readonly QueueCapability[];
 }
 
 export type QueueBindingDescriptor = AzureServiceBusQueueDescriptor;
@@ -141,6 +144,18 @@ export function prepareBindingSnapshot(
       );
     }
     validateEntity(name, descriptor.entity);
+    const capabilities = descriptor.capabilities ?? ["send"];
+    if (
+      capabilities.length === 0 ||
+      new Set(capabilities).size !== capabilities.length ||
+      capabilities.some((capability) =>
+        capability !== "send" && capability !== "inspect"
+      )
+    ) {
+      throw new RuntimeError(
+        `Invalid capabilities for queue binding "${name}"`,
+      );
+    }
     if (!descriptor.connectionStringSecret?.trim()) {
       throw new RuntimeError(
         `Queue binding "${name}" requires a connection string secret reference`,

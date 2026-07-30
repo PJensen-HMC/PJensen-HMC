@@ -7,6 +7,7 @@ import type {
   CrimsonSDKEnv,
   NotificationsBinding,
   QueueRegistry,
+  QueueStats,
   TasksBinding,
   UniversesBinding,
   WebBinding,
@@ -16,6 +17,10 @@ import { RuntimeError } from "./runtime_error.ts";
 
 export type MockAPIService = Partial<APIService>;
 export type MockQueueSender = (message: unknown) => void | Promise<void>;
+export interface MockQueueBinding {
+  send?: MockQueueSender;
+  stats?: () => QueueStats | Promise<QueueStats>;
+}
 export interface MockEnvOverrides {
   AI?: Partial<AIBinding>;
   API?: Record<string, MockAPIService>;
@@ -23,7 +28,7 @@ export interface MockEnvOverrides {
   COSMOS?: Partial<CosmosBinding>;
   FABRIC?: Partial<Fabric>;
   NOTIFICATIONS?: Partial<NotificationsBinding>;
-  QUEUES?: Record<string, MockQueueSender>;
+  QUEUES?: Record<string, MockQueueSender | MockQueueBinding>;
   TASKS?: Partial<TasksBinding>;
   UNIVERSES?: Partial<UniversesBinding>;
   WEB?: Partial<WebBinding>;
@@ -65,19 +70,36 @@ function createMockAPIRegistry(
 }
 
 function createMockQueueRegistry(
-  senders: Record<string, MockQueueSender> = {},
+  bindings: Record<string, MockQueueSender | MockQueueBinding> = {},
 ): QueueRegistry {
+  const resolve = (binding: string): MockQueueBinding => {
+    const configured = bindings[binding];
+    if (!configured) {
+      throw new RuntimeError(`Queue binding not granted: "${binding}"`);
+    }
+    return typeof configured === "function" ? { send: configured } : configured;
+  };
   return Object.freeze({
     async send<T>(binding: string, message: T): Promise<void> {
-      const sender = senders[binding];
+      const sender = resolve(binding).send;
       if (!sender) {
-        throw new RuntimeError(`Queue binding not granted: "${binding}"`);
+        throw new RuntimeError(
+          `Queue operation not granted for binding "${binding}": send`,
+        );
       }
       await sender(message);
     },
+    async stats(binding: string): Promise<QueueStats> {
+      const inspect = resolve(binding).stats;
+      if (!inspect) {
+        throw new RuntimeError(
+          `Queue operation not granted for binding "${binding}": stats`,
+        );
+      }
+      return await inspect();
+    },
   });
 }
-
 const defaultAI: AIBinding = {
   run: () =>
     Promise.resolve({

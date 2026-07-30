@@ -1,12 +1,17 @@
-import type { QueueRegistry } from "../capabilities/queues.ts";
+import type { QueueRegistry, QueueStats } from "../capabilities/queues.ts";
 import { RuntimeError } from "../runtime_error.ts";
-import type { QueueBindingDescriptor } from "./config.ts";
+import type { QueueBindingDescriptor, QueueCapability } from "./config.ts";
 
 interface ParsedConnectionString {
   endpoint: string;
   keyName: string;
   key: string;
   entityPath?: string;
+}
+
+interface QueueAdapter {
+  send?(message: unknown): Promise<void>;
+  stats?(): Promise<QueueStats>;
 }
 
 function parseConnectionString(value: string): ParsedConnectionString {
@@ -77,52 +82,120 @@ async function createSasToken(
     `&se=${expiresAt}&skn=${encodeURIComponent(keyName)}`;
 }
 
-function createSender(
+function xmlInteger(xml: string, name: string): number | undefined {
+  const expression = new RegExp(
+    `<(?:[\\w.-]+:)?${name}(?:\\s[^>]*)?>\\s*(\\d+)\\s*<\\/(?:[\\w.-]+:)?${name}\\s*>`,
+    "i",
+  );
+  const raw = expression.exec(xml)?.[1];
+  if (raw === undefined) return undefined;
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value)) {
+    throw new RuntimeError(`Invalid queue runtime property: ${name}`);
+  }
+  return value;
+}
+
+function parseQueueStats(xml: string): QueueStats {
+  const required = (name: string): number => {
+    const value = xmlInteger(xml, name);
+    if (value === undefined) {
+      throw new RuntimeError(`Missing queue runtime property: ${name}`);
+    }
+    return value;
+  };
+  const activeMessageCount = required("ActiveMessageCount");
+  const deadLetterMessageCount = required("DeadLetterMessageCount");
+  const scheduledMessageCount = required("ScheduledMessageCount");
+  const transferMessageCount = required("TransferMessageCount");
+  const transferDeadLetterMessageCount = required(
+    "TransferDeadLetterMessageCount",
+  );
+  const totalMessageCount = xmlInteger(xml, "MessageCount") ??
+    activeMessageCount + deadLetterMessageCount + scheduledMessageCount +
+      transferMessageCount + transferDeadLetterMessageCount;
+  const sizeInBytes = xmlInteger(xml, "SizeInBytes");
+  return {
+    activeMessageCount,
+    deadLetterMessageCount,
+    scheduledMessageCount,
+    transferMessageCount,
+    transferDeadLetterMessageCount,
+    totalMessageCount,
+    ...(sizeInBytes === undefined ? {} : { sizeInBytes }),
+  };
+}
+
+function createAzureAdapter(
   descriptor: QueueBindingDescriptor,
   connectionString: string,
-): (message: unknown) => Promise<void> {
+): QueueAdapter {
   const config = parseConnectionString(connectionString);
   const entity = normalizeEntity(descriptor.entity);
-  if (
-    config.entityPath && normalizeEntity(config.entityPath) !== entity
-  ) {
+  if (config.entityPath && normalizeEntity(config.entityPath) !== entity) {
     throw new RuntimeError(
-      `Queue connection string is scoped to a different entity`,
+      "Queue connection string is scoped to a different entity",
     );
   }
   const resourceUri = `${config.endpoint}/${entity}`;
-  return async (message) => {
-    const body = JSON.stringify(message);
-    if (body === undefined) {
-      throw new RuntimeError("Queue message must be JSON serializable");
-    }
-    const authorization = await createSasToken(
-      resourceUri,
-      config.keyName,
-      config.key,
-      descriptor.sasTokenTtlSeconds ?? 300,
-    );
-    const response = await fetch(`${resourceUri}/messages`, {
-      method: "POST",
-      headers: {
-        Authorization: authorization,
-        "Content-Type": "application/json",
-      },
-      body,
-    });
-    if (!response.ok) {
-      throw new RuntimeError(
-        `Queue send failed for configured binding: HTTP ${response.status}`,
-      );
-    }
-  };
+  const ttlSeconds = descriptor.sasTokenTtlSeconds ?? 300;
+  const capabilities = new Set<QueueCapability>(
+    descriptor.capabilities ?? ["send"],
+  );
+  const authorization = () =>
+    createSasToken(resourceUri, config.keyName, config.key, ttlSeconds);
+  const adapter: QueueAdapter = {};
+
+  if (capabilities.has("send")) {
+    adapter.send = async (message) => {
+      const body = JSON.stringify(message);
+      if (body === undefined) {
+        throw new RuntimeError("Queue message must be JSON serializable");
+      }
+      const response = await fetch(`${resourceUri}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: await authorization(),
+          "Content-Type": "application/json",
+        },
+        body,
+      });
+      if (!response.ok) {
+        throw new RuntimeError(
+          `Queue send failed for configured binding: HTTP ${response.status}`,
+        );
+      }
+    };
+  }
+
+  if (capabilities.has("inspect")) {
+    adapter.stats = async () => {
+      const url = new URL(resourceUri);
+      url.searchParams.set("api-version", "2021-05");
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/atom+xml",
+          Authorization: await authorization(),
+        },
+      });
+      if (!response.ok) {
+        throw new RuntimeError(
+          `Queue inspection failed for configured binding: HTTP ${response.status}`,
+        );
+      }
+      return parseQueueStats(await response.text());
+    };
+  }
+
+  return Object.freeze(adapter);
 }
 
 export function createQueueRegistry(
   descriptors: Readonly<Record<string, QueueBindingDescriptor>>,
   resolvedSecrets: ReadonlyMap<string, string>,
 ): QueueRegistry {
-  const senders = new Map<string, (message: unknown) => Promise<void>>();
+  const adapters = new Map<string, QueueAdapter>();
   for (const [name, descriptor] of Object.entries(descriptors)) {
     const connectionString = resolvedSecrets.get(
       descriptor.connectionStringSecret,
@@ -132,15 +205,32 @@ export function createQueueRegistry(
         `Secret reference for queue binding "${name}" could not be resolved`,
       );
     }
-    senders.set(name, createSender(descriptor, connectionString));
+    adapters.set(name, createAzureAdapter(descriptor, connectionString));
   }
+
+  const operation = <K extends keyof QueueAdapter>(
+    binding: string,
+    name: K,
+  ): NonNullable<QueueAdapter[K]> => {
+    const adapter = adapters.get(binding);
+    if (!adapter) {
+      throw new RuntimeError(`Queue binding not granted: "${binding}"`);
+    }
+    const handler = adapter[name];
+    if (!handler) {
+      throw new RuntimeError(
+        `Queue operation not granted for binding "${binding}": ${name}`,
+      );
+    }
+    return handler as NonNullable<QueueAdapter[K]>;
+  };
+
   return Object.freeze({
     async send<T>(binding: string, message: T): Promise<void> {
-      const sender = senders.get(binding);
-      if (!sender) {
-        throw new RuntimeError(`Queue binding not granted: "${binding}"`);
-      }
-      await sender(message);
+      await operation(binding, "send")(message);
+    },
+    async stats(binding: string): Promise<QueueStats> {
+      return await operation(binding, "stats")();
     },
   });
 }

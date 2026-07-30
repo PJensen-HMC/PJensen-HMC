@@ -29,6 +29,7 @@ export type {
   AzureServiceBusQueueDescriptor,
   BindingSnapshot,
   QueueBindingDescriptor,
+  QueueCapability,
   SecretProvider,
 } from "./bindings/config.ts";
 

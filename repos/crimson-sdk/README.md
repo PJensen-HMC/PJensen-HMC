@@ -33,6 +33,7 @@ const bindingSnapshot = {
       provider: "azure-service-bus",
       entity: "research-indexing",
       connectionStringSecret: "AzureServiceBus",
+      capabilities: ["send", "inspect"],
     },
   },
 };
@@ -74,7 +75,20 @@ await env.QUEUES.send("research-indexing", {
 
 Queue bindings are provider-neutral. The Azure Service Bus adapter owns
 connection-string parsing, SAS generation, entity scoping, and REST transport.
-Messages are JSON serialized.
+Messages are JSON serialized. Runtime counts are available only when the binding
+explicitly grants `inspect`:
+
+```ts
+const stats = await env.QUEUES.stats("research-indexing");
+console.log(stats.activeMessageCount);
+console.log(stats.deadLetterMessageCount);
+console.log(stats.totalMessageCount);
+```
+
+Azure queue inspection uses the Service Bus Atom management endpoint and
+requires a credential with `Manage` rights. Counts are operational snapshots;
+avoid tight polling loops. A binding with no `capabilities` field defaults to
+`["send"]`.
 
 ## Typed HMC clients
 
@@ -140,3 +154,21 @@ The default input is
 default output is its sibling `missing_2026_note_attachment_ids_downloads`
 directory. Override these with `CRIMSON_NOTES_ATTACHMENT_ID_FILE` and
 `CRIMSON_NOTES_ATTACHMENT_OUTPUT`.
+
+### Queue depth watcher
+
+The queue stats integration test watches `index-document-command` at a bounded,
+non-aggressive interval. It defaults to 10 samples, one minute apart; intervals
+below 30 seconds are rejected. The connection string must reference a SAS policy
+with `Manage` rights.
+
+```powershell
+$env:RUN_CRIMSON_QUEUE_STATS_INTEGRATION = "1"
+$env:CRIMSON_SERVICE_BUS_CONNECTION_STRING = "<Service Bus connection string>"
+$env:CRIMSON_QUEUE_STATS_SAMPLES = "10"
+$env:CRIMSON_QUEUE_STATS_INTERVAL_MS = "60000"
+deno task test:queue-stats
+```
+
+The connection string is read only from the process environment and is never
+written to the binding snapshot, logs, or repository.

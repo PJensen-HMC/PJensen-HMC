@@ -16,6 +16,7 @@
     "test": "deno test --allow-all tests/",
     "test:watch": "deno test --watch --allow-all tests/",
     "test:notes-attachments": "deno test --allow-all tests/integration/notes_attachments.test.ts",
+    "test:queue-stats": "deno test --allow-all tests/integration/queue_stats.test.ts",
     "lint": "deno lint",
     "fmt": "deno fmt",
     "check": "deno check src/mod.ts"
