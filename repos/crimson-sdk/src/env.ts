@@ -21,12 +21,15 @@ export type {
   FabricQueryResult,
 } from "./capabilities/fabric.ts";
 export type {
+  IndexEntry,
+  IndexEntryType,
+  IndexQuality,
   NoteAttachment,
   NoteDepositOptions,
-  NoteIndexEntry,
-  NoteReindexOptions,
   NoteResult,
   NotesBinding,
+  ReindexOptions,
+  UniqueIdentifier,
 } from "./capabilities/notes.ts";
 export type { ServiceBusBinding } from "./capabilities/service_bus.ts";
 export type {

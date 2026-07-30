@@ -20,22 +20,27 @@ export interface NoteAttachment {
   fileName: string | null;
 }
 
-export interface NoteIndexEntry {
-  entryType: string;
-  id: string;
+export type IndexEntryType = "Attachment" | "Document" | "Note";
+export type IndexQuality = "low" | "med" | "high";
+export type UniqueIdentifier = string;
+
+export interface IndexEntry {
+  entryType: IndexEntryType;
+  id: UniqueIdentifier;
 }
 
-export interface NoteReindexOptions {
+export interface ReindexOptions {
   fireAndForget?: boolean;
   force?: boolean;
-  quality?: string;
+  quality?: IndexQuality;
+  hardDelete?: boolean;
 }
 
 export interface NotesBinding {
   deposit(options: NoteDepositOptions): Promise<NoteResult>;
   downloadAttachment(attachmentId: string): Promise<NoteAttachment>;
   reindex(
-    entries: NoteIndexEntry[],
-    options?: NoteReindexOptions,
+    entries: IndexEntry[],
+    options?: ReindexOptions,
   ): Promise<void>;
 }

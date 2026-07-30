@@ -407,19 +407,28 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
       if (entries.length === 0) {
         throw new RuntimeError("At least one indexing entry is required");
       }
-      if (
-        entries.some((entry) => !entry.entryType.trim() || !entry.id.trim())
-      ) {
-        throw new RuntimeError("Indexing entries require entryType and id");
+      const allowedEntryTypes = new Set(["Attachment", "Document", "Note"]);
+      const uniqueIdentifier =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (entries.some((entry) => !allowedEntryTypes.has(entry.entryType))) {
+        throw new RuntimeError(
+          "Indexing entryType must be Attachment, Document, or Note",
+        );
+      }
+      if (entries.some((entry) => !uniqueIdentifier.test(entry.id))) {
+        throw new RuntimeError("Indexing entry id must be a uniqueidentifier");
       }
 
       const url = new URL(`${ctx.serviceUrls.notes}/v1/Indexing`);
-      url.searchParams.set(
-        "fireAndForget",
-        String(options?.fireAndForget ?? true),
-      );
-      url.searchParams.set("force", String(options?.force ?? true));
-      url.searchParams.set("quality", options?.quality ?? "med");
+      const query: Record<string, boolean | string | undefined> = {
+        fireAndForget: options?.fireAndForget,
+        force: options?.force,
+        quality: options?.quality,
+        hardDelete: options?.hardDelete,
+      };
+      for (const [name, value] of Object.entries(query)) {
+        if (value !== undefined) url.searchParams.set(name, String(value));
+      }
       const res = await fetchWithAuth(
         url.toString(),
         "crimson.notes",

@@ -1,5 +1,9 @@
 import { assertEquals } from "@std/assert";
-import { createEnv, StaticTokenProvider } from "../../src/mod.ts";
+import {
+  createEnv,
+  type IndexEntry,
+  StaticTokenProvider,
+} from "../../src/mod.ts";
 
 const RUN_INTEGRATION =
   Deno.env.get("RUN_CRIMSON_NOTES_REINDEX_INTEGRATION") === "1";
@@ -21,7 +25,7 @@ Deno.test({
     const lines = (await Deno.readTextFile(manifestPath)).split(/\r?\n/).slice(
       1,
     );
-    const entries = lines.flatMap((line) => {
+    const entries: IndexEntry[] = lines.flatMap((line) => {
       const [id, status] = line.split("\t", 3);
       return status === "downloaded" || status === "skipped"
         ? [{ entryType: "Attachment", id }]
@@ -51,7 +55,12 @@ Deno.test({
       serviceRoutes: { notifications: { events: "/unused" } },
     });
 
-    await env.NOTES.reindex(entries);
+    await env.NOTES.reindex(entries, {
+      fireAndForget: true,
+      force: true,
+      quality: "med",
+      hardDelete: false,
+    });
     console.log(
       `Submitted ${entries.length} recovered attachments for reindexing`,
     );

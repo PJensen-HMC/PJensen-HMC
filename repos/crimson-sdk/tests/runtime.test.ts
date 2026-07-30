@@ -275,11 +275,19 @@ Deno.test("notes bulk reindexes entries", async () => {
 
   try {
     const env = createEnv(ctx);
-    const entries = [{ entryType: "Attachment", id: "attachment-001" }];
-    await env.NOTES.reindex(entries);
+    const entries = [{
+      entryType: "Attachment" as const,
+      id: "0b67ca3b-1f6a-4e60-a51f-7765e2e08fdc",
+    }];
+    await env.NOTES.reindex(entries, {
+      fireAndForget: true,
+      force: true,
+      quality: "med",
+      hardDelete: false,
+    });
     assertEquals(
       capturedUrl,
-      "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api/v1/Indexing?fireAndForget=true&force=true&quality=med",
+      "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api/v1/Indexing?fireAndForget=true&force=true&quality=med&hardDelete=false",
     );
     assertEquals(capturedMethod, "PATCH");
     assertEquals(capturedScope, "crimson.notes");

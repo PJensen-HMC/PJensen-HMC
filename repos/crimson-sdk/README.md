@@ -50,6 +50,26 @@ await env.SERVICE_BUS.send("queue-or-topic", {
 Messages are serialized as JSON. Keep the connection string in runtime secret
 configuration; do not expose it through `env.CONFIGURATION` or commit it.
 
+## Reindexing Research Management entries
+
+```ts
+await env.NOTES.reindex(
+  [{
+    entryType: "Attachment", // "Attachment" | "Document" | "Note"
+    id: "0b67ca3b-1f6a-4e60-a51f-7765e2e08fdc",
+  }],
+  {
+    fireAndForget: true,
+    force: true,
+    quality: "med", // "low" | "med" | "high"
+    hardDelete: false,
+  },
+);
+```
+
+All PATCH query options are explicit. Entry IDs are validated as SQL-style
+`uniqueidentifier` values before the request is sent.
+
 ## Runtime authentication
 
 Runtime bindings obtain scoped bearer tokens through the `TokenProvider`
