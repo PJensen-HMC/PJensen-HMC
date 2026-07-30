@@ -70,3 +70,21 @@ const serviceRoutes = {
 The notifications events route is public. Pass `userId` in the `send` options to
 place it on the query string, or include it in the event metadata property bag.
 An authenticated caller does not need to provide it explicitly.
+
+## Live note attachment integration test
+
+The opt-in integration test reads the recovery TSV, downloads every unique
+attachment, and writes a resumable manifest beside the input file. Supply a
+fresh token through the process environment; never commit it.
+
+```powershell
+$env:RUN_CRIMSON_NOTES_ATTACHMENT_INTEGRATION = "1"
+$env:CRIMSON_NOTES_TOKEN = "<fresh bearer token>"
+deno task test:notes-attachments
+```
+
+By default it reads
+`C:\Users\jensenp\AppData\Local\Temp\missing_2026_note_attachment_ids.txt` and
+writes to the sibling `missing_2026_note_attachment_ids_downloads` directory.
+Override those paths with `CRIMSON_NOTES_ATTACHMENT_ID_FILE` and
+`CRIMSON_NOTES_ATTACHMENT_OUTPUT`. Existing completed IDs are skipped.
