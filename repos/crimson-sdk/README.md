@@ -158,14 +158,14 @@ directory. Override these with `CRIMSON_NOTES_ATTACHMENT_ID_FILE` and
 ### Queue depth watcher
 
 The queue stats integration test watches `index-document-command` at a bounded,
-non-aggressive interval. It defaults to 10 samples, one minute apart; intervals
-below 30 seconds are rejected. The connection string must reference a SAS policy
-with `Manage` rights.
+non-aggressive interval. It defaults to 11 samples over a ten-minute window;
+intervals below 30 seconds are rejected. The connection string must reference a
+SAS policy with `Manage` rights.
 
 ```powershell
 $env:RUN_CRIMSON_QUEUE_STATS_INTEGRATION = "1"
 $env:CRIMSON_SERVICE_BUS_CONNECTION_STRING = "<Service Bus connection string>"
-$env:CRIMSON_QUEUE_STATS_SAMPLES = "10"
+$env:CRIMSON_QUEUE_STATS_SAMPLES = "11"
 $env:CRIMSON_QUEUE_STATS_INTERVAL_MS = "60000"
 deno task test:queue-stats
 ```

@@ -7,7 +7,7 @@ const QUEUE_BINDING = "index-document-command";
 const CONNECTION_STRING_SECRET = "AzureServiceBus";
 const DEFAULT_INTERVAL_MS = 60_000;
 const MINIMUM_INTERVAL_MS = 30_000;
-const DEFAULT_SAMPLES = 10;
+const DEFAULT_SAMPLES = 11;
 const MAXIMUM_SAMPLES = 60;
 
 function boundedInteger(
