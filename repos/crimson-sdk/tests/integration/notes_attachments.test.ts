@@ -91,6 +91,11 @@ function createNotesEnv(token: string): CrimsonSDKEnv {
   });
 }
 
+function shouldRetry(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /HTTP (408|429|5\d\d)\b/.test(message);
+}
+
 async function downloadAttachment(
   env: CrimsonSDKEnv,
   outputDirectory: string,
@@ -111,7 +116,7 @@ async function downloadAttachment(
       existing.set(id, path);
       return { id, status: "downloaded", path };
     } catch (error) {
-      if (attempt === MAX_ATTEMPTS) {
+      if (attempt === MAX_ATTEMPTS || !shouldRetry(error)) {
         return {
           id,
           status: "failed",
