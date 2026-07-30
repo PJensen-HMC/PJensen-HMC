@@ -1,0 +1,171 @@
+import { RuntimeError } from "../runtime_error.ts";
+
+export type APIAuthDescriptor =
+  | { kind: "none" }
+  | { kind: "bearer"; scope: string };
+
+export interface APIBindingDescriptor {
+  baseUrl: string;
+  auth: APIAuthDescriptor;
+  defaultHeaders?: Record<string, string>;
+}
+
+export interface AzureServiceBusQueueDescriptor {
+  provider: "azure-service-bus";
+  entity: string;
+  connectionStringSecret: string;
+  sasTokenTtlSeconds?: number;
+}
+
+export type QueueBindingDescriptor = AzureServiceBusQueueDescriptor;
+
+export interface BindingSnapshot {
+  version: string;
+  api: Record<string, APIBindingDescriptor>;
+  queues: Record<string, QueueBindingDescriptor>;
+}
+
+export interface SecretProvider {
+  get(name: string): string | undefined;
+}
+
+export interface PreparedBindingSnapshot {
+  snapshot: Readonly<BindingSnapshot>;
+  resolvedSecrets: ReadonlyMap<string, string>;
+}
+
+const BINDING_NAME = /^[A-Za-z][A-Za-z0-9._-]*$/;
+
+function assertBindingName(name: string): void {
+  if (!BINDING_NAME.test(name)) {
+    throw new RuntimeError(`Invalid binding name: "${name}"`);
+  }
+}
+
+function validateBaseUrl(name: string, value: string): void {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch (cause) {
+    throw new RuntimeError(`Invalid base URL for API binding "${name}"`, cause);
+  }
+  if (
+    !["http:", "https:"].includes(url.protocol) || url.username ||
+    url.password || url.search || url.hash
+  ) {
+    throw new RuntimeError(
+      `API binding "${name}" requires an HTTP(S) base URL without credentials, query, or fragment`,
+    );
+  }
+}
+
+function validateEntity(name: string, entity: string): void {
+  const normalized = entity.replace(/^\/+|\/+$/g, "");
+  const segments = normalized.split("/");
+  if (
+    !normalized ||
+    segments.some((segment) => !segment || segment === "." || segment === "..")
+  ) {
+    throw new RuntimeError(`Invalid entity for queue binding "${name}"`);
+  }
+}
+
+function deepFreeze<T>(value: T): Readonly<T> {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const nested of Object.values(value as Record<string, unknown>)) {
+      deepFreeze(nested);
+    }
+  }
+  return value;
+}
+
+export function prepareBindingSnapshot(
+  input: BindingSnapshot,
+  secrets: SecretProvider,
+): PreparedBindingSnapshot {
+  const snapshot = structuredClone(input);
+  if (!snapshot.version?.trim()) {
+    throw new RuntimeError("Binding snapshot version is required");
+  }
+  if (!snapshot.api || !snapshot.queues) {
+    throw new RuntimeError("Binding snapshot requires api and queues maps");
+  }
+
+  const names = new Set<string>();
+  for (const [name, descriptor] of Object.entries(snapshot.api)) {
+    assertBindingName(name);
+    names.add(name);
+    if (
+      !descriptor || typeof descriptor.baseUrl !== "string" || !descriptor.auth
+    ) {
+      throw new RuntimeError(`Invalid descriptor for API binding "${name}"`);
+    }
+    validateBaseUrl(name, descriptor.baseUrl);
+    if (descriptor.auth.kind === "bearer") {
+      if (!descriptor.auth.scope?.trim()) {
+        throw new RuntimeError(
+          `API binding "${name}" requires a bearer token scope`,
+        );
+      }
+    } else if (descriptor.auth.kind !== "none") {
+      throw new RuntimeError(
+        `Unsupported auth adapter for API binding "${name}"`,
+      );
+    }
+    if (
+      descriptor.defaultHeaders &&
+      Object.keys(descriptor.defaultHeaders).some((header) =>
+        header.toLowerCase() === "authorization"
+      )
+    ) {
+      throw new RuntimeError(
+        `API binding "${name}" cannot configure an Authorization header`,
+      );
+    }
+  }
+
+  const resolvedSecrets = new Map<string, string>();
+  for (const [name, descriptor] of Object.entries(snapshot.queues)) {
+    assertBindingName(name);
+    if (names.has(name)) {
+      throw new RuntimeError(`Duplicate binding name: "${name}"`);
+    }
+    names.add(name);
+    if (!descriptor || typeof descriptor !== "object") {
+      throw new RuntimeError(`Invalid descriptor for queue binding "${name}"`);
+    }
+    if (descriptor.provider !== "azure-service-bus") {
+      throw new RuntimeError(
+        `Unsupported queue provider for binding "${name}"`,
+      );
+    }
+    validateEntity(name, descriptor.entity);
+    if (!descriptor.connectionStringSecret?.trim()) {
+      throw new RuntimeError(
+        `Queue binding "${name}" requires a connection string secret reference`,
+      );
+    }
+    if (
+      descriptor.sasTokenTtlSeconds !== undefined &&
+      (!Number.isInteger(descriptor.sasTokenTtlSeconds) ||
+        descriptor.sasTokenTtlSeconds < 1)
+    ) {
+      throw new RuntimeError(
+        `Queue binding "${name}" requires a positive SAS token TTL`,
+      );
+    }
+    const secret = secrets.get(descriptor.connectionStringSecret);
+    if (!secret) {
+      throw new RuntimeError(
+        `Secret reference for queue binding "${name}" could not be resolved`,
+      );
+    }
+    resolvedSecrets.set(descriptor.connectionStringSecret, secret);
+  }
+
+  return {
+    snapshot: deepFreeze(snapshot),
+    resolvedSecrets,
+  };
+}

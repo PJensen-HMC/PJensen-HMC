@@ -1,8 +1,9 @@
 export type { AIBinding, AIOptions, AIResult } from "./capabilities/ai.ts";
 export type {
-  APIBinding,
-  APICallOptions,
-  APICallResult,
+  APIQueryValue,
+  APIRegistry,
+  APIRequestOptions,
+  APIService,
 } from "./capabilities/api.ts";
 export type {
   AppPolicy,
@@ -21,22 +22,11 @@ export type {
   FabricQueryResult,
 } from "./capabilities/fabric.ts";
 export type {
-  IndexEntry,
-  IndexEntryType,
-  IndexQuality,
-  NoteAttachment,
-  NoteDepositOptions,
-  NoteResult,
-  NotesBinding,
-  ReindexOptions,
-  UniqueIdentifier,
-} from "./capabilities/notes.ts";
-export type { ServiceBusBinding } from "./capabilities/service_bus.ts";
-export type {
   NotificationPayload,
   NotificationsBinding,
   NotificationSendOptions,
 } from "./capabilities/notifications.ts";
+export type { QueueRegistry } from "./capabilities/queues.ts";
 export type {
   TaskCreateOptions,
   TaskPriority,
@@ -58,26 +48,24 @@ export type {
 } from "./capabilities/web.ts";
 
 import type { AIBinding } from "./capabilities/ai.ts";
-import type { APIBinding } from "./capabilities/api.ts";
+import type { APIRegistry } from "./capabilities/api.ts";
 import type { ConfigurationBinding } from "./capabilities/configuration.ts";
 import type { CosmosBinding } from "./capabilities/cosmos.ts";
 import type { Fabric } from "./capabilities/fabric.ts";
-import type { NotesBinding } from "./capabilities/notes.ts";
 import type { NotificationsBinding } from "./capabilities/notifications.ts";
-import type { ServiceBusBinding } from "./capabilities/service_bus.ts";
+import type { QueueRegistry } from "./capabilities/queues.ts";
 import type { TasksBinding } from "./capabilities/tasks.ts";
 import type { UniversesBinding } from "./capabilities/universes.ts";
 import type { WebBinding } from "./capabilities/web.ts";
 
 export interface CrimsonSDKEnv {
   AI: AIBinding;
-  API: APIBinding;
+  API: APIRegistry;
   CONFIGURATION: ConfigurationBinding;
   COSMOS: CosmosBinding;
   FABRIC: Fabric;
-  NOTES: NotesBinding;
   NOTIFICATIONS: NotificationsBinding;
-  SERVICE_BUS: ServiceBusBinding;
+  QUEUES: QueueRegistry;
   TASKS: TasksBinding;
   UNIVERSES: UniversesBinding;
   WEB: WebBinding;

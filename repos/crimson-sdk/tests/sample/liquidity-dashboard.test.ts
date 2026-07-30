@@ -1,5 +1,5 @@
 import { assertEquals, assertObjectMatch } from "@std/assert";
-import { createMockEnv } from "../../src/testing.ts";
+import { createMockEnv, type MockEnvOverrides } from "../../src/testing.ts";
 import app, { type DashboardResult } from "./liquidity-dashboard.ts";
 
 // Shared mock positions and risk data used across tests
@@ -15,7 +15,7 @@ const MOCK_RISK_LIMITS = {
   riskManagerId: "rm-user-001",
 };
 
-function buildEnv(overrides = {}) {
+function buildEnv(overrides: MockEnvOverrides = {}) {
   return createMockEnv({
     UNIVERSES: {
       constituents: (universeId) =>
@@ -46,10 +46,6 @@ function buildEnv(overrides = {}) {
           hasMore: false as const,
         }),
     },
-    API: {
-      call: () =>
-        Promise.resolve({ status: 200, data: MOCK_RISK_LIMITS as never }),
-    },
     WEB: {
       search: (query) =>
         Promise.resolve({
@@ -71,6 +67,20 @@ function buildEnv(overrides = {}) {
         }),
     },
     ...overrides,
+    API: {
+      risk: { get: () => Promise.resolve(Response.json(MOCK_RISK_LIMITS)) },
+      "hmc-notes": {
+        post: () =>
+          Promise.resolve(Response.json({
+            noteId: "mock-note-id",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            subject: "mock",
+            createdBy: "test-user-id",
+            linkedEntities: [],
+          })),
+      },
+      ...overrides.API,
+    },
   });
 }
 
@@ -109,7 +119,7 @@ Deno.test("dashboard detects breach, creates task and note above threshold", asy
             quantity: 1000,
             value: 150_000,
             currency: "USD",
-          }],
+          }] as never,
           total: 1,
           hasMore: false,
         }),
@@ -127,16 +137,19 @@ Deno.test("dashboard detects breach, creates task and note above threshold", asy
         });
       },
     },
-    NOTES: {
-      deposit: (opts: { subject: string; createdBy: string }) => {
-        noteDeposited = true;
-        return Promise.resolve({
-          noteId: "note-breach-001",
-          createdAt: "2026-04-02T00:00:00.000Z",
-          subject: opts.subject,
-          createdBy: opts.createdBy,
-          linkedEntities: [],
-        });
+    API: {
+      "hmc-notes": {
+        post: (_path, body) => {
+          noteDeposited = true;
+          const opts = body as { subject: string; createdBy: string };
+          return Promise.resolve(Response.json({
+            noteId: "note-breach-001",
+            createdAt: "2026-04-02T00:00:00.000Z",
+            subject: opts.subject,
+            createdBy: opts.createdBy,
+            linkedEntities: [],
+          }));
+        },
       },
     },
     NOTIFICATIONS: {
@@ -175,7 +188,7 @@ Deno.test("dashboard returns cached result on second call", async () => {
       query: () => {
         fabricCallCount++;
         return Promise.resolve({
-          rows: MOCK_POSITIONS,
+          rows: MOCK_POSITIONS as never,
           total: MOCK_POSITIONS.length,
           hasMore: false,
         });

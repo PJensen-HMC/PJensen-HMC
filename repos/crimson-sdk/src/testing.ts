@@ -1,31 +1,82 @@
 import type {
   AIBinding,
-  APIBinding,
+  APIRegistry,
+  APIService,
   ConfigurationBinding,
   CosmosBinding,
   CrimsonSDKEnv,
-  NotesBinding,
   NotificationsBinding,
-  ServiceBusBinding,
+  QueueRegistry,
   TasksBinding,
   UniversesBinding,
   WebBinding,
 } from "./env.ts";
 import type { Fabric } from "./capabilities/fabric.ts";
+import { RuntimeError } from "./runtime_error.ts";
 
-type MockOverrides = {
+export type MockAPIService = Partial<APIService>;
+export type MockQueueSender = (message: unknown) => void | Promise<void>;
+export interface MockEnvOverrides {
   AI?: Partial<AIBinding>;
-  API?: Partial<APIBinding>;
+  API?: Record<string, MockAPIService>;
   CONFIGURATION?: Partial<ConfigurationBinding>;
   COSMOS?: Partial<CosmosBinding>;
   FABRIC?: Partial<Fabric>;
-  NOTES?: Partial<NotesBinding>;
   NOTIFICATIONS?: Partial<NotificationsBinding>;
-  SERVICE_BUS?: Partial<ServiceBusBinding>;
+  QUEUES?: Record<string, MockQueueSender>;
   TASKS?: Partial<TasksBinding>;
   UNIVERSES?: Partial<UniversesBinding>;
   WEB?: Partial<WebBinding>;
-};
+}
+
+const ok = () => Promise.resolve(new Response(null, { status: 200 }));
+
+export function createMockAPIService(
+  overrides: MockAPIService = {},
+): APIService {
+  const service: APIService = {
+    fetch: ok,
+    get: ok,
+    post: ok,
+    put: ok,
+    patch: ok,
+    delete: ok,
+  };
+  return Object.freeze({ ...service, ...overrides });
+}
+
+function createMockAPIRegistry(
+  descriptors: Record<string, MockAPIService> = {},
+): APIRegistry {
+  const services = new Map(
+    Object.entries(descriptors).map((
+      [name, service],
+    ) => [name, createMockAPIService(service)]),
+  );
+  return Object.freeze({
+    service(name: string): APIService {
+      const service = services.get(name);
+      if (!service) {
+        throw new RuntimeError(`API binding not granted: "${name}"`);
+      }
+      return service;
+    },
+  });
+}
+
+function createMockQueueRegistry(
+  senders: Record<string, MockQueueSender> = {},
+): QueueRegistry {
+  return Object.freeze({
+    async send<T>(binding: string, message: T): Promise<void> {
+      const sender = senders[binding];
+      if (!sender) {
+        throw new RuntimeError(`Queue binding not granted: "${binding}"`);
+      }
+      await sender(message);
+    },
+  });
+}
 
 const defaultAI: AIBinding = {
   run: () =>
@@ -34,11 +85,6 @@ const defaultAI: AIBinding = {
       usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
     }),
 };
-
-const defaultAPI: APIBinding = {
-  call: () => Promise.resolve({ status: 200, data: undefined as never }),
-};
-
 const defaultConfiguration: ConfigurationBinding = {
   get: () => undefined,
   getIdentity: () => ({
@@ -51,7 +97,6 @@ const defaultConfiguration: ConfigurationBinding = {
     allowedFabricDatasets: ["*"],
   }),
 };
-
 const defaultCosmos: CosmosBinding = {
   get: () => Promise.resolve(undefined),
   set: () => Promise.resolve(),
@@ -59,38 +104,12 @@ const defaultCosmos: CosmosBinding = {
   increment: () => Promise.resolve(1),
   lock: () => Promise.resolve({ release: () => Promise.resolve() }),
 };
-
 const defaultFabric: Fabric = {
   query: () => Promise.resolve({ rows: [], total: 0, hasMore: false }),
 };
-
-const defaultNotes: NotesBinding = {
-  deposit: (opts) =>
-    Promise.resolve({
-      noteId: "mock-note-id",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      subject: opts.subject,
-      createdBy: opts.createdBy,
-      linkedEntities: opts.linkedEntities ?? [],
-    }),
-  reindex: () => Promise.resolve(),
-  downloadAttachment: (attachmentId) =>
-    Promise.resolve({
-      attachmentId,
-      content: new Uint8Array(),
-      contentType: "application/octet-stream",
-      fileName: null,
-    }),
-};
-
 const defaultNotifications: NotificationsBinding = {
   send: () => Promise.resolve(),
 };
-
-const defaultServiceBus: ServiceBusBinding = {
-  send: () => Promise.resolve(),
-};
-
 const defaultTasks: TasksBinding = {
   create: (opts) =>
     Promise.resolve({
@@ -102,7 +121,6 @@ const defaultTasks: TasksBinding = {
       priority: opts.priority ?? "normal",
     }),
 };
-
 const defaultUniverses: UniversesBinding = {
   list: () => Promise.resolve({ universes: [] }),
   constituents: (universeId) =>
@@ -112,23 +130,21 @@ const defaultUniverses: UniversesBinding = {
       constituents: [],
     }),
 };
-
 const defaultWeb: WebBinding = {
   search: (query) => Promise.resolve({ query, hits: [], estimatedTotal: 0 }),
 };
 
-export function createMockEnv(overrides: MockOverrides = {}): CrimsonSDKEnv {
-  return {
+export function createMockEnv(overrides: MockEnvOverrides = {}): CrimsonSDKEnv {
+  return Object.freeze({
     AI: { ...defaultAI, ...overrides.AI },
-    API: { ...defaultAPI, ...overrides.API },
+    API: createMockAPIRegistry(overrides.API),
     CONFIGURATION: { ...defaultConfiguration, ...overrides.CONFIGURATION },
     COSMOS: { ...defaultCosmos, ...overrides.COSMOS },
     FABRIC: { ...defaultFabric, ...overrides.FABRIC },
-    NOTES: { ...defaultNotes, ...overrides.NOTES },
     NOTIFICATIONS: { ...defaultNotifications, ...overrides.NOTIFICATIONS },
-    SERVICE_BUS: { ...defaultServiceBus, ...overrides.SERVICE_BUS },
+    QUEUES: createMockQueueRegistry(overrides.QUEUES),
     TASKS: { ...defaultTasks, ...overrides.TASKS },
     UNIVERSES: { ...defaultUniverses, ...overrides.UNIVERSES },
     WEB: { ...defaultWeb, ...overrides.WEB },
-  };
+  });
 }

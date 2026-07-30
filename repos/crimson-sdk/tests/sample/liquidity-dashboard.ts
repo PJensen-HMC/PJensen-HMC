@@ -12,13 +12,14 @@
  *   env.AI            — summarize exposure and risk in natural language
  *   env.NOTIFICATIONS — alert the user when exposure exceeds threshold
  *   env.TASKS         — create a follow-up task when a breach is detected
- *   env.NOTES         — deposit an audit note on the account record
+ *   Notes client      — compose typed note operations over env.API
  *
  * A real app would live in its own repo and import from "@crimsonsdk/sdk".
  * Here we import direct from src to keep the sample self-contained.
  */
 
 import { defineCrimsonApp } from "../../src/env.ts";
+import { createNotesClient } from "../../src/clients/notes.ts";
 import { Errors } from "../../src/errors.ts";
 
 interface Position {
@@ -80,13 +81,15 @@ export default defineCrimsonApp(async (env) => {
 
     const totalExposure = positions.rows.reduce((sum, p) => sum + p.value, 0);
 
-    // Fetch risk limits for this account
-    const { data: riskLimits } = await env.API.call<RiskLimits>(
+    // Fetch risk limits from a configured capability, not an app-supplied URL.
+    const riskResponse = await env.API.service("risk").get(
       "/risk/v1/limits",
-      {
-        params: { accountId: identity.userId },
-      },
+      { query: { accountId: identity.userId } },
     );
+    if (!riskResponse.ok) {
+      throw new Errors.Base(`Risk lookup failed: HTTP ${riskResponse.status}`);
+    }
+    const riskLimits = await riskResponse.json() as RiskLimits;
 
     // Pull current market context via web search to ground the AI summary
     const marketContext = await env.WEB.search(
@@ -148,7 +151,8 @@ export default defineCrimsonApp(async (env) => {
       taskId = task.taskId;
 
       // Deposit an audit note on the account record
-      const note = await env.NOTES.deposit({
+      const notes = createNotesClient(env.API.service("hmc-notes"));
+      const note = await notes.deposit({
         subject: `Liquidity threshold breach detected`,
         content: aiResult.response,
         createdBy: identity.userId,

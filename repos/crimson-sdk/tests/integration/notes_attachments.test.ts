@@ -1,16 +1,15 @@
 import { assertEquals } from "@std/assert";
+import { createEnv, StaticTokenProvider } from "../../src/mod.ts";
 import {
-  createEnv,
-  type CrimsonSDKEnv,
-  StaticTokenProvider,
-} from "../../src/mod.ts";
+  createResearchManagementClient,
+  type ResearchManagementClient,
+} from "../../src/clients/research_management.ts";
 
 const RUN_INTEGRATION =
   Deno.env.get("RUN_CRIMSON_NOTES_ATTACHMENT_INTEGRATION") === "1";
 const DEFAULT_ID_FILE =
   "C:\\Users\\jensenp\\AppData\\Local\\Temp\\missing_2026_note_attachment_ids.txt";
-const NOTES_BASE_URL =
-  "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api";
+const NOTES_BASE_URL = "https://crimson.hmc.harvard.edu/hmc-researchmanagement";
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_ATTEMPTS = 3;
@@ -65,8 +64,8 @@ async function findExistingAttachments(
   return existing;
 }
 
-function createNotesEnv(token: string): CrimsonSDKEnv {
-  return createEnv({
+function createResearchClient(token: string): ResearchManagementClient {
+  const env = createEnv({
     appIdentity: {
       appId: "notes-attachment-integration-test",
       appName: "Notes attachment integration test",
@@ -74,30 +73,39 @@ function createNotesEnv(token: string): CrimsonSDKEnv {
       grantedScopes: ["crimson.notes"],
     },
     tokens: new StaticTokenProvider({ "crimson.notes": token }),
+    bindingSnapshot: {
+      version: "integration-test",
+      api: {
+        "hmc-researchmanagement": {
+          baseUrl: NOTES_BASE_URL,
+          auth: { kind: "bearer", scope: "crimson.notes" },
+        },
+      },
+      queues: {},
+    },
+    secrets: { get: () => undefined },
     serviceUrls: {
-      api: NOTES_BASE_URL,
       fabric: NOTES_BASE_URL,
       ai: NOTES_BASE_URL,
       notifications: NOTES_BASE_URL,
       tasks: NOTES_BASE_URL,
-      notes: NOTES_BASE_URL,
       universes: NOTES_BASE_URL,
       web: NOTES_BASE_URL,
       cosmos: NOTES_BASE_URL,
     },
-    serviceRoutes: {
-      notifications: { events: "/unused" },
-    },
+    serviceRoutes: { notifications: { events: "/unused" } },
   });
+  return createResearchManagementClient(
+    env.API.service("hmc-researchmanagement"),
+  );
 }
-
 function shouldRetry(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return /HTTP (408|429|5\d\d)\b/.test(message);
 }
 
 async function downloadAttachment(
-  env: CrimsonSDKEnv,
+  client: ResearchManagementClient,
   outputDirectory: string,
   id: string,
   existing: Map<string, string>,
@@ -107,7 +115,7 @@ async function downloadAttachment(
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const attachment = await env.NOTES.downloadAttachment(id);
+      const attachment = await client.downloadAttachment(id);
       const fileName = `${id}--${safeFileName(attachment.fileName ?? id)}`;
       const path = joinPath(outputDirectory, fileName);
       const partialPath = `${path}.part`;
@@ -187,7 +195,7 @@ Deno.test({
 
     await Deno.mkdir(outputDirectory, { recursive: true });
     const existing = await findExistingAttachments(outputDirectory);
-    const env = createNotesEnv(token);
+    const client = createResearchClient(token);
 
     console.log(
       `Downloading ${ids.length} attachments to ${outputDirectory} ` +
@@ -196,7 +204,7 @@ Deno.test({
     const results = await runPool(
       ids,
       concurrency,
-      (id) => downloadAttachment(env, outputDirectory, id, existing),
+      (id) => downloadAttachment(client, outputDirectory, id, existing),
     );
 
     const manifestPath = joinPath(outputDirectory, "download-manifest.tsv");

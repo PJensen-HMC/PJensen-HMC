@@ -1,549 +1,341 @@
-import { assertEquals, assertInstanceOf, assertRejects } from "@std/assert";
 import {
-  type AccessToken,
-  type AppIdentity,
+  assertEquals,
+  assertNotEquals,
+  assertRejects,
+  assertStringIncludes,
+  assertThrows,
+} from "@std/assert";
+import {
+  type BindingSnapshot,
   createEnv,
   type RuntimeContext,
   RuntimeError,
-  type ServiceRoutes,
-  type ServiceUrls,
-  type TokenScope,
-} from "../src/runtime.ts";
+  StaticTokenProvider,
+} from "../src/mod.ts";
 
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
-
-const TEST_SERVICE_URLS: ServiceUrls = {
-  api: "https://api.crimson.test",
-  fabric: "https://fabric.crimson.test",
-  ai: "https://ai.crimson.test",
-  notifications: "https://notifications.crimson.test",
-  tasks: "https://tasks.crimson.test",
-  notes: "https://notes.crimson.test",
-  universes: "https://universes.crimson.test",
-  web: "https://web.crimson.test",
-  cosmos: "https://cosmos.crimson.test",
+const SERVICE_URLS = {
+  fabric: "https://fabric.test",
+  ai: "https://ai.test",
+  notifications: "https://notifications.test",
+  tasks: "https://tasks.test",
+  universes: "https://universes.test",
+  web: "https://web.test",
+  cosmos: "https://cosmos.test",
 };
 
-const TEST_SERVICE_ROUTES: ServiceRoutes = {
-  notifications: {
-    events: "/hmc-notifications/api/v1/Events",
-  },
-};
-
-const TEST_APP_IDENTITY: AppIdentity = {
-  appId: "app-test-001",
-  appName: "Test App",
-  tenantId: "tenant-test",
-  grantedScopes: [
-    "crimson.api",
-    "crimson.fabric",
-    "crimson.ai",
-    "crimson.notifications",
-    "crimson.tasks",
-    "crimson.notes",
-    "crimson.universes",
-    "crimson.web",
-  ],
-};
-
-function makeToken(scope: string): AccessToken {
+function snapshot(): BindingSnapshot {
   return {
-    value: `mock-token-${scope}`,
-    expiresAt: Date.now() + 3_600_000,
+    version: "2026-07-30.1",
+    api: {
+      research: {
+        baseUrl: "https://api.test/root",
+        auth: { kind: "bearer", scope: "api://research" },
+      },
+    },
+    queues: {},
   };
 }
 
-function makeContext(overrides: Partial<RuntimeContext> = {}): RuntimeContext {
+function context(overrides: Partial<RuntimeContext> = {}): RuntimeContext {
   return {
-    appIdentity: TEST_APP_IDENTITY,
-    tokens: {
-      getToken: (scope: TokenScope) => Promise.resolve(makeToken(scope)),
+    appIdentity: {
+      appId: "test-app",
+      appName: "Test App",
+      tenantId: "hmc",
+      grantedScopes: [],
     },
-    serviceUrls: TEST_SERVICE_URLS,
-    serviceRoutes: TEST_SERVICE_ROUTES,
+    tokens: new StaticTokenProvider({ "api://research": "test-token" }),
+    serviceUrls: SERVICE_URLS,
+    serviceRoutes: { notifications: { events: "/events" } },
+    bindingSnapshot: snapshot(),
+    secrets: { get: () => undefined },
     ...overrides,
   };
 }
 
-// ---------------------------------------------------------------------------
-// createEnv validation
-// ---------------------------------------------------------------------------
-
-Deno.test("createEnv returns a valid CrimsonSDKEnv with all bindings", () => {
-  const env = createEnv(makeContext());
-  assertEquals(typeof env.AI.run, "function");
-  assertEquals(typeof env.API.call, "function");
-  assertEquals(typeof env.CONFIGURATION.get, "function");
-  assertEquals(typeof env.COSMOS.get, "function");
-  assertEquals(typeof env.FABRIC.query, "function");
-  assertEquals(typeof env.NOTES.deposit, "function");
-  assertEquals(typeof env.NOTES.downloadAttachment, "function");
-  assertEquals(typeof env.NOTES.reindex, "function");
-  assertEquals(typeof env.NOTIFICATIONS.send, "function");
-  assertEquals(typeof env.SERVICE_BUS.send, "function");
-  assertEquals(typeof env.TASKS.create, "function");
-  assertEquals(typeof env.UNIVERSES.list, "function");
-  assertEquals(typeof env.UNIVERSES.constituents, "function");
-  assertEquals(typeof env.WEB.search, "function");
+Deno.test("env exposes immutable API and QUEUES registries", () => {
+  const env = createEnv(context());
+  assertEquals(typeof env.API.service, "function");
+  assertEquals(typeof env.QUEUES.send, "function");
+  assertEquals(Object.isFrozen(env), true);
+  assertEquals("NOTES" in env, false);
+  assertEquals("SERVICE_BUS" in env, false);
 });
 
-Deno.test("createEnv throws RuntimeError when a service URL is missing", () => {
-  const { cosmos: _omitted, ...withoutCosmos } = TEST_SERVICE_URLS;
-  const ctx = makeContext({ serviceUrls: withoutCosmos as ServiceUrls });
-  try {
-    createEnv(ctx);
-    throw new Error("Expected RuntimeError to be thrown");
-  } catch (err) {
-    assertInstanceOf(err, RuntimeError);
-  }
-});
-
-Deno.test("createEnv throws RuntimeError when a service route is missing", () => {
-  const ctx = makeContext({
-    serviceRoutes: { notifications: {} } as ServiceRoutes,
-  });
-  try {
-    createEnv(ctx);
-    throw new Error("Expected RuntimeError to be thrown");
-  } catch (err) {
-    assertInstanceOf(err, RuntimeError);
-  }
-});
-
-Deno.test("notifications uses the configured public events route", async () => {
-  let capturedUrl = "";
-  let capturedBody = "";
-  let capturedAuthorization: string | null = null;
-  let tokenRequested = false;
-  const ctx = makeContext({
-    tokens: {
-      getToken: (scope: TokenScope) => {
-        tokenRequested = true;
-        return Promise.resolve(makeToken(scope));
+Deno.test("snapshot validation rejects malformed and unsupported descriptors", () => {
+  for (
+    const bindingSnapshot of [
+      { version: "", api: {}, queues: {} },
+      {
+        version: "v",
+        api: { bad: { baseUrl: "not a url", auth: { kind: "none" } } },
+        queues: {},
       },
-    },
-    serviceRoutes: {
-      notifications: { events: "/custom/notification-events" },
-    },
-  });
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-    capturedUrl = input.toString();
-    capturedBody = String(init?.body);
-    capturedAuthorization = new Headers(init?.headers).get("Authorization");
-    return Promise.resolve(new Response(null, { status: 202 }));
-  }) as typeof fetch;
-
-  try {
-    const env = createEnv(ctx);
-    await env.NOTIFICATIONS.send(
-      { name: "test", metadata: { source: "runtime-test" } },
-      { userId: "user-001" },
-    );
-    assertEquals(
-      capturedUrl,
-      "https://notifications.crimson.test/custom/notification-events?userId=user-001",
-    );
-    assertEquals(
-      capturedBody,
-      JSON.stringify({ name: "test", metadata: { source: "runtime-test" } }),
-    );
-    assertEquals(capturedAuthorization, null);
-    assertEquals(tokenRequested, false);
-  } finally {
-    globalThis.fetch = origFetch;
-  }
-});
-
-// ---------------------------------------------------------------------------
-// Token provider — getToken is called with correct scope
-// ---------------------------------------------------------------------------
-
-Deno.test("binding calls getToken with correct scope for AI", async () => {
-  let capturedScope = "";
-
-  const ctx = makeContext({
-    tokens: {
-      getToken: (scope: TokenScope) => {
-        capturedScope = scope;
-        return Promise.resolve(makeToken(scope));
+      {
+        version: "v",
+        api: { bad: { baseUrl: "https://api.test", auth: { kind: "magic" } } },
+        queues: {},
       },
-    },
-  });
-
-  // Intercept the fetch to avoid real network calls
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = () =>
-    Promise.resolve(
-      new Response(
-        JSON.stringify({
-          response: "ok",
-          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 },
-        }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      ),
-    );
-
-  try {
-    const env = createEnv(ctx);
-    await env.AI.run("@cf/meta/llama-3.1-8b-instruct", { prompt: "test" });
-    assertEquals(capturedScope, "crimson.ai");
-  } finally {
-    globalThis.fetch = origFetch;
-  }
-});
-
-Deno.test("binding injects Bearer token into Authorization header", async () => {
-  let capturedAuthHeader = "";
-
-  const ctx = makeContext();
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
-    const headers = new Headers(init?.headers);
-    capturedAuthHeader = headers.get("Authorization") ?? "";
-    return Promise.resolve(
-      new Response(JSON.stringify({ universes: [] }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-  }) as typeof fetch;
-
-  try {
-    const env = createEnv(ctx);
-    await env.UNIVERSES.list();
-    assertEquals(capturedAuthHeader, "Bearer mock-token-crimson.universes");
-  } finally {
-    globalThis.fetch = origFetch;
-  }
-});
-
-Deno.test("binding injects X-Crimson-App-Id header", async () => {
-  let capturedAppId = "";
-
-  const ctx = makeContext();
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
-    const headers = new Headers(init?.headers);
-    capturedAppId = headers.get("X-Crimson-App-Id") ?? "";
-    return Promise.resolve(
-      new Response(JSON.stringify({ hits: [], estimatedTotal: 0, query: "" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-  }) as typeof fetch;
-
-  try {
-    const env = createEnv(ctx);
-    await env.WEB.search("test query");
-    assertEquals(capturedAppId, "app-test-001");
-  } finally {
-    globalThis.fetch = origFetch;
-  }
-});
-
-Deno.test("notes bulk reindexes entries", async () => {
-  let capturedUrl = "";
-  let capturedMethod = "";
-  let capturedContentType = "";
-  let capturedBody = "";
-  let capturedScope = "";
-  const ctx = makeContext({
-    serviceUrls: {
-      ...TEST_SERVICE_URLS,
-      notes: "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api",
-    },
-    tokens: {
-      getToken: (scope: TokenScope) => {
-        capturedScope = scope;
-        return Promise.resolve(makeToken(scope));
-      },
-    },
-  });
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-    const headers = new Headers(init?.headers);
-    capturedUrl = input.toString();
-    capturedMethod = init?.method ?? "";
-    capturedContentType = headers.get("Content-Type") ?? "";
-    capturedBody = String(init?.body);
-    return Promise.resolve(new Response(null, { status: 202 }));
-  }) as typeof fetch;
-
-  try {
-    const env = createEnv(ctx);
-    const entries = [{
-      entryType: "Attachment" as const,
-      id: "0b67ca3b-1f6a-4e60-a51f-7765e2e08fdc",
-    }];
-    await env.NOTES.reindex(entries, {
-      fireAndForget: true,
-      force: true,
-      quality: "med",
-      hardDelete: false,
-    });
-    assertEquals(
-      capturedUrl,
-      "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api/v1/Indexing?fireAndForget=true&force=true&quality=med&hardDelete=false",
-    );
-    assertEquals(capturedMethod, "PATCH");
-    assertEquals(capturedScope, "crimson.notes");
-    assertEquals(capturedContentType, "application/json-patch+json");
-    assertEquals(capturedBody, JSON.stringify(entries));
-  } finally {
-    globalThis.fetch = origFetch;
-  }
-});
-Deno.test("notes downloads an attachment from Research Management", async () => {
-  let capturedUrl = "";
-  let capturedScope = "";
-  let capturedAccept = "";
-  const ctx = makeContext({
-    serviceUrls: {
-      ...TEST_SERVICE_URLS,
-      notes: "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api",
-    },
-    tokens: {
-      getToken: (scope: TokenScope) => {
-        capturedScope = scope;
-        return Promise.resolve(makeToken(scope));
-      },
-    },
-  });
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-    capturedUrl = input.toString();
-    capturedAccept = new Headers(init?.headers).get("Accept") ?? "";
-    return Promise.resolve(
-      new Response(new Uint8Array([1, 2, 3]), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": 'attachment; filename="report.pdf"',
+      {
+        version: "v",
+        api: {},
+        queues: {
+          bad: {
+            provider: "other",
+            entity: "q",
+            connectionStringSecret: "q-secret",
+          },
         },
-      }),
-    );
-  }) as typeof fetch;
-
-  try {
-    const env = createEnv(ctx);
-    const result = await env.NOTES.downloadAttachment("attachment/id");
-    assertEquals(
-      capturedUrl,
-      "https://crimson.hmc.harvard.edu/hmc-researchmanagement/api/v1/Attachments/attachment%2Fid",
-    );
-    assertEquals(capturedScope, "crimson.notes");
-    assertEquals(capturedAccept, "*/*");
-    assertEquals(result.attachmentId, "attachment/id");
-    assertEquals(result.content, new Uint8Array([1, 2, 3]));
-    assertEquals(result.contentType, "application/pdf");
-    assertEquals(result.fileName, "report.pdf");
-  } finally {
-    globalThis.fetch = origFetch;
-  }
-});
-
-Deno.test("notes attachment download rejects unsuccessful responses", async () => {
-  const origFetch = globalThis.fetch;
-  globalThis.fetch =
-    (() =>
-      Promise.resolve(new Response(null, { status: 404 }))) as typeof fetch;
-
-  try {
-    const env = createEnv(makeContext());
-    await assertRejects(
-      () => env.NOTES.downloadAttachment("missing"),
+      },
+    ]
+  ) {
+    assertThrows(
+      () =>
+        createEnv(
+          context({ bindingSnapshot: bindingSnapshot as BindingSnapshot }),
+        ),
       RuntimeError,
-      'Attachment download failed for "missing": HTTP 404',
     );
-  } finally {
-    globalThis.fetch = origFetch;
   }
 });
 
-Deno.test("service bus sends a JSON message using runtime configuration", async () => {
-  let capturedUrl = "";
-  let capturedAuthorization = "";
-  let capturedContentType = "";
-  let capturedBody = "";
-  const ctx = makeContext({
-    serviceBus: {
-      connectionString: "Endpoint=sb://messages.crimson.test/;" +
-        "SharedAccessKeyName=SendOnly;SharedAccessKey=test-signing-key",
-      sasTokenTtlSeconds: 300,
+Deno.test("snapshot validation rejects duplicate names and unresolved secrets", () => {
+  const duplicate: BindingSnapshot = {
+    version: "v",
+    api: { shared: { baseUrl: "https://api.test", auth: { kind: "none" } } },
+    queues: {
+      shared: {
+        provider: "azure-service-bus",
+        entity: "q",
+        connectionStringSecret: "missing",
+      },
     },
-  });
-  const origFetch = globalThis.fetch;
-  const origDateNow = Date.now;
-  Date.now = () => 1_700_000_000_000;
-  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-    const headers = new Headers(init?.headers);
-    capturedUrl = input.toString();
-    capturedAuthorization = headers.get("Authorization") ?? "";
-    capturedContentType = headers.get("Content-Type") ?? "";
-    capturedBody = String(init?.body);
-    return Promise.resolve(new Response(null, { status: 201 }));
-  }) as typeof fetch;
+  };
+  assertThrows(
+    () => createEnv(context({ bindingSnapshot: duplicate })),
+    RuntimeError,
+    "Duplicate binding name",
+  );
 
+  duplicate.queues = { queue: duplicate.queues.shared };
+  assertThrows(
+    () => createEnv(context({ bindingSnapshot: duplicate })),
+    RuntimeError,
+    "could not be resolved",
+  );
+});
+
+Deno.test("API resolves relative paths, serializes query/body, and injects auth", async () => {
+  const originalFetch = globalThis.fetch;
+  let request: Request | undefined;
+  globalThis.fetch = (input, init) => {
+    request = new Request(input, init);
+    return Promise.resolve(new Response(null, { status: 204 }));
+  };
   try {
-    const env = createEnv(ctx);
-    await env.SERVICE_BUS.send("notes/recovery", {
-      attachmentId: "attachment-001",
+    const response = await createEnv(context()).API.service("research").patch(
+      "/items",
+      { ok: true },
+      { query: { force: true, tag: ["a", "b"] }, headers: { "X-Test": "yes" } },
+    );
+    assertEquals(response.status, 204);
+    assertEquals(
+      request?.url,
+      "https://api.test/root/items?force=true&tag=a&tag=b",
+    );
+    assertEquals(request?.method, "PATCH");
+    assertEquals(request?.headers.get("authorization"), "Bearer test-token");
+    assertEquals(request?.headers.get("x-crimson-app-id"), "test-app");
+    assertEquals(request?.headers.get("x-test"), "yes");
+    assertEquals(await request?.text(), '{"ok":true}');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+Deno.test("API fetch preserves binary responses and non-success responses", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = () =>
+    Promise.resolve(new Response(new Uint8Array([1, 2, 3]), { status: 503 }));
+  try {
+    const response = await createEnv(context()).API.service("research").fetch(
+      "/blob",
+    );
+    assertEquals(response.status, 503);
+    assertEquals(
+      new Uint8Array(await response.arrayBuffer()),
+      new Uint8Array([1, 2, 3]),
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+Deno.test("API rejects unknown bindings, absolute paths, and traversal", async () => {
+  const env = createEnv(context());
+  assertThrows(() => env.API.service("ungranted"), RuntimeError, "not granted");
+  assertThrows(
+    () => env.API.service("research").get("https://evil.test"),
+    RuntimeError,
+    "relative",
+  );
+  assertThrows(
+    () => env.API.service("research").get("../secret"),
+    RuntimeError,
+    "traverse",
+  );
+  assertThrows(
+    () => env.API.service("research").get("/%2e%2e/secret"),
+    RuntimeError,
+    "traverse",
+  );
+  await assertRejects(
+    () =>
+      env.API.service("research").fetch("/items", {
+        headers: { Authorization: "Bearer app-token" },
+      }),
+    RuntimeError,
+    "controlled",
+  );
+});
+
+Deno.test("API retries once with a refreshed bearer token", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  const refreshes: boolean[] = [];
+  globalThis.fetch = () =>
+    Promise.resolve(new Response(null, { status: ++calls === 1 ? 401 : 204 }));
+  try {
+    const ctx = context({
+      tokens: {
+        getToken: (_scope, options) => {
+          refreshes.push(options?.forceRefresh ?? false);
+          return Promise.resolve({
+            value: options?.forceRefresh ? "fresh" : "stale",
+            expiresAt: Date.now() + 60_000,
+          });
+        },
+      },
     });
     assertEquals(
-      capturedUrl,
-      "https://messages.crimson.test/notes/recovery/messages",
+      (await createEnv(ctx).API.service("research").get("/items")).status,
+      204,
     );
-    assertEquals(capturedContentType, "application/json");
-    assertEquals(
-      capturedBody,
-      JSON.stringify({ attachmentId: "attachment-001" }),
-    );
-    assertEquals(
-      capturedAuthorization.startsWith("SharedAccessSignature "),
-      true,
-    );
-    const token = new URLSearchParams(
-      capturedAuthorization.slice("SharedAccessSignature ".length),
-    );
-    assertEquals(token.get("skn"), "SendOnly");
-    assertEquals(
-      token.get("sr"),
-      "https://messages.crimson.test/notes/recovery",
-    );
-    assertEquals(token.get("se"), "1700000300");
-    assertEquals(
-      token.get("sig"),
-      "OwAiXms5tUCD6YWc2rs6FPOzhD4ptCQgOSmsb3BNSHA=",
-    );
+    assertEquals(refreshes, [false, true]);
   } finally {
-    globalThis.fetch = origFetch;
-    Date.now = origDateNow;
+    globalThis.fetch = originalFetch;
   }
 });
 
-Deno.test("service bus requires runtime configuration", async () => {
-  const env = createEnv(makeContext());
-  await assertRejects(
-    () => env.SERVICE_BUS.send("queue", { ok: true }),
-    RuntimeError,
-    "Missing Service Bus runtime configuration",
-  );
+Deno.test("binding snapshot is copied before env construction", async () => {
+  const originalFetch = globalThis.fetch;
+  let url = "";
+  globalThis.fetch = (input, init) => {
+    url = new Request(input, init).url;
+    return Promise.resolve(new Response());
+  };
+  try {
+    const input = snapshot();
+    const env = createEnv(context({ bindingSnapshot: input }));
+    input.api.research.baseUrl = "https://changed.test";
+    await env.API.service("research").get("/items");
+    assertEquals(url, "https://api.test/root/items");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
-Deno.test("service bus enforces an EntityPath-scoped connection string", async () => {
-  const env = createEnv(makeContext({
-    serviceBus: {
-      connectionString: "Endpoint=sb://messages.crimson.test/;" +
-        "SharedAccessKeyName=SendOnly;SharedAccessKey=test-signing-key;" +
-        "EntityPath=allowed-queue",
-    },
-  }));
-  await assertRejects(
-    () => env.SERVICE_BUS.send("other-queue", { ok: true }),
-    RuntimeError,
-    'Service Bus connection string is scoped to "allowed-queue"',
-  );
-});
-// ---------------------------------------------------------------------------
-// Token refresh on 401
-// ---------------------------------------------------------------------------
-
-Deno.test("binding retries with refreshed token on 401", async () => {
-  let refreshCallCount = 0;
-  let callCount = 0;
-
-  const ctx = makeContext({
-    tokens: {
-      getToken: (_scope: TokenScope, opts?: { forceRefresh?: boolean }) => {
-        if (opts?.forceRefresh) refreshCallCount++;
-        return Promise.resolve(makeToken("crimson.tasks"));
+const CONNECTION =
+  "Endpoint=sb://bus.test/;SharedAccessKeyName=send;SharedAccessKey=test-key";
+function queueContext(): RuntimeContext {
+  return context({
+    bindingSnapshot: {
+      version: "v",
+      api: {},
+      queues: {
+        indexing: {
+          provider: "azure-service-bus",
+          entity: "research-indexing",
+          connectionStringSecret: "AzureServiceBus",
+          sasTokenTtlSeconds: 60,
+        },
       },
     },
+    secrets: {
+      get: (name) => name === "AzureServiceBus" ? CONNECTION : undefined,
+    },
   });
+}
 
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = (() => {
-    callCount++;
-    const status = callCount === 1 ? 401 : 200;
-    return Promise.resolve(
-      new Response(
-        JSON.stringify({
-          taskId: "t-001",
-          createdAt: "",
-          title: "",
-          assignedTo: "",
-          status: "open",
-          priority: "normal",
-        }),
-        { status, headers: { "Content-Type": "application/json" } },
-      ),
-    );
-  }) as typeof fetch;
-
+Deno.test("QUEUES resolves named Azure destinations and JSON serializes", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalNow = Date.now;
+  const requests: Request[] = [];
+  Date.now = () => 1_800_000_000_000;
+  globalThis.fetch = (input, init) => {
+    requests.push(new Request(input, init));
+    return Promise.resolve(new Response(null, { status: 201 }));
+  };
   try {
-    const env = createEnv(ctx);
-    await env.TASKS.create({ title: "Test", assignedTo: "user-001" });
-    assertEquals(refreshCallCount, 1);
-    assertEquals(callCount, 2);
+    const queues = createEnv(queueContext()).QUEUES;
+    await queues.send("indexing", { id: 7 });
+    await queues.send("indexing", { id: 8 });
+    assertEquals(
+      requests[0].url,
+      "https://bus.test/research-indexing/messages",
+    );
+    assertEquals(await requests[0].text(), '{"id":7}');
+    const firstSas = requests[0].headers.get("authorization");
+    const secondSas = requests[1].headers.get("authorization");
+    assertEquals(firstSas, secondSas);
+    assertStringIncludes(
+      firstSas ?? "",
+      "sr=https%3A%2F%2Fbus.test%2Fresearch-indexing",
+    );
+    assertStringIncludes(firstSas ?? "", "se=1800000060");
   } finally {
-    globalThis.fetch = origFetch;
+    Date.now = originalNow;
+    globalThis.fetch = originalFetch;
   }
 });
 
-Deno.test("binding throws RuntimeError when 401 persists after token refresh", async () => {
-  const ctx = makeContext();
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = (() =>
-    Promise.resolve(
-      new Response("Unauthorized", { status: 401 }),
-    )) as typeof fetch;
+Deno.test("QUEUES rejects unknown bindings, scoped mismatches, and failed sends", async () => {
+  await assertRejects(
+    () => createEnv(queueContext()).QUEUES.send("other", {}),
+    RuntimeError,
+    "not granted",
+  );
+  const scoped = queueContext();
+  scoped.secrets = { get: () => `${CONNECTION};EntityPath=other` };
+  assertThrows(
+    () => createEnv(scoped),
+    RuntimeError,
+    "different entity",
+  );
 
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = () => Promise.resolve(new Response(null, { status: 500 }));
   try {
-    const env = createEnv(ctx);
     await assertRejects(
-      () =>
-        env.NOTES.deposit({ subject: "test", content: "x", createdBy: "u-1" }),
+      () => createEnv(queueContext()).QUEUES.send("indexing", {}),
       RuntimeError,
+      "HTTP 500",
     );
   } finally {
-    globalThis.fetch = origFetch;
+    globalThis.fetch = originalFetch;
   }
 });
 
-// ---------------------------------------------------------------------------
-// TokenProvider contract
-// ---------------------------------------------------------------------------
-
-Deno.test("TokenProvider.getToken receives the scope it was called with", async () => {
-  const received: TokenScope[] = [];
-
-  const ctx = makeContext({
-    tokens: {
-      getToken: (scope: TokenScope) => {
-        received.push(scope);
-        return Promise.resolve(makeToken(scope));
-      },
-    },
-  });
-
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = (() =>
-    Promise.resolve(
-      new Response("{}", {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    )) as typeof fetch;
-
+Deno.test("secrets are absent from env and error messages", () => {
+  const env = createEnv(queueContext());
+  assertNotEquals(JSON.stringify(env).includes("test-key"), true);
+  const bad = queueContext();
+  bad.secrets = { get: () => "the-sensitive-value" };
+  let message = "";
   try {
-    const env = createEnv(ctx);
-    await env.FABRIC.query("portfolio.positions");
-    assertEquals(received[0], "crimson.fabric");
-  } finally {
-    globalThis.fetch = origFetch;
+    createEnv(bad);
+  } catch (error) {
+    message = String(error);
   }
+  assertEquals(message.includes("the-sensitive-value"), false);
 });
