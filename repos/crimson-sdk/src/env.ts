@@ -26,6 +26,7 @@ export type {
   NoteResult,
   NotesBinding,
 } from "./capabilities/notes.ts";
+export type { ServiceBusBinding } from "./capabilities/service_bus.ts";
 export type {
   NotificationPayload,
   NotificationsBinding,
@@ -58,6 +59,7 @@ import type { CosmosBinding } from "./capabilities/cosmos.ts";
 import type { Fabric } from "./capabilities/fabric.ts";
 import type { NotesBinding } from "./capabilities/notes.ts";
 import type { NotificationsBinding } from "./capabilities/notifications.ts";
+import type { ServiceBusBinding } from "./capabilities/service_bus.ts";
 import type { TasksBinding } from "./capabilities/tasks.ts";
 import type { UniversesBinding } from "./capabilities/universes.ts";
 import type { WebBinding } from "./capabilities/web.ts";
@@ -70,6 +72,7 @@ export interface CrimsonSDKEnv {
   FABRIC: Fabric;
   NOTES: NotesBinding;
   NOTIFICATIONS: NotificationsBinding;
+  SERVICE_BUS: ServiceBusBinding;
   TASKS: TasksBinding;
   UNIVERSES: UniversesBinding;
   WEB: WebBinding;

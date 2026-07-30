@@ -28,6 +28,28 @@ export default defineCrimsonApp(async (env) => {
 Use `createMockEnv` from `@crimsonsdk/sdk/testing` in unit tests. See the
 liquidity dashboard under `tests/sample/` for a full example.
 
+## Sending Azure Service Bus messages
+
+The runtime may provide a Service Bus connection string without exposing it to
+app code:
+
+```ts
+const env = createEnv({
+  // Existing runtime configuration...
+  serviceBus: {
+    connectionString: Deno.env.get("AZURE_SERVICE_BUS_CONNECTION_STRING")!,
+  },
+});
+
+await env.SERVICE_BUS.send("queue-or-topic", {
+  eventType: "note-attachment-missing",
+  attachmentId: "41889919-2FF6-4C2C-8450-D4860ECACC7A",
+});
+```
+
+Messages are serialized as JSON. Keep the connection string in runtime secret
+configuration; do not expose it through `env.CONFIGURATION` or commit it.
+
 ## Runtime authentication
 
 Runtime bindings obtain scoped bearer tokens through the `TokenProvider`

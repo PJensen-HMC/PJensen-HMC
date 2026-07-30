@@ -81,6 +81,7 @@ Deno.test("createEnv returns a valid CrimsonSDKEnv with all bindings", () => {
   assertEquals(typeof env.NOTES.deposit, "function");
   assertEquals(typeof env.NOTES.downloadAttachment, "function");
   assertEquals(typeof env.NOTIFICATIONS.send, "function");
+  assertEquals(typeof env.SERVICE_BUS.send, "function");
   assertEquals(typeof env.TASKS.create, "function");
   assertEquals(typeof env.UNIVERSES.list, "function");
   assertEquals(typeof env.UNIVERSES.constituents, "function");
@@ -310,6 +311,90 @@ Deno.test("notes attachment download rejects unsuccessful responses", async () =
   }
 });
 
+Deno.test("service bus sends a JSON message using runtime configuration", async () => {
+  let capturedUrl = "";
+  let capturedAuthorization = "";
+  let capturedContentType = "";
+  let capturedBody = "";
+  const ctx = makeContext({
+    serviceBus: {
+      connectionString: "Endpoint=sb://messages.crimson.test/;" +
+        "SharedAccessKeyName=SendOnly;SharedAccessKey=test-signing-key",
+      sasTokenTtlSeconds: 300,
+    },
+  });
+  const origFetch = globalThis.fetch;
+  const origDateNow = Date.now;
+  Date.now = () => 1_700_000_000_000;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const headers = new Headers(init?.headers);
+    capturedUrl = input.toString();
+    capturedAuthorization = headers.get("Authorization") ?? "";
+    capturedContentType = headers.get("Content-Type") ?? "";
+    capturedBody = String(init?.body);
+    return Promise.resolve(new Response(null, { status: 201 }));
+  }) as typeof fetch;
+
+  try {
+    const env = createEnv(ctx);
+    await env.SERVICE_BUS.send("notes/recovery", {
+      attachmentId: "attachment-001",
+    });
+    assertEquals(
+      capturedUrl,
+      "https://messages.crimson.test/notes/recovery/messages",
+    );
+    assertEquals(capturedContentType, "application/json");
+    assertEquals(
+      capturedBody,
+      JSON.stringify({ attachmentId: "attachment-001" }),
+    );
+    assertEquals(
+      capturedAuthorization.startsWith("SharedAccessSignature "),
+      true,
+    );
+    const token = new URLSearchParams(
+      capturedAuthorization.slice("SharedAccessSignature ".length),
+    );
+    assertEquals(token.get("skn"), "SendOnly");
+    assertEquals(
+      token.get("sr"),
+      "https://messages.crimson.test/notes/recovery",
+    );
+    assertEquals(token.get("se"), "1700000300");
+    assertEquals(
+      token.get("sig"),
+      "OwAiXms5tUCD6YWc2rs6FPOzhD4ptCQgOSmsb3BNSHA=",
+    );
+  } finally {
+    globalThis.fetch = origFetch;
+    Date.now = origDateNow;
+  }
+});
+
+Deno.test("service bus requires runtime configuration", async () => {
+  const env = createEnv(makeContext());
+  await assertRejects(
+    () => env.SERVICE_BUS.send("queue", { ok: true }),
+    RuntimeError,
+    "Missing Service Bus runtime configuration",
+  );
+});
+
+Deno.test("service bus enforces an EntityPath-scoped connection string", async () => {
+  const env = createEnv(makeContext({
+    serviceBus: {
+      connectionString: "Endpoint=sb://messages.crimson.test/;" +
+        "SharedAccessKeyName=SendOnly;SharedAccessKey=test-signing-key;" +
+        "EntityPath=allowed-queue",
+    },
+  }));
+  await assertRejects(
+    () => env.SERVICE_BUS.send("other-queue", { ok: true }),
+    RuntimeError,
+    'Service Bus connection string is scoped to "allowed-queue"',
+  );
+});
 // ---------------------------------------------------------------------------
 // Token refresh on 401
 // ---------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import type {
   CrimsonSDKEnv,
   NotesBinding,
   NotificationsBinding,
+  ServiceBusBinding,
   TasksBinding,
   UniversesBinding,
   WebBinding,
@@ -65,11 +66,19 @@ export interface TokenProvider {
   ): Promise<AccessToken>;
 }
 
+export interface ServiceBusRuntimeConfig {
+  /** Kept in the runtime; never exposed through CrimsonSDKEnv. */
+  connectionString: string;
+  /** Lifetime of generated SAS tokens. Defaults to 300 seconds. */
+  sasTokenTtlSeconds?: number;
+}
+
 export interface RuntimeContext {
   appIdentity: AppIdentity;
   tokens: TokenProvider;
   serviceUrls: ServiceUrls;
   serviceRoutes: ServiceRoutes;
+  serviceBus?: ServiceBusRuntimeConfig;
 }
 
 export class RuntimeError extends Error {
@@ -136,6 +145,104 @@ function contentDispositionFileName(value: string | null): string | null {
   return /filename="([^"]+)"/i.exec(value)?.[1] ??
     /filename=([^;]+)/i.exec(value)?.[1]?.trim() ??
     null;
+}
+
+interface ParsedServiceBusConnectionString {
+  endpoint: string;
+  keyName: string;
+  key: string;
+  entityPath?: string;
+}
+
+function parseServiceBusConnectionString(
+  connectionString: string,
+): ParsedServiceBusConnectionString {
+  const values = new Map<string, string>();
+  for (const component of connectionString.split(";")) {
+    if (!component) continue;
+    const separator = component.indexOf("=");
+    if (separator < 1) continue;
+    values.set(
+      component.slice(0, separator).trim().toLowerCase(),
+      component.slice(separator + 1).trim(),
+    );
+  }
+
+  const rawEndpoint = values.get("endpoint");
+  const keyName = values.get("sharedaccesskeyname");
+  const key = values.get("sharedaccesskey");
+  if (!rawEndpoint || !keyName || !key) {
+    throw new RuntimeError(
+      "Service Bus connection string requires Endpoint, " +
+        "SharedAccessKeyName, and SharedAccessKey",
+    );
+  }
+
+  let endpoint: URL;
+  try {
+    endpoint = new URL(rawEndpoint.replace(/^sb:/i, "https:"));
+  } catch (cause) {
+    throw new RuntimeError("Invalid Service Bus Endpoint", cause);
+  }
+  if (endpoint.protocol !== "https:" || !endpoint.hostname) {
+    throw new RuntimeError("Service Bus Endpoint must use sb:// or https://");
+  }
+
+  return {
+    endpoint: `https://${endpoint.host}`,
+    keyName,
+    key,
+    entityPath: values.get("entitypath") || undefined,
+  };
+}
+
+function normalizeServiceBusEntity(entity: string): string {
+  const normalized = entity.replace(/^\/+|\/+$/g, "");
+  const segments = normalized.split("/");
+  if (
+    !normalized ||
+    segments.some((segment) => !segment || segment === "." || segment === "..")
+  ) {
+    throw new RuntimeError(`Invalid Service Bus entity: "${entity}"`);
+  }
+  return segments.map(encodeURIComponent).join("/");
+}
+
+async function createServiceBusSasToken(
+  resourceUri: string,
+  keyName: string,
+  key: string,
+  ttlSeconds: number,
+): Promise<string> {
+  if (!Number.isInteger(ttlSeconds) || ttlSeconds < 1) {
+    throw new RuntimeError(
+      "Service Bus SAS token TTL must be a positive integer",
+    );
+  }
+
+  const expiresAt = Math.floor(Date.now() / 1_000) + ttlSeconds;
+  const encodedResource = encodeURIComponent(resourceUri);
+  const stringToSign = `${encodedResource}\n${expiresAt}`;
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(key),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = new Uint8Array(
+    await crypto.subtle.sign(
+      "HMAC",
+      cryptoKey,
+      new TextEncoder().encode(stringToSign),
+    ),
+  );
+  const encodedSignature = encodeURIComponent(
+    btoa(String.fromCharCode(...signature)),
+  );
+
+  return `SharedAccessSignature sr=${encodedResource}&sig=${encodedSignature}` +
+    `&se=${expiresAt}&skn=${encodeURIComponent(keyName)}`;
 }
 
 export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
@@ -345,6 +452,55 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
     },
   };
 
+  const SERVICE_BUS: ServiceBusBinding = {
+    async send(entity, message) {
+      if (!ctx.serviceBus?.connectionString) {
+        throw new RuntimeError(
+          "Missing Service Bus runtime configuration: connectionString",
+        );
+      }
+
+      const config = parseServiceBusConnectionString(
+        ctx.serviceBus.connectionString,
+      );
+      const entityPath = normalizeServiceBusEntity(entity);
+      if (
+        config.entityPath &&
+        normalizeServiceBusEntity(config.entityPath) !== entityPath
+      ) {
+        throw new RuntimeError(
+          `Service Bus connection string is scoped to "${config.entityPath}"`,
+        );
+      }
+
+      const resourceUri = `${config.endpoint}/${entityPath}`;
+      const authorization = await createServiceBusSasToken(
+        resourceUri,
+        config.keyName,
+        config.key,
+        ctx.serviceBus.sasTokenTtlSeconds ?? 300,
+      );
+      const body = JSON.stringify(message);
+      if (body === undefined) {
+        throw new RuntimeError("Service Bus message must be JSON serializable");
+      }
+
+      const res = await fetch(`${resourceUri}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: authorization,
+          "Content-Type": "application/json",
+        },
+        body,
+      });
+      if (!res.ok) {
+        throw new RuntimeError(
+          `Service Bus send failed for "${entity}": HTTP ${res.status}`,
+        );
+      }
+    },
+  };
+
   const TASKS: TasksBinding = {
     async create(options) {
       const res = await fetchWithAuth(
@@ -404,6 +560,7 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
     FABRIC,
     NOTES,
     NOTIFICATIONS,
+    SERVICE_BUS,
     TASKS,
     UNIVERSES,
     WEB,

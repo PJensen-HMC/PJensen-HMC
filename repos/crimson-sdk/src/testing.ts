@@ -6,6 +6,7 @@ import type {
   CrimsonSDKEnv,
   NotesBinding,
   NotificationsBinding,
+  ServiceBusBinding,
   TasksBinding,
   UniversesBinding,
   WebBinding,
@@ -20,6 +21,7 @@ type MockOverrides = {
   FABRIC?: Partial<Fabric>;
   NOTES?: Partial<NotesBinding>;
   NOTIFICATIONS?: Partial<NotificationsBinding>;
+  SERVICE_BUS?: Partial<ServiceBusBinding>;
   TASKS?: Partial<TasksBinding>;
   UNIVERSES?: Partial<UniversesBinding>;
   WEB?: Partial<WebBinding>;
@@ -84,6 +86,10 @@ const defaultNotifications: NotificationsBinding = {
   send: () => Promise.resolve(),
 };
 
+const defaultServiceBus: ServiceBusBinding = {
+  send: () => Promise.resolve(),
+};
+
 const defaultTasks: TasksBinding = {
   create: (opts) =>
     Promise.resolve({
@@ -119,6 +125,7 @@ export function createMockEnv(overrides: MockOverrides = {}): CrimsonSDKEnv {
     FABRIC: { ...defaultFabric, ...overrides.FABRIC },
     NOTES: { ...defaultNotes, ...overrides.NOTES },
     NOTIFICATIONS: { ...defaultNotifications, ...overrides.NOTIFICATIONS },
+    SERVICE_BUS: { ...defaultServiceBus, ...overrides.SERVICE_BUS },
     TASKS: { ...defaultTasks, ...overrides.TASKS },
     UNIVERSES: { ...defaultUniverses, ...overrides.UNIVERSES },
     WEB: { ...defaultWeb, ...overrides.WEB },
