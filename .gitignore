@@ -93,9 +93,9 @@ repos/*
 !repos/
 !repos/init.sh
 !repos/repos.list
-!repos/crimson-sandbox/
-!repos/crimson-sandbox/src/
-!repos/crimson-sandbox/src/**
+!repos/crimson-sdk/
+!repos/crimson-sdk/src/
+!repos/crimson-sdk/src/**
 
 
 # ------------------------------------------------------------
