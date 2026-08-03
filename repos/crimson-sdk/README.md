@@ -36,6 +36,15 @@ const bindingSnapshot = {
       capabilities: ["send", "inspect"],
     },
   },
+  sql: {
+    "research-management": {
+      provider: "sql-server",
+      connectionStringSecret: "ResearchManagementSql",
+      connectionTimeoutMs: 15_000,
+      requestTimeoutMs: 30_000,
+      pool: { max: 5, min: 0, idleTimeoutMs: 30_000 },
+    },
+  },
 };
 ```
 
@@ -89,6 +98,45 @@ Azure queue inspection uses the Service Bus Atom management endpoint and
 requires a credential with `Manage` rights. Counts are operational snapshots;
 avoid tight polling loops. A binding with no `capabilities` field defaults to
 `["send"]`.
+
+## SQL Server
+
+SQL Server databases are granted by name and resolved from secret-backed
+connection strings. Applications never receive the connection string or target
+descriptor.
+
+```ts
+interface NoteRow extends Record<string, unknown> {
+  Id: string;
+  Subject: string;
+}
+
+const database = env.SQL.database("research-management");
+const rows = await database.query<NoteRow>(
+  "SELECT Id, Subject FROM dbo.Notes WHERE Id = @id",
+  { id: "41889919-2FF6-4C2C-8450-D4860ECACC7A" },
+);
+```
+
+Parameters are bound through the SQL Server driver; do not interpolate values
+into SQL text. The initial SDK surface intentionally exposes queries only.
+Read-only access must also be enforced by the database credential because SQL
+text cannot be safely classified by a client-side prefix check. Runtime hosts
+can call `await env.SQL.close()` during shutdown to close all lazy connection
+pools.
+
+The live connectivity check is opt-in and performs exactly one read-only query:
+
+```powershell
+$env:RUN_CRIMSON_SQL_INTEGRATION = "1"
+$env:CRIMSON_SQL_CONNECTION_STRING = "<SQL Server connection string>"
+deno task test:sql
+```
+
+It reads `Id`, `Name`, `FileType`, and `CachedFileSize` from one
+`[Research].[ResearchAttachments]` row, prints only the returned column names,
+and always closes its connection pool. The credential is process-only and is
+never written to configuration, logs, or source.
 
 ## Typed HMC clients
 

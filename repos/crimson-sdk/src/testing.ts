@@ -8,6 +8,9 @@ import type {
   NotificationsBinding,
   QueueRegistry,
   QueueStats,
+  SQLDatabase,
+  SQLParameters,
+  SQLRegistry,
   TasksBinding,
   UniversesBinding,
   WebBinding,
@@ -21,6 +24,13 @@ export interface MockQueueBinding {
   send?: MockQueueSender;
   stats?: () => QueueStats | Promise<QueueStats>;
 }
+export type MockSQLQuery = (
+  statement: string,
+  parameters: SQLParameters,
+) => Record<string, unknown>[] | Promise<Record<string, unknown>[]>;
+export interface MockSQLDatabase {
+  query: MockSQLQuery;
+}
 export interface MockEnvOverrides {
   AI?: Partial<AIBinding>;
   API?: Record<string, MockAPIService>;
@@ -29,6 +39,7 @@ export interface MockEnvOverrides {
   FABRIC?: Partial<Fabric>;
   NOTIFICATIONS?: Partial<NotificationsBinding>;
   QUEUES?: Record<string, MockQueueSender | MockQueueBinding>;
+  SQL?: Record<string, MockSQLQuery | MockSQLDatabase>;
   TASKS?: Partial<TasksBinding>;
   UNIVERSES?: Partial<UniversesBinding>;
   WEB?: Partial<WebBinding>;
@@ -100,6 +111,36 @@ function createMockQueueRegistry(
     },
   });
 }
+
+function createMockSQLRegistry(
+  bindings: Record<string, MockSQLQuery | MockSQLDatabase> = {},
+): SQLRegistry {
+  const databases = new Map<string, SQLDatabase>();
+  for (const [name, configured] of Object.entries(bindings)) {
+    const query = typeof configured === "function"
+      ? configured
+      : configured.query;
+    databases.set(
+      name,
+      Object.freeze({
+        query: <T extends Record<string, unknown>>(
+          statement: string,
+          parameters: SQLParameters = {},
+        ) => Promise.resolve(query(statement, parameters)) as Promise<T[]>,
+      }),
+    );
+  }
+  return Object.freeze({
+    database(name: string): SQLDatabase {
+      const database = databases.get(name);
+      if (!database) {
+        throw new RuntimeError(`SQL binding not granted: "${name}"`);
+      }
+      return database;
+    },
+    close: () => Promise.resolve(),
+  });
+}
 const defaultAI: AIBinding = {
   run: () =>
     Promise.resolve({
@@ -165,6 +206,7 @@ export function createMockEnv(overrides: MockEnvOverrides = {}): CrimsonSDKEnv {
     FABRIC: { ...defaultFabric, ...overrides.FABRIC },
     NOTIFICATIONS: { ...defaultNotifications, ...overrides.NOTIFICATIONS },
     QUEUES: createMockQueueRegistry(overrides.QUEUES),
+    SQL: createMockSQLRegistry(overrides.SQL),
     TASKS: { ...defaultTasks, ...overrides.TASKS },
     UNIVERSES: { ...defaultUniverses, ...overrides.UNIVERSES },
     WEB: { ...defaultWeb, ...overrides.WEB },

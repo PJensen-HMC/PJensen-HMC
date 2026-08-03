@@ -7,3 +7,9 @@ export type {
   FabricQueryOptions,
   FabricQueryResult,
 } from "./capabilities/fabric.ts";
+export type {
+  SQLDatabase,
+  SQLParameters,
+  SQLParameterValue,
+  SQLRegistry,
+} from "./capabilities/sql.ts";

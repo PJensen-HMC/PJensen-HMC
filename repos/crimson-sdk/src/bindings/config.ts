@@ -22,10 +22,25 @@ export interface AzureServiceBusQueueDescriptor {
 
 export type QueueBindingDescriptor = AzureServiceBusQueueDescriptor;
 
+export interface SQLPoolDescriptor {
+  max?: number;
+  min?: number;
+  idleTimeoutMs?: number;
+}
+
+export interface SQLServerBindingDescriptor {
+  provider: "sql-server";
+  connectionStringSecret: string;
+  connectionTimeoutMs?: number;
+  requestTimeoutMs?: number;
+  pool?: SQLPoolDescriptor;
+}
+
 export interface BindingSnapshot {
   version: string;
   api: Record<string, APIBindingDescriptor>;
   queues: Record<string, QueueBindingDescriptor>;
+  sql?: Record<string, SQLServerBindingDescriptor>;
 }
 
 export interface SecretProvider {
@@ -73,6 +88,51 @@ function validateEntity(name: string, entity: string): void {
   }
 }
 
+function validateSQLDescriptor(
+  name: string,
+  descriptor: SQLServerBindingDescriptor,
+): void {
+  if (descriptor.provider !== "sql-server") {
+    throw new RuntimeError(`Unsupported SQL provider for binding "${name}"`);
+  }
+  if (!descriptor.connectionStringSecret?.trim()) {
+    throw new RuntimeError(
+      `SQL binding "${name}" requires a connection string secret reference`,
+    );
+  }
+  for (
+    const [property, value] of [
+      ["connectionTimeoutMs", descriptor.connectionTimeoutMs],
+      ["requestTimeoutMs", descriptor.requestTimeoutMs],
+      ["pool.max", descriptor.pool?.max],
+      ["pool.idleTimeoutMs", descriptor.pool?.idleTimeoutMs],
+    ] as const
+  ) {
+    if (value !== undefined && (!Number.isInteger(value) || value < 1)) {
+      throw new RuntimeError(
+        `SQL binding "${name}" requires a positive ${property}`,
+      );
+    }
+  }
+  if (
+    descriptor.pool?.min !== undefined &&
+    (!Number.isInteger(descriptor.pool.min) || descriptor.pool.min < 0)
+  ) {
+    throw new RuntimeError(
+      `SQL binding "${name}" requires a non-negative pool.min`,
+    );
+  }
+  if (
+    descriptor.pool?.max !== undefined &&
+    descriptor.pool?.min !== undefined &&
+    descriptor.pool.min > descriptor.pool.max
+  ) {
+    throw new RuntimeError(
+      `SQL binding "${name}" requires pool.min not to exceed pool.max`,
+    );
+  }
+}
+
 function deepFreeze<T>(value: T): Readonly<T> {
   if (value && typeof value === "object" && !Object.isFrozen(value)) {
     Object.freeze(value);
@@ -94,6 +154,7 @@ export function prepareBindingSnapshot(
   if (!snapshot.api || !snapshot.queues) {
     throw new RuntimeError("Binding snapshot requires api and queues maps");
   }
+  snapshot.sql ??= {};
 
   const names = new Set<string>();
   for (const [name, descriptor] of Object.entries(snapshot.api)) {
@@ -174,6 +235,25 @@ export function prepareBindingSnapshot(
     if (!secret) {
       throw new RuntimeError(
         `Secret reference for queue binding "${name}" could not be resolved`,
+      );
+    }
+    resolvedSecrets.set(descriptor.connectionStringSecret, secret);
+  }
+
+  for (const [name, descriptor] of Object.entries(snapshot.sql)) {
+    assertBindingName(name);
+    if (names.has(name)) {
+      throw new RuntimeError(`Duplicate binding name: "${name}"`);
+    }
+    names.add(name);
+    if (!descriptor || typeof descriptor !== "object") {
+      throw new RuntimeError(`Invalid descriptor for SQL binding "${name}"`);
+    }
+    validateSQLDescriptor(name, descriptor);
+    const secret = secrets.get(descriptor.connectionStringSecret);
+    if (!secret) {
+      throw new RuntimeError(
+        `Secret reference for SQL binding "${name}" could not be resolved`,
       );
     }
     resolvedSecrets.set(descriptor.connectionStringSecret, secret);

@@ -20,6 +20,7 @@ import {
   type SecretProvider,
 } from "./bindings/config.ts";
 import { createQueueRegistry } from "./bindings/queue_registry.ts";
+import { createSQLRegistry } from "./bindings/sql_registry.ts";
 import { RuntimeError } from "./runtime_error.ts";
 
 export { RuntimeError } from "./runtime_error.ts";
@@ -31,6 +32,8 @@ export type {
   QueueBindingDescriptor,
   QueueCapability,
   SecretProvider,
+  SQLPoolDescriptor,
+  SQLServerBindingDescriptor,
 } from "./bindings/config.ts";
 
 export type TokenScope = string;
@@ -140,6 +143,10 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
   );
   const QUEUES = createQueueRegistry(
     prepared.snapshot.queues,
+    prepared.resolvedSecrets,
+  );
+  const SQL = createSQLRegistry(
+    prepared.snapshot.sql ?? {},
     prepared.resolvedSecrets,
   );
 
@@ -321,6 +328,7 @@ export function createEnv(ctx: RuntimeContext): CrimsonSDKEnv {
     FABRIC,
     NOTIFICATIONS,
     QUEUES,
+    SQL,
     TASKS,
     UNIVERSES,
     WEB,

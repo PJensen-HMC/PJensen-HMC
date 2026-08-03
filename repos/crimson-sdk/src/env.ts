@@ -28,6 +28,12 @@ export type {
 } from "./capabilities/notifications.ts";
 export type { QueueRegistry, QueueStats } from "./capabilities/queues.ts";
 export type {
+  SQLDatabase,
+  SQLParameters,
+  SQLParameterValue,
+  SQLRegistry,
+} from "./capabilities/sql.ts";
+export type {
   TaskCreateOptions,
   TaskPriority,
   TaskResult,
@@ -54,6 +60,7 @@ import type { CosmosBinding } from "./capabilities/cosmos.ts";
 import type { Fabric } from "./capabilities/fabric.ts";
 import type { NotificationsBinding } from "./capabilities/notifications.ts";
 import type { QueueRegistry } from "./capabilities/queues.ts";
+import type { SQLRegistry } from "./capabilities/sql.ts";
 import type { TasksBinding } from "./capabilities/tasks.ts";
 import type { UniversesBinding } from "./capabilities/universes.ts";
 import type { WebBinding } from "./capabilities/web.ts";
@@ -66,6 +73,7 @@ export interface CrimsonSDKEnv {
   FABRIC: Fabric;
   NOTIFICATIONS: NotificationsBinding;
   QUEUES: QueueRegistry;
+  SQL: SQLRegistry;
   TASKS: TasksBinding;
   UNIVERSES: UniversesBinding;
   WEB: WebBinding;
